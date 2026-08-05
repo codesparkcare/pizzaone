@@ -42,6 +42,22 @@
             transition: all 0.3s;
             z-index: 1000;
             color: #fff;
+            overflow-y: auto;
+        }
+
+        /* Customize Scrollbar for sidebar */
+        .sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+        }
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.4);
         }
 
         .sidebar-header {
@@ -246,6 +262,9 @@
         <h3>Pizza One</h3>
     </div>
     <div class="sidebar-menu">
+        <a href="<?php echo base_url(); ?>" target="_blank" style="background: rgba(255,255,255,0.05); color: var(--primary); font-weight: 500; border-bottom: 1px solid rgba(255,255,255,0.1);">
+            <i class="fas fa-external-link-alt"></i> Visit Site
+        </a>
         <a href="<?php echo base_url('admin/dashboard'); ?>" class="<?php echo ($this->uri->segment(2) == 'dashboard') ? 'active' : ''; ?>">
             <i class="fas fa-tachometer-alt"></i> Dashboard
         </a>
@@ -268,6 +287,7 @@
         <a href="<?php echo base_url('admin/offers'); ?>" class="<?php echo ($this->uri->segment(2) == 'offers') ? 'active' : ''; ?>">
             <i class="fas fa-tags"></i> Manage Offers
         </a>
+
         <a href="<?php echo base_url('admin/products'); ?>" class="<?php echo ($this->uri->segment(2) == 'products') ? 'active' : ''; ?>">
             <i class="fas fa-pizza-slice"></i> Manage Products
         </a>
@@ -281,6 +301,9 @@
         </a>
         <a href="<?php echo base_url('admin/reviews'); ?>" class="<?php echo ($this->uri->segment(2) == 'reviews') ? 'active' : ''; ?>">
             <i class="fas fa-star"></i> Reviews
+        </a>
+        <a href="<?php echo base_url('admin/slider_videos'); ?>" class="<?php echo ($this->uri->segment(2) == 'slider_videos') ? 'active' : ''; ?>">
+            <i class="fas fa-video"></i> Slider Videos
         </a>
         <a href="<?php echo base_url('admin/logout'); ?>" style="margin-top: 50px; color: #e74c3c;">
             <i class="fas fa-sign-out-alt"></i> Logout

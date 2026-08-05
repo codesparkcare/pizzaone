@@ -25,6 +25,7 @@ class Welcome extends CI_Controller {
         $this->db->order_by('id', 'DESC');
         $this->db->limit(6);
         $data['reviews'] = $this->Common_model->get_where('reviews', ['status' => 1]);
+        $data['slider_videos'] = $this->Common_model->get_where('slider_videos', ['status' => 1]);
         
 		$this->load->view('includes/header');
 		$this->load->view('welcome_message', $data);

@@ -15,31 +15,33 @@
                 </div>
             </div>
 
-            <div class="footer-section contact-item">
-                <div class="section-header">
-                    <i class="fas fa-map-marked-alt"></i>
-                    <h3>Our Address</h3>
-                </div>
-                <div class="contact-details">
-                    <p>1. 11 Place de la Tolinette, 95400 Villiers-le-bel</p>
-                    <p>2. Commercial des hauts de saint-nicolas, 93700 Le Plessis-Bouchard</p>
-                    <a href="https://maps.google.com" target="_blank" class="map-link">View on Map <i
-                            class="fas fa-external-link-alt"></i></a>
-                </div>
-            </div>
-
-            <div class="footer-section contact-item">
-                <div class="section-header">
+            <style>
+                @media (min-width: 577px) {
+                    .footer-merged { grid-column: span 2; }
+                }
+            </style>
+            <div class="footer-section contact-item footer-merged">
+                <div class="section-header" style="margin-bottom: 20px; display: flex; justify-content: center;">
                     <i class="fas fa-utensils"></i>
-                    <h3>Book a Table</h3>
+                    <h3 style="text-align: center;">Book a Table</h3>
                 </div>
-                <div class="contact-details">
-                    <p class="service-desc">Call us to place an order or book a table.</p>
-                    <p class="phone-number"><i class="fas fa-phone-alt"></i> <a href="tel:0134199456"
-                            style="color: inherit; text-decoration: none;">01 34 19 94 56</a></p>
-                    <p class="phone-number"><i class="fas fa-phone-alt"></i> <a href="tel:0134141516"
-                            style="color: inherit; text-decoration: none;">01 34 14 15 16</a></p>
-                    <a href="tel:0134199456" class="btn-footer-call">Call Now</a>
+                <div class="contact-details" style="display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; text-align: center;">
+                    <div style="flex: 1 1 40%; min-width: 200px;">
+                        <h4 style="color: var(--white); margin-bottom: 10px; font-size: 1.1rem;">1. Villiers-le-bel</h4>
+                        <p style="margin-bottom: 10px; opacity: 0.8; font-size: 0.95rem;">11 Place de la Tolinette, 95400</p>
+                        <p class="phone-number" style="margin-bottom: 15px; display: flex; justify-content: center;"><i class="fas fa-phone-alt"></i> <a href="tel:0134199456" style="color: inherit; text-decoration: none; margin-left: 8px;">01 34 19 94 56</a></p>
+                        <div style="display: flex; justify-content: center; align-items: center;">
+                            <a href="tel:0134199456" class="btn-footer-call">Call Now</a>
+                        </div>
+                    </div>
+                    <div style="flex: 1 1 40%; min-width: 200px;">
+                        <h4 style="color: var(--white); margin-bottom: 10px; font-size: 1.1rem;">2. Le Plessis-Bouchard</h4>
+                        <p style="margin-bottom: 10px; opacity: 0.8; font-size: 0.95rem;">Commercial des hauts de saint-nicolas, 93700</p>
+                        <p class="phone-number" style="margin-bottom: 15px; display: flex; justify-content: center;"><i class="fas fa-phone-alt"></i> <a href="tel:0134141516" style="color: inherit; text-decoration: none; margin-left: 8px;">01 34 14 15 16</a></p>
+                        <div style="display: flex; justify-content: center; align-items: center;">
+                            <a href="tel:0134141516" class="btn-footer-call">Call Now</a>
+                        </div>
+                    </div>
                 </div>
             </div>
 

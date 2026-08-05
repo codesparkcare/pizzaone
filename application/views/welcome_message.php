@@ -1,5 +1,21 @@
+
 <!-- Hero Slider Section -->
 <section class="hero-slider">
+    <?php if(!empty($slider_videos)): ?>
+        <?php foreach($slider_videos as $index => $video): ?>
+            <div class="slide <?php echo $index == 0 ? 'active' : ''; ?>">
+                <video autoplay muted loop playsinline class="slider-video" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;">
+                    <source src="<?php echo base_url('assets/videos/'.$video->video_url); ?>" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="slide-content" style="position: relative; z-index: 1;">
+                    <h2><?php echo htmlspecialchars($video->title); ?></h2>
+                    <p>Experience the authentic taste of Pizza One</p>
+                    <a href="#menu" class="btn-hero">Order Now</a>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    <?php else: ?>
     <div class="slide active" style="background-image: url('<?php echo base_url('assets/images/slider/pizza1.png'); ?>');">
         <div class="slide-content">
             <h2>The Perfect Slice</h2>
@@ -21,6 +37,7 @@
             <a href="#menu" class="btn-hero">Order Delivery</a>
         </div>
     </div>
+    <?php endif; ?>
 </section>
 
 <!-- Features Section -->

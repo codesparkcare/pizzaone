@@ -1254,5 +1254,130 @@ class Admin extends CI_Controller
         $this->session->set_flashdata('success', 'Review deleted successfully');
         redirect('admin/reviews');
     }
+    public function slider_videos()
+    {
+        $this->check_login();
+        $data['title'] = 'Manage Slider Videos';
+        $data['videos'] = $this->Common_model->get_all('slider_videos', 'id', 'DESC');
+        $this->load->view('admin/includes/header', $data);
+        $this->load->view('admin/slider_videos', $data);
+        $this->load->view('admin/includes/footer');
+    }
+
+    public function add_slider_video()
+    {
+        $this->check_login();
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && $_SERVER['CONTENT_LENGTH'] > 0) {
+            $this->session->set_flashdata('error', 'The uploaded video file is too large. Please upload a smaller video (Max ' . ini_get('post_max_size') . ').');
+            redirect('admin/slider_videos');
+        }
+
+        $this->form_validation->set_rules('title', 'Title', 'required');
+
+        if ($this->form_validation->run() == TRUE) {
+            $video_filename = '';
+            if (isset($_FILES['video_file']['name']) && !empty($_FILES['video_file']['name'])) {
+                $config['upload_path'] = './assets/videos/';
+                $config['allowed_types'] = 'mp4|avi|mov|wmv|webm';
+                $config['encrypt_name'] = TRUE;
+
+                $this->load->library('upload', $config);
+
+                if ($this->upload->do_upload('video_file')) {
+                    $upload_data = $this->upload->data();
+                    $video_filename = $upload_data['file_name'];
+                } else {
+                    $this->session->set_flashdata('error', $this->upload->display_errors());
+                    redirect('admin/slider_videos');
+                }
+            } else {
+                $this->session->set_flashdata('error', 'Video file is required.');
+                redirect('admin/slider_videos');
+            }
+
+            $data = [
+                'title' => $this->input->post('title'),
+                'video_url' => $video_filename,
+                'status' => $this->input->post('status') ? 1 : 0
+            ];
+            $this->Common_model->insert('slider_videos', $data);
+            $this->session->set_flashdata('success', 'Slider Video added successfully');
+        } else {
+            if (validation_errors()) {
+                $this->session->set_flashdata('error', validation_errors());
+            }
+        }
+        redirect('admin/slider_videos');
+    }
+
+    public function edit_slider_video($id)
+    {
+        $this->check_login();
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && $_SERVER['CONTENT_LENGTH'] > 0) {
+            $this->session->set_flashdata('error', 'The uploaded video file is too large. Please upload a smaller video (Max ' . ini_get('post_max_size') . ').');
+            redirect('admin/edit_slider_video/' . $id);
+        }
+
+        $data['title'] = 'Edit Slider Video';
+        $data['video'] = $this->Common_model->get_single('slider_videos', ['id' => $id]);
+
+        if (!$data['video']) {
+            redirect('admin/slider_videos');
+        }
+
+        $this->form_validation->set_rules('title', 'Title', 'required');
+
+        if ($this->form_validation->run() == TRUE) {
+            $update_data = [
+                'title' => $this->input->post('title'),
+                'status' => $this->input->post('status') ? 1 : 0
+            ];
+
+            if (isset($_FILES['video_file']['name']) && !empty($_FILES['video_file']['name'])) {
+                $config['upload_path'] = './assets/videos/';
+                $config['allowed_types'] = 'mp4|avi|mov|wmv|webm';
+                $config['encrypt_name'] = TRUE;
+
+                $this->load->library('upload', $config);
+
+                if ($this->upload->do_upload('video_file')) {
+                    $upload_data = $this->upload->data();
+                    $update_data['video_url'] = $upload_data['file_name'];
+                    
+                    // Delete old video
+                    if (file_exists('./assets/videos/' . $data['video']->video_url) && $data['video']->video_url != '') {
+                        unlink('./assets/videos/' . $data['video']->video_url);
+                    }
+                } else {
+                    $this->session->set_flashdata('error', $this->upload->display_errors());
+                    redirect('admin/edit_slider_video/' . $id);
+                }
+            }
+            
+            $this->Common_model->update('slider_videos', ['id' => $id], $update_data);
+            $this->session->set_flashdata('success', 'Slider Video updated successfully');
+            redirect('admin/slider_videos');
+        }
+
+        $this->load->view('admin/includes/header', $data);
+        $this->load->view('admin/edit_slider_video', $data);
+        $this->load->view('admin/includes/footer');
+    }
+
+    public function delete_slider_video($id)
+    {
+        $this->check_login();
+        $video = $this->Common_model->get_single('slider_videos', ['id' => $id]);
+        if ($video) {
+            if (file_exists('./assets/videos/' . $video->video_url) && $video->video_url != '') {
+                unlink('./assets/videos/' . $video->video_url);
+            }
+            $this->Common_model->delete('slider_videos', ['id' => $id]);
+            $this->session->set_flashdata('success', 'Slider Video deleted successfully');
+        }
+        redirect('admin/slider_videos');
+    }
 }
 ?>

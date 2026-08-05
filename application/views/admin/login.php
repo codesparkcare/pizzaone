@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -34,7 +35,7 @@
             background: var(--white);
             padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
             width: 100%;
             max-width: 400px;
             text-align: center;
@@ -132,30 +133,32 @@
         }
     </style>
 </head>
+
 <body>
     <div class="login-container">
         <div class="logo">Pizza<span>One</span></div>
         <h2>Admin Portal</h2>
-        
-        <?php if($this->session->flashdata('error')): ?>
+
+        <?php if ($this->session->flashdata('error')): ?>
             <div class="error-msg">
                 <i class="fas fa-exclamation-circle"></i> <?php echo $this->session->flashdata('error'); ?>
             </div>
         <?php endif; ?>
 
         <?php echo form_open('admin/login'); ?>
-            <div class="form-group">
-                <label>Username</label>
-                <i class="fas fa-user"></i>
-                <input type="text" name="username" placeholder="Enter your username" required>
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <i class="fas fa-lock"></i>
-                <input type="password" name="password" placeholder="Enter your password" required>
-            </div>
-            <button type="submit" class="btn-login">LOGIN</button>
+        <div class="form-group">
+            <label>Username</label>
+            <i class="fas fa-user"></i>
+            <input type="text" name="username" placeholder="Enter your username" required>
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <i class="fas fa-lock"></i>
+            <input type="password" name="password" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" class="btn-login">LOGIN</button>
         <?php echo form_close(); ?>
     </div>
 </body>
+
 </html>

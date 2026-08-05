@@ -22,18 +22,38 @@
         <div class="pizza-slice"></div>
     </div>
     <header class="main-header">
-        <button class="mobile-menu-btn" id="mobileMenuBtn">
-            <i class="fas fa-bars"></i>
-        </button>
+        <div class="header-left" style="display: flex; align-items: center; gap: 15px;">
+            <button class="mobile-menu-btn" id="mobileMenuBtn" style="margin: 0 !important;">
+                <i class="fas fa-bars"></i>
+            </button>
 
-        <div class="logo">
-            <a href="<?php echo base_url(); ?>">
-
-                <img src="<?php echo base_url('assets/images/logo.png'); ?>" alt="Pizza One Logo">
-            </a>
+            <div class="logo" style="margin: 0 !important;">
+                <a href="<?php echo base_url(); ?>">
+                    <img src="<?php echo base_url('assets/images/logo.png'); ?>" alt="Pizza One Logo">
+                </a>
+            </div>
         </div>
 
         <nav class="nav-menu">
+            <style>
+                .nav-mobile-logo { display: none; }
+                @media (max-width: 992px) {
+                    .nav-mobile-logo {
+                        display: block;
+                        text-align: center;
+                        padding-bottom: 20px;
+                        margin-bottom: 10px;
+                        border-bottom: 1px solid #f0f0f0;
+                        margin-top: -20px;
+                    }
+                    .nav-mobile-logo img {
+                        height: 45px;
+                    }
+                }
+            </style>
+            <div class="nav-mobile-logo">
+                <img src="<?php echo base_url('assets/images/logo.png'); ?>" alt="Pizza One Logo">
+            </div>
             <ul>
                 <li><a href="<?php echo base_url(); ?>">Home</a></li>
                 <li><a href="<?php echo base_url('menu'); ?>">Menu</a></li>
@@ -68,6 +88,12 @@
                     <a href="javascript:void(0);" onclick="changeLanguage('en')">English</a>
                     <a href="javascript:void(0);" onclick="changeLanguage('fr')">French</a>
                 </div>
+            </div>
+
+            <div class="wishlist-container" style="margin-right: 10px;">
+                <a href="<?php echo base_url('wishlist'); ?>" class="cart-btn">
+                    <i class="fas fa-heart"></i>
+                </a>
             </div>
 
             <div class="cart-container">
