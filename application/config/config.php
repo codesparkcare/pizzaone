@@ -23,7 +23,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-$config['base_url'] = 'http://localhost/pizzaone/';
+// Dynamic Auto-Detecting Base URL for Localhost & Production (https://pizzaonerestaurant.com/)
+$protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || 
+            (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ? 'https://' : 'http://';
+
+if (isset($_SERVER['HTTP_HOST'])) {
+    $script_dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
+    $script_dir = trim($script_dir, '/');
+    $config['base_url'] = $protocol . $_SERVER['HTTP_HOST'] . ($script_dir ? '/' . $script_dir : '') . '/';
+} else {
+    $config['base_url'] = 'http://localhost/pizzaone/';
+}
 
 /*
 |--------------------------------------------------------------------------
