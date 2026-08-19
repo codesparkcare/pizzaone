@@ -73,12 +73,32 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $active_group = 'default';
 $query_builder = TRUE;
 
+// Auto-detect environment: Live Production Server vs Localhost XAMPP
+$is_live = isset($_SERVER['HTTP_HOST']) && (
+    strpos($_SERVER['HTTP_HOST'], 'pizzaonerestaurant.com') !== false ||
+    ($_SERVER['HTTP_HOST'] !== 'localhost' && $_SERVER['HTTP_HOST'] !== '127.0.0.1' && strpos($_SERVER['HTTP_HOST'], '192.168.') === false)
+);
+
+if ($is_live) {
+    // Live Server Credentials (pizzaonerestaurant.com)
+    $db_host = 'localhost';
+    $db_user = 'pizzaone_Rathi';
+    $db_pass = 'Rathi@123*';
+    $db_name = 'pizzaone_Rathi';
+} else {
+    // Localhost XAMPP Credentials
+    $db_host = 'localhost';
+    $db_user = 'root';
+    $db_pass = '';
+    $db_name = 'pizzaone';
+}
+
 $db['default'] = array(
-	'dsn' => '',
-	'hostname' => 'localhost',
-	'username' => 'root',
-	'password' => '',
-	'database' => 'pizzaone',
+	'dsn'	=> '',
+	'hostname' => $db_host,
+	'username' => $db_user,
+	'password' => $db_pass,
+	'database' => $db_name,
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
