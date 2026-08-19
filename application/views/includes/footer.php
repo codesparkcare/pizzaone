@@ -125,8 +125,12 @@
     <span class="btn-text">+33 1 34 19 94 56</span>
 </a>
 
-<!-- Google Translate Scripts -->
 <script type="text/javascript">
+    window.currentLang = '<?php echo current_lang(); ?>';
+    window.t = function(fr, en) {
+        return window.currentLang === 'en' ? (en || fr) : fr;
+    };
+
     function googleTranslateElementInit() {
         new google.translate.TranslateElement({
             pageLanguage: 'fr',
@@ -142,6 +146,8 @@
             activeLangDisplay.innerText = langCode.toUpperCase();
         }
 
+        document.cookie = "site_lang=" + langCode + "; path=/; max-age=31536000;";
+
         var domain = window.location.hostname;
         if (langCode === 'fr') {
             document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
@@ -153,18 +159,14 @@
             document.cookie = "googtrans=/fr/" + langCode + "; path=/; domain=" + domain + ";";
         }
 
-        var selectField = document.querySelector('select.goog-te-combo');
-        if (selectField) {
-            selectField.value = langCode;
-            selectField.dispatchEvent(new Event('change', { bubbles: true }));
-        } else {
-            location.reload();
-        }
-
         var langDropdown = document.getElementById('langDropdown');
         if (langDropdown) {
             langDropdown.classList.remove('show');
         }
+
+        fetch('<?php echo base_url("language/switch_lang/"); ?>' + langCode)
+            .then(function() { location.reload(); })
+            .catch(function() { location.reload(); });
     }
 
     // Auto-detect existing translation on page load
@@ -211,7 +213,7 @@
         modalBody.innerHTML = `
             <div class="modal-loading">
                 <div class="spinner"></div>
-                <p>Loading delicious details...</p>
+                <p>${window.t('Chargement des détails...', 'Loading delicious details...')}</p>
             </div>
         `;
 
@@ -238,7 +240,7 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                modalBody.innerHTML = `<p style="padding: 2rem; text-align: center; color: red;">Error loading product.</p>`;
+                modalBody.innerHTML = `<p style="padding: 2rem; text-align: center; color: red;">${window.t('Erreur de chargement du produit.', 'Error loading product.')}</p>`;
             });
     }
 
@@ -260,13 +262,13 @@
     <div class="custom-alert-content">
         <div class="custom-alert-header">
             <span class="custom-alert-icon"><i class="fas fa-info-circle"></i></span>
-            <h3 class="custom-alert-title">Notice</h3>
+            <h3 class="custom-alert-title"><?php echo t('Notice', 'Notice'); ?></h3>
         </div>
         <div class="custom-alert-body">
             <p id="customAlertMessage"></p>
         </div>
         <div class="custom-alert-footer">
-            <button class="custom-alert-btn" onclick="closeCustomAlert()">OK</button>
+            <button class="custom-alert-btn" onclick="closeCustomAlert()"><?php echo t('OK', 'OK'); ?></button>
         </div>
     </div>
 </div>
@@ -398,14 +400,14 @@
         if (isError) {
             iconElem.classList.add('error');
             iconElem.innerHTML = '<i class="fas fa-exclamation-circle"></i>';
-            titleElem.textContent = 'Oops!';
+            titleElem.textContent = window.t('Oups !', 'Oops!');
         } else if (isSuccess) {
             iconElem.classList.add('success');
             iconElem.innerHTML = '<i class="fas fa-check-circle"></i>';
-            titleElem.textContent = 'Success!';
+            titleElem.textContent = window.t('Succès !', 'Success!');
         } else {
             iconElem.innerHTML = '<i class="fas fa-info-circle"></i>';
-            titleElem.textContent = 'Notice';
+            titleElem.textContent = window.t('Notice', 'Notice');
         }
 
         msgElem.textContent = message;

@@ -305,11 +305,18 @@ body {
     color: var(--secondary);
 }
 
+.contact-page {
+    overflow-x: hidden;
+    width: 100%;
+}
+
 .text-box p,
 .text-box a {
     color: #ccc;
     text-decoration: none;
     transition: var(--transition);
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 .text-box a:hover {
@@ -382,6 +389,9 @@ body {
     font-family: inherit;
     font-size: 1rem;
     transition: var(--transition);
+    width: 100%;
+    box-sizing: border-box;
+    max-width: 100%;
 }
 
 .form-group input:focus,
@@ -421,17 +431,59 @@ body {
 @media (max-width: 992px) {
     .contact-grid {
         grid-template-columns: 1fr;
-        margin-top: 2rem;
+        margin-top: 0;
+        gap: 2rem;
+    }
+
+    .contact-hero {
+        padding: 5rem 1rem;
     }
 
     .contact-hero h1 {
-        font-size: 3rem;
+        font-size: 2.8rem;
+    }
+
+    .contact-info-card,
+    .contact-form-card {
+        padding: 2rem 1.5rem;
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
     }
 }
 
 @media (max-width: 576px) {
+    .contact-hero {
+        padding: 3.5rem 1rem;
+    }
+
+    .contact-hero h1 {
+        font-size: 2rem;
+    }
+
+    .contact-info-card,
+    .contact-form-card {
+        padding: 1.5rem 1rem;
+        border-radius: 14px;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .contact-info-card h2,
+    .contact-form-card h2 {
+        font-size: 1.4rem;
+    }
+
     .form-row {
         grid-template-columns: 1fr;
+        gap: 1.2rem;
+    }
+
+    .btn-submit {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px 20px;
     }
 }
 
@@ -1250,9 +1302,17 @@ body {
 
 .features-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
     text-align: center;
+    align-items: flex-start;
+}
+
+.feature-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 5px;
 }
 
 .feature-item i {
@@ -1262,14 +1322,39 @@ body {
 }
 
 .feature-item h3 {
-    font-size: 1.1rem;
+    font-size: 1rem;
     margin-bottom: 5px;
+    font-weight: 700;
 }
 
 .feature-item p {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     margin: 0;
     color: #666;
+    line-height: 1.3;
+}
+
+@media (max-width: 768px) {
+    .features-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 6px !important;
+    }
+    .feature-item {
+        padding: 2px;
+    }
+    .feature-item i {
+        font-size: 1.3rem;
+        margin-bottom: 4px;
+    }
+    .feature-item h3 {
+        font-size: 0.72rem;
+        margin-bottom: 2px;
+        line-height: 1.15;
+    }
+    .feature-item p {
+        font-size: 0.62rem;
+        line-height: 1.15;
+    }
 }
 
 /* Categories Section */
@@ -1839,25 +1924,25 @@ body {
 .location-modal-card {
     background: #ffffff;
     width: 100%;
-    max-width: 620px;
-    border-radius: 24px;
-    padding: 35px 30px;
+    max-width: 400px;
+    border-radius: 16px;
+    padding: 20px 16px;
     position: relative;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.3);
     text-align: center;
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .location-modal-close {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 12px;
+    right: 12px;
     background: #f1f5f9;
     border: none;
-    width: 36px;
-    height: 36px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
-    font-size: 1.4rem;
+    font-size: 1.1rem;
     color: #64748b;
     cursor: pointer;
     display: flex;
@@ -1873,53 +1958,53 @@ body {
 }
 
 .location-modal-header {
-    margin-bottom: 25px;
+    margin-bottom: 14px;
 }
 
 .location-modal-icon {
-    width: 65px;
-    height: 65px;
+    width: 42px;
+    height: 42px;
     background: linear-gradient(135deg, #fff5f5, #ffe3e3);
     color: #e74c3c;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.8rem;
-    margin: 0 auto 15px auto;
-    box-shadow: 0 10px 20px rgba(231, 76, 60, 0.15);
+    font-size: 1.25rem;
+    margin: 0 auto 8px auto;
+    box-shadow: 0 6px 14px rgba(231, 76, 60, 0.15);
 }
 
 .location-modal-header h3 {
-    font-size: 1.6rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #1e293b;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     font-family: 'Poppins', sans-serif;
 }
 
 .location-modal-header p {
     color: #64748b;
-    font-size: 0.95rem;
+    font-size: 0.78rem;
     margin: 0;
-    line-height: 1.5;
+    line-height: 1.35;
 }
 
 .location-options {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     margin-top: 10px;
 }
 
 .location-option-card {
     background: #f8fafc;
-    border: 2px solid #e2e8f0;
-    border-radius: 18px;
-    padding: 22px 18px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 14px;
     text-align: left;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     display: flex;
     flex-direction: column;
@@ -1929,40 +2014,40 @@ body {
 .location-option-card:hover {
     border-color: #e74c3c;
     background: #fff;
-    transform: translateY(-4px);
-    box-shadow: 0 12px 25px rgba(231, 76, 60, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(231, 76, 60, 0.12);
 }
 
 .location-option-card.active {
     border-color: #e74c3c;
     background: #fff5f5;
-    box-shadow: 0 8px 20px rgba(231, 76, 60, 0.12);
+    box-shadow: 0 6px 15px rgba(231, 76, 60, 0.1);
 }
 
 .loc-badge {
     display: inline-block;
-    font-size: 0.75rem;
+    font-size: 0.68rem;
     font-weight: 600;
     color: #e74c3c;
     background: rgba(231, 76, 60, 0.1);
-    padding: 4px 10px;
-    border-radius: 20px;
-    margin-bottom: 10px;
+    padding: 2px 8px;
+    border-radius: 14px;
+    margin-bottom: 4px;
     width: fit-content;
 }
 
 .location-option-card h4 {
-    font-size: 1.2rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: #0f172a;
-    margin-bottom: 8px;
+    margin-bottom: 3px;
 }
 
 .location-option-card p {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     color: #64748b;
-    margin-bottom: 18px;
-    line-height: 1.4;
+    margin-bottom: 8px;
+    line-height: 1.3;
 }
 
 /* ==========================================

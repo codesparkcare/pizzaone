@@ -60,7 +60,7 @@ class Cart extends CI_Controller {
         }
 
         $data['product'] = $product;
-        $data['title'] = 'Add to Cart - ' . $product->name;
+        $data['title'] = t('Ajouter au panier - ', 'Add to Cart - ') . $product->name;
 
         $this->load->view('includes/header', $data);
         $this->load->view('add_to_cart', $data);
@@ -73,13 +73,13 @@ class Cart extends CI_Controller {
     public function quick_view($product_id = null)
     {
         if (!$product_id || !$this->input->is_ajax_request()) {
-            echo json_encode(['status' => 'error', 'message' => 'Invalid request']);
+            echo json_encode(['status' => 'error', 'message' => t('Requête invalide', 'Invalid request')]);
             return;
         }
 
         $product = $this->Common_model->get_single('products', ['id' => $product_id]);
         if (!$product) {
-            echo json_encode(['status' => 'error', 'message' => 'Product not found']);
+            echo json_encode(['status' => 'error', 'message' => t('Produit non trouvé', 'Product not found')]);
             return;
         }
 
@@ -153,7 +153,7 @@ class Cart extends CI_Controller {
         // Get product info
         $product = $this->Common_model->get_single('products', ['id' => $product_id]);
         if (!$product) {
-            echo json_encode(['status' => 'error', 'message' => 'Product not found']);
+            echo json_encode(['status' => 'error', 'message' => t('Produit non trouvé', 'Product not found')]);
             return;
         }
 
@@ -162,11 +162,11 @@ class Cart extends CI_Controller {
 
         // Validate inputs
         if (!$product_id || !$quantity) {
-            echo json_encode(['status' => 'error', 'message' => 'Invalid product or quantity']);
+            echo json_encode(['status' => 'error', 'message' => t('Produit ou quantité invalide', 'Invalid product or quantity')]);
             return;
         }
         if ($has_sizes && !$size_price) {
-            echo json_encode(['status' => 'error', 'message' => 'Size required for this product']);
+            echo json_encode(['status' => 'error', 'message' => t('La taille est obligatoire pour ce produit', 'Size required for this product')]);
             return;
         }
 
@@ -230,7 +230,7 @@ class Cart extends CI_Controller {
 
         echo json_encode([
             'status' => 'success',
-            'message' => $product->name . ' added to cart!',
+            'message' => $product->name . t(' ajouté au panier !', ' added to cart!'),
             'cart_count' => count($cart)
         ]);
     }
@@ -243,7 +243,7 @@ class Cart extends CI_Controller {
         $cart = $this->session->userdata('cart') ?: [];
         
         $data['cart_items'] = $cart;
-        $data['title'] = 'Shopping Cart';
+        $data['title'] = t('Mon Panier', 'Shopping Cart');
 
         // Calculate totals
         $subtotal = 0;
@@ -267,7 +267,7 @@ class Cart extends CI_Controller {
         $item_key = $this->input->post('item_key');
 
         if (!$item_key) {
-            echo json_encode(['status' => 'error', 'message' => 'Invalid item']);
+            echo json_encode(['status' => 'error', 'message' => t('Article invalide', 'Invalid item')]);
             return;
         }
 
@@ -279,11 +279,11 @@ class Cart extends CI_Controller {
             
             echo json_encode([
                 'status' => 'success',
-                'message' => 'Item removed from cart',
+                'message' => t('Article retiré du panier', 'Item removed from cart'),
                 'cart_count' => count($cart)
             ]);
         } else {
-            echo json_encode(['status' => 'error', 'message' => 'Item not found']);
+            echo json_encode(['status' => 'error', 'message' => t('Article non trouvé', 'Item not found')]);
         }
     }
 
@@ -296,7 +296,7 @@ class Cart extends CI_Controller {
         $quantity = $this->input->post('quantity', true);
 
         if (!$item_key || !$quantity) {
-            echo json_encode(['status' => 'error', 'message' => 'Invalid request']);
+            echo json_encode(['status' => 'error', 'message' => t('Requête invalide', 'Invalid request')]);
             return;
         }
 
@@ -332,7 +332,7 @@ class Cart extends CI_Controller {
                 'total' => number_format($subtotal + ($subtotal * 0.1), 2)
             ]);
         } else {
-            echo json_encode(['status' => 'error', 'message' => 'Item not found']);
+            echo json_encode(['status' => 'error', 'message' => t('Article non trouvé', 'Item not found')]);
         }
     }
 
@@ -358,7 +358,7 @@ class Cart extends CI_Controller {
         $data['cart_items']  = $cart;
         $data['subtotal']    = $subtotal;
         $data['shops']       = $shops;
-        $data['title']       = 'Checkout';
+        $data['title']       = t('Commande', 'Checkout');
 
         $this->load->view('includes/header', $data);
         $this->load->view('checkout', $data);
@@ -402,7 +402,7 @@ class Cart extends CI_Controller {
 
         // Basic validation
         if (!$customer_name || !$customer_phone || !$order_type || !$payment) {
-            $this->session->set_flashdata('checkout_error', 'Please fill in all required fields.');
+            $this->session->set_flashdata('checkout_error', t('Veuillez remplir tous les champs obligatoires.', 'Please fill in all required fields.'));
             redirect('cart/checkout');
         }
 
@@ -455,7 +455,7 @@ class Cart extends CI_Controller {
         if (!$order) { redirect('menu'); }
 
         $data['order'] = $order;
-        $data['title'] = 'Order Confirmed!';
+        $data['title'] = t('Commande confirmée !', 'Order Confirmed!');
 
         $this->load->view('includes/header', $data);
         $this->load->view('order_confirmed', $data);
@@ -476,7 +476,7 @@ class Cart extends CI_Controller {
         $customer_phone = $order['customer_phone'];
         // Fetch all orders for this phone number
         $data['orders'] = $this->Common_model->get_where('orders', ['customer_phone' => $customer_phone]);
-        $data['title'] = 'My Orders';
+        $data['title'] = t('Mes Commandes', 'My Orders');
         $this->load->view('includes/header', $data);
         $this->load->view('customer_orders', $data);
         $this->load->view('includes/footer');
@@ -489,7 +489,7 @@ class Cart extends CI_Controller {
     public function clear()
     {
         $this->session->unset_userdata('cart');
-        echo json_encode(['status' => 'success', 'message' => 'Cart cleared']);
+        echo json_encode(['status' => 'success', 'message' => t('Panier vidé', 'Cart cleared')]);
     }
 }
 ?>

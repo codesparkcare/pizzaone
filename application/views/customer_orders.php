@@ -3,7 +3,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title><?= isset($title) ? $title : 'My Orders'; ?></title>
+    <title><?= isset($title) ? $title : t('Mes Commandes', 'My Orders'); ?></title>
     <style>
         body {font-family: 'Inter', sans-serif; background:#f9fafb; margin:0; padding:0;}
         .container {max-width:960px; margin:auto; padding:2rem;}
@@ -23,28 +23,34 @@
 </head>
 <body>
 <div class="container">
-    <h2><?= $title ?? 'My Orders'; ?></h2>
+    <h2><?= $title ?? t('Mes Commandes', 'My Orders'); ?></h2>
     <?php if (!empty($orders) && is_array($orders)): ?>
         <table>
             <thead>
                 <tr>
                     <th>#ID</th>
-                    <th>Type</th>
-                    <th>Total</th>
-                    <th>Status</th>
-                    <th>Date</th>
+                    <th><?php echo t('Type', 'Type'); ?></th>
+                    <th><?php echo t('Total', 'Total'); ?></th>
+                    <th><?php echo t('Statut', 'Status'); ?></th>
+                    <th><?php echo t('Date', 'Date'); ?></th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($orders as $order): ?>
                     <tr>
                         <td><?= $order->id; ?></td>
-                        <td><?= ucfirst($order->order_type); ?></td>
-                        <td>$<?= number_format($order->total_amount, 2); ?></td>
+                        <td><?= $order->order_type === 'collect' ? t('À emporter', 'Collect') : t('Livraison', 'Delivery'); ?></td>
+                        <td>€<?= number_format($order->total_amount, 2); ?></td>
                         <td>
                             <?php
                                 $statusClass = strtolower($order->status);
-                                echo "<span class='badge $statusClass'>" . ucfirst($order->status) . "</span>";
+                                $statusName = $order->status;
+                                if ($statusClass === 'pending') $statusName = t('En attente', 'Pending');
+                                elseif ($statusClass === 'confirmed') $statusName = t('Confirmée', 'Confirmed');
+                                elseif ($statusClass === 'preparing') $statusName = t('En préparation', 'Preparing');
+                                elseif ($statusClass === 'delivered') $statusName = t('Livrée', 'Delivered');
+                                elseif ($statusClass === 'cancelled') $statusName = t('Annulée', 'Cancelled');
+                                echo "<span class='badge $statusClass'>" . htmlspecialchars($statusName) . "</span>";
                             ?>
                         </td>
                         <td><?= date('d M Y', strtotime($order->created_at)); ?></td>
@@ -53,9 +59,9 @@
             </tbody>
         </table>
     <?php else: ?>
-        <p class="no-orders">You have no orders yet.</p>
+        <p class="no-orders"><?php echo t('Vous n\'avez encore aucune commande.', 'You have no orders yet.'); ?></p>
     <?php endif; ?>
-    <a href="<?= base_url('menu'); ?>" class="btn">Continue Shopping</a>
+    <a href="<?= base_url('menu'); ?>" class="btn"><?php echo t('Continuer mes achats', 'Continue Shopping'); ?></a>
 </div>
 </body>
 </html>

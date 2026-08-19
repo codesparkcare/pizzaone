@@ -11,19 +11,11 @@
                     <div class="menu-card" id="wishlist-item-<?php echo $p->id; ?>">
                         <div class="menu-card-img">
                             <img src="<?php echo base_url('assets/images/products/'.($p->image ? $p->image : 'default.png')); ?>" alt="<?php echo $p->name; ?>">
-                            <div class="menu-card-badge">
-                                <?php if (!empty($p->offer_name)): ?>
-                                    <div style="background: #ff0000; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-bottom: 2px; text-align: center; font-weight: bold; box-shadow: 0 0 5px rgba(255,0,0,0.5);"><?php echo $p->offer_name; ?></div>
-                                <?php endif; ?>
-                                <?php if(!empty($p->subcategory_name)): ?>
-                                    <div style="display: flex; flex-direction: column; gap: 2px;">
-                                        <span style="font-size: 0.75rem; opacity: 0.8;"><?php echo $p->category_name; ?></span>
-                                        <span style="font-weight: 600;"><?php echo $p->subcategory_name; ?></span>
-                                    </div>
-                                <?php else: ?>
-                                    <span><?php echo $p->category_name; ?></span>
-                                <?php endif; ?>
-                            </div>
+                            <?php if (!empty($p->offer_name)): ?>
+                                <div class="menu-card-badge">
+                                    <div style="background: #ff0000; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; text-align: center; font-weight: bold; box-shadow: 0 0 5px rgba(255,0,0,0.5);"><?php echo $p->offer_name; ?></div>
+                                </div>
+                            <?php endif; ?>
                             <button class="wishlist-btn" onclick="removeFromWishlist(<?php echo $p->id; ?>)" title="Remove from Wishlist">
                                 <i class="fas fa-trash" style="color: #ff4757;"></i>
                             </button>
@@ -69,24 +61,32 @@
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0,0,0,0.05);
     transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 .menu-card:hover {
     transform: translateY(-10px);
     box-shadow: 0 15px 40px rgba(0,0,0,0.1);
 }
 .menu-card-img {
-    height: 220px;
+    height: 200px;
     position: relative;
     overflow: hidden;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
 }
 .menu-card-img img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     transition: var(--transition);
 }
 .menu-card:hover .menu-card-img img {
-    transform: scale(1.1);
+    transform: scale(1.08);
 }
 .menu-card-badge {
     position: absolute;
@@ -101,6 +101,10 @@
 }
 .menu-card-body {
     padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: space-between;
 }
 .menu-card-header {
     display: flex;

@@ -34,7 +34,7 @@
                         <div class="product-meta">
                             <div class="meta-item">
                                 <i class="fas fa-check-circle"></i>
-                                <span>100% Fresh Ingredients</span>
+                                <span><?php echo t('Ingrédients 100% Frais', '100% Fresh Ingredients'); ?></span>
                             </div>
                         </div>
                     </div>
@@ -48,8 +48,8 @@
                             <div class="form-section">
                                 <div class="section-header">
                                     <h3 class="section-title">
-                                        <i class="fas fa-expand"></i> Choose Size
-                                        <span class="required-badge">Required</span>
+                                        <i class="fas fa-expand"></i> <?php echo t('Choisir la taille', 'Choose Size'); ?>
+                                        <span class="required-badge"><?php echo t('Obligatoire', 'Required'); ?></span>
                                     </h3>
                                 </div>
                                 <div class="size-options-grid">
@@ -84,15 +84,15 @@
                                                     <i class="fas fa-plus-circle"></i> 
                                                     <?php echo $group->group_name; ?>
                                                     <?php if ($group->is_required): ?>
-                                                        <span class="required-badge">Required</span>
+                                                        <span class="required-badge"><?php echo t('Obligatoire', 'Required'); ?></span>
                                                     <?php endif; ?>
                                                 </h3>
                                                 <div class="addon-group-info">
                                                     <?php 
                                                         if ($group->min_selections == 0 && $group->max_selections == 1) {
-                                                            echo '<span class="selection-hint">Choose up to 1</span>';
+                                                            echo '<span class="selection-hint">' . t('Choisissez jusqu\'à 1', 'Choose up to 1') . '</span>';
                                                         } elseif ($group->max_selections > 1) {
-                                                            echo '<span class="selection-hint">Choose up to ' . $group->max_selections . '</span>';
+                                                            echo '<span class="selection-hint">' . t('Choisissez jusqu\'à ', 'Choose up to ') . $group->max_selections . '</span>';
                                                         }
                                                     ?>
                                                 </div>
@@ -119,7 +119,7 @@
                                                                     if ($addon->price > 0) {
                                                                         echo '+€' . number_format($addon->price, 2);
                                                                     } else {
-                                                                        echo 'Free';
+                                                                        echo t('Gratuit', 'Free');
                                                                     }
                                                                 ?>
                                                             </span>
@@ -134,8 +134,8 @@
                                     <div class="form-section">
                                         <div class="section-header">
                                             <h3 class="section-title">
-                                                <i class="fas fa-plus-circle"></i> Customize Your Order
-                                                <span class="optional-badge">Optional</span>
+                                                <i class="fas fa-plus-circle"></i> <?php echo t('Personnaliser votre commande', 'Customize Your Order'); ?>
+                                                <span class="optional-badge"><?php echo t('Optionnel', 'Optional'); ?></span>
                                             </h3>
                                         </div>
                                         <div class="addons-showcase">
@@ -155,9 +155,9 @@
                                                                 if ($addon->price > 0) {
                                                                     echo '+€' . number_format($addon->price, 2);
                                                                 } elseif ($addon->type == 'exclude') {
-                                                                    echo 'Remove';
+                                                                    echo t('Retirer', 'Remove');
                                                                 } else {
-                                                                    echo 'Free';
+                                                                    echo t('Gratuit', 'Free');
                                                                 }
                                                             ?>
                                                         </span>
@@ -174,7 +174,7 @@
                         <div class="form-section">
                             <div class="section-header">
                                 <h3 class="section-title">
-                                    <i class="fas fa-box"></i> Quantity
+                                    <i class="fas fa-box"></i> <?php echo t('Quantité', 'Quantity'); ?>
                                 </h3>
                             </div>
                             <div class="quantity-control">
@@ -192,21 +192,21 @@
                         <div class="price-card">
                             <div class="price-details">
                                 <div class="price-line">
-                                    <span class="price-label">Base Price:</span>
+                                    <span class="price-label"><?php echo t('Prix de base :', 'Base Price:'); ?></span>
                                     <span class="price-value" id="basePrice">€<?php echo number_format($product->sizes[0]->price ?? $product->price, 2); ?></span>
                                 </div>
                                 <div class="price-line" id="addonPriceRow" style="display: none;">
-                                    <span class="price-label">Add-ons:</span>
+                                    <span class="price-label"><?php echo t('Suppléments :', 'Add-ons:'); ?></span>
                                     <span class="price-value addon-sum" id="addonPrice">€0.00</span>
                                 </div>
                                 <div class="price-line">
-                                    <span class="price-label">Quantity:</span>
+                                    <span class="price-label"><?php echo t('Quantité :', 'Quantity:'); ?></span>
                                     <span class="price-value qty-count" id="qtyDisplay">1</span>
                                 </div>
                             </div>
                             <div class="price-divider"></div>
                             <div class="total-price-section">
-                                <span class="total-label">Total</span>
+                                <span class="total-label"><?php echo t('Total', 'Total'); ?></span>
                                 <span class="total-amount" id="totalPrice">€<?php echo number_format($product->sizes[0]->price ?? $product->price, 2); ?></span>
                             </div>
                         </div>
@@ -215,11 +215,11 @@
                         <div class="action-buttons-group">
                             <button type="submit" class="btn btn-primary btn-lg">
                                 <i class="fas fa-shopping-cart"></i>
-                                <span>Add to Cart</span>
+                                <span><?php echo t('Ajouter au panier', 'Add to Cart'); ?></span>
                             </button>
                             <a href="<?php echo base_url('menu'); ?>" class="btn btn-secondary btn-lg">
                                 <i class="fas fa-arrow-left"></i>
-                                <span>Continue Shopping</span>
+                                <span><?php echo t('Continuer mes achats', 'Continue Shopping'); ?></span>
                             </a>
                         </div>
                     </form>
@@ -237,7 +237,6 @@
     border-radius: 12px;
 }
 
-
 /* Product Section */
 .product-section {
     padding: 0;
@@ -245,10 +244,11 @@
 
 .product-wrapper {
     display: grid;
-    grid-template-columns: 1fr 1.3fr;
-    gap: 2.5rem;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 1rem;
     background: var(--white);
-    padding: 2.5rem;
+    padding: 1rem;
+    border-radius: 12px;
 }
 
 /* Product Image Container */
@@ -258,19 +258,18 @@
 }
 
 .image-frame {
-    position: sticky;
-    top: 20px;
+    position: relative;
     width: 100%;
     background: linear-gradient(135deg, rgba(230, 126, 34, 0.05) 0%, rgba(52, 152, 219, 0.05) 100%);
-    border-radius: 20px;
-    padding: 2rem;
+    border-radius: 12px;
+    padding: 0.75rem;
     overflow: hidden;
 }
 
 .product-image-main {
     width: 100%;
-    aspect-ratio: 1;
-    border-radius: 12px;
+    aspect-ratio: 1.2;
+    border-radius: 10px;
     overflow: hidden;
     background: var(--white);
 }
@@ -288,23 +287,21 @@
 
 .badge-overlay {
     position: absolute;
-    top: 1.5rem;
-    left: 1.5rem;
+    top: 1rem;
+    left: 1rem;
     display: flex;
-    gap: 0.75rem;
+    gap: 0.5rem;
     flex-wrap: wrap;
 }
 
 .badge {
     display: inline-block;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 14px;
+    font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    letter-spacing: 0.4px;
 }
 
 .badge-category {
@@ -321,60 +318,59 @@
 .product-details-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 0.5rem;
 }
 
 .product-info-header {
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    padding-bottom: 2rem;
+    padding-bottom: 0.4rem;
 }
 
 .product-title {
-    font-size: 2.5rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: var(--dark);
-    margin-bottom: 1rem;
+    margin-bottom: 0.2rem;
     line-height: 1.2;
-    letter-spacing: -0.5px;
 }
 
 .product-description {
     color: var(--dark-muted);
-    font-size: 1.05rem;
-    line-height: 1.8;
-    margin-bottom: 1.5rem;
+    font-size: 0.8rem;
+    line-height: 1.35;
+    margin-bottom: 0.3rem;
 }
 
 .product-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 1.5rem;
+    gap: 0.6rem;
 }
 
 .meta-item {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.4rem;
     color: var(--dark-muted);
-    font-size: 0.95rem;
+    font-size: 0.78rem;
     font-weight: 500;
 }
 
 .meta-item i {
     color: var(--primary);
-    font-size: 1.1rem;
+    font-size: 0.9rem;
 }
 
 /* Customization Form */
 .customization-form {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 0.5rem;
 }
 
 .form-section {
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-    padding-bottom: 2rem;
+    padding-bottom: 0.4rem;
 }
 
 .form-section:last-of-type {
@@ -382,38 +378,38 @@
 }
 
 .section-header {
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.35rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 6px;
 }
 
 .section-title {
-    font-size: 1.1rem;
+    font-size: 0.85rem;
     font-weight: 700;
     color: var(--dark);
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.4rem;
     margin: 0;
 }
 
 .section-title i {
-    font-size: 1.3rem;
+    font-size: 1rem;
     color: var(--primary);
 }
 
 .required-badge,
 .optional-badge {
     display: inline-block;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 600;
-    padding: 0.3rem 0.6rem;
+    padding: 0.15rem 0.4rem;
     border-radius: 4px;
     text-transform: uppercase;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.3px;
     margin-left: auto;
 }
 
@@ -427,11 +423,11 @@
     color: var(--primary);
 }
 
-/* Size Options Grid */
+/* Size Options Grid - Always Side-by-Side (2 Columns) */
 .size-options-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
 }
 
 .size-card {
@@ -448,12 +444,12 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 1.5rem;
+    padding: 0.4rem 0.5rem;
     border: 2px solid rgba(0, 0, 0, 0.1);
-    border-radius: 12px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 8px;
+    transition: all 0.2s ease;
     background: var(--white);
-    min-height: 120px;
+    min-height: auto;
     text-align: center;
     position: relative;
 }
@@ -461,44 +457,42 @@
 .size-card input[type="radio"]:checked + .size-card-content {
     border-color: var(--primary);
     background: linear-gradient(135deg, rgba(230, 126, 34, 0.05) 0%, rgba(230, 126, 34, 0.02) 100%);
-    box-shadow: 0 4px 20px rgba(230, 126, 34, 0.15);
-    transform: translateY(-2px);
+    box-shadow: 0 2px 10px rgba(230, 126, 34, 0.15);
 }
 
 .size-card:hover .size-card-content {
     border-color: rgba(230, 126, 34, 0.4);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .size-name {
     font-weight: 700;
     color: var(--dark);
-    margin-bottom: 0.6rem;
-    font-size: 1rem;
+    margin-bottom: 0.1rem;
+    font-size: 0.8rem;
 }
 
 .size-price {
-    font-size: 1.2rem;
+    font-size: 0.85rem;
     font-weight: 700;
     color: var(--primary);
 }
 
 .checkmark {
     position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    width: 24px;
-    height: 24px;
+    top: 0.25rem;
+    right: 0.25rem;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     background: var(--primary);
     color: var(--white);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     opacity: 0;
     transform: scale(0);
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .size-card input[type="radio"]:checked ~ .checkmark {
@@ -509,24 +503,24 @@
 /* Add-ons Showcase */
 .addons-showcase {
     display: grid;
-    gap: 0.8rem;
+    gap: 0.4rem;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
 }
 
 .addon-card {
     display: flex;
     align-items: center;
-    gap: 1.2rem;
-    padding: 1.2rem;
-    border: 2px solid rgba(0, 0, 0, 0.08);
-    border-radius: 12px;
+    gap: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    border: 1.5px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
     background: var(--white);
 }
 
 .addon-card:hover {
     border-color: rgba(230, 126, 34, 0.3);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .addon-checkbox {
@@ -541,10 +535,10 @@
 }
 
 .checkbox-custom {
-    width: 24px;
-    height: 24px;
-    border: 2px solid rgba(0, 0, 0, 0.2);
-    border-radius: 6px;
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -561,7 +555,7 @@
 .addon-checkbox input[type="checkbox"]:checked + .checkbox-custom::after {
     content: '✓';
     color: var(--white);
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     font-weight: bold;
 }
 
@@ -575,78 +569,77 @@
 .addon-name {
     font-weight: 600;
     color: var(--dark);
-    font-size: 0.95rem;
+    font-size: 0.78rem;
 }
 
 .addon-price {
     font-weight: 700;
     color: var(--primary);
-    font-size: 0.9rem;
+    font-size: 0.78rem;
     white-space: nowrap;
 }
 
-/* Quantity Control */
+/* Quantity Control - Small & Compact */
 .quantity-control {
     display: flex;
     align-items: center;
     gap: 0;
     width: fit-content;
     background: rgba(0, 0, 0, 0.03);
-    border-radius: 12px;
-    padding: 0.5rem;
+    border-radius: 8px;
+    padding: 0.15rem;
     border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .qty-btn {
-    width: 44px;
-    height: 44px;
+    width: 30px;
+    height: 30px;
     border: none;
     background: var(--white);
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--primary);
-    font-size: 1rem;
+    font-size: 0.85rem;
     font-weight: 600;
 }
 
 .qty-btn:hover {
     background: var(--primary);
     color: var(--white);
-    transform: scale(1.05);
 }
 
 .qty-input {
-    width: 80px;
-    padding: 0.8rem;
+    width: 45px;
+    padding: 0.2rem;
     text-align: center;
     border: none;
     background: transparent;
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     font-weight: 700;
     color: var(--dark);
 }
 
-/* Price Card */
+/* Price Card - Small & Compact */
 .price-card {
     background: linear-gradient(135deg, rgba(230, 126, 34, 0.08) 0%, rgba(52, 152, 219, 0.08) 100%);
-    padding: 2rem;
-    border-radius: 14px;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
     border: 1px solid rgba(230, 126, 34, 0.2);
 }
 
 .price-details {
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.3rem;
 }
 
 .price-line {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 0.2rem;
     color: var(--dark);
 }
 
@@ -656,13 +649,13 @@
 
 .price-label {
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 0.78rem;
     color: var(--dark-muted);
 }
 
 .price-value {
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.82rem;
     color: var(--dark);
 }
 
@@ -673,15 +666,15 @@
 .qty-count {
     background: rgba(230, 126, 34, 0.1);
     color: var(--primary);
-    padding: 0.3rem 0.8rem;
-    border-radius: 6px;
-    font-size: 0.9rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
 }
 
 .price-divider {
     height: 1px;
     background: rgba(230, 126, 34, 0.3);
-    margin: 1.5rem 0;
+    margin: 0.3rem 0;
 }
 
 .total-price-section {
@@ -691,205 +684,137 @@
 }
 
 .total-label {
-    font-size: 1rem;
+    font-size: 0.82rem;
     font-weight: 600;
     color: var(--dark);
 }
 
 .total-amount {
-    font-size: 2rem;
+    font-size: 1.15rem;
     font-weight: 800;
     color: var(--primary);
-    letter-spacing: -0.5px;
+    letter-spacing: -0.3px;
 }
 
-/* Action Buttons */
+/* Action Buttons - Side-by-Side */
 .action-buttons-group {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-top: 1rem;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
 }
 
 .btn {
-    padding: 1.1rem 2rem;
+    padding: 0.55rem 0.8rem;
     border: none;
-    border-radius: 12px;
-    font-size: 1rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
+    gap: 0.4rem;
     text-decoration: none;
-    letter-spacing: 0.3px;
 }
 
 .btn-lg {
-    min-height: 56px;
+    min-height: 38px;
 }
 
 .btn-primary {
     background: linear-gradient(135deg, var(--primary) 0%, #e67e22 100%);
     color: var(--white);
-    box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
-}
-
-.btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(230, 126, 34, 0.4);
-}
-
-.btn-primary:active {
-    transform: translateY(-1px);
+    box-shadow: 0 2px 10px rgba(230, 126, 34, 0.3);
 }
 
 .btn-secondary {
     background: var(--white);
     color: var(--dark);
-    border: 2px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-.btn-secondary:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    border: 1.5px solid rgba(0, 0, 0, 0.1);
 }
 
 .btn i {
-    font-size: 1.2rem;
+    font-size: 0.95rem;
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-    .product-wrapper {
-        grid-template-columns: 1fr;
-        gap: 3rem;
-        padding: 2.5rem;
-    }
-
-    .product-title {
-        font-size: 2rem;
-    }
-
-    .size-options-grid {
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    }
-}
-
+/* Mobile & Small Screen Responsive Rules */
 @media (max-width: 768px) {
-    .cart-page {
-        padding-top: 1rem;
-    }
-
-    .product-section {
-        padding: 1.5rem 0;
-    }
-
     .product-wrapper {
         grid-template-columns: 1fr;
-        gap: 2rem;
-        padding: 1.5rem;
-        border-radius: 12px;
+        gap: 0.6rem;
+        padding: 0.75rem;
     }
 
     .product-title {
-        font-size: 1.75rem;
+        font-size: 1.1rem;
     }
 
-    .product-description {
-        font-size: 0.95rem;
+    .product-image-main {
+        aspect-ratio: 1.4;
     }
 
     .size-options-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.75rem;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.4rem !important;
     }
 
     .size-card-content {
-        min-height: 100px;
-        padding: 1.2rem;
-    }
-
-    .addons-showcase {
-        gap: 0.5rem;
-        grid-template-columns: 1fr;
-    }
-
-    .addon-card {
-        flex-direction: row;
-        text-align: left;
-        gap: 0.8rem;
-        padding: 0.6rem 1rem;
-    }
-
-    .addon-info {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-        font-size: 0.95rem;
+        min-height: auto;
+        padding: 0.4rem 0.5rem;
     }
 
     .action-buttons-group {
-        grid-template-columns: 1fr;
-        gap: 0.8rem;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 0.4rem;
     }
 
     .btn {
-        padding: 1rem 1.5rem;
+        padding: 0.5rem 0.4rem;
+        font-size: 0.78rem;
     }
 
     .btn-lg {
-        min-height: 50px;
-    }
-
-    .section-title {
-        font-size: 1rem;
+        min-height: 36px;
     }
 
     .price-card {
-        padding: 1.5rem;
+        padding: 0.5rem 0.7rem;
     }
 
     .total-amount {
-        font-size: 1.5rem;
+        font-size: 1.1rem;
     }
 }
 
-/* Addon Groups Styling */
 .addon-group-section {
-    margin-bottom: 2.5rem;
-    padding-bottom: 2rem;
-    border-bottom: 2px solid rgba(0, 0, 0, 0.06);
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .addon-group-section:last-child {
     border-bottom: none;
-    margin-bottom: 2rem;
+    margin-bottom: 0.4rem;
     padding-bottom: 0;
 }
 
 .addon-group-info {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.5rem;
     margin-left: auto;
 }
 
 .selection-hint {
     display: inline-block;
-    font-size: 0.85rem;
+    font-size: 0.72rem;
     color: var(--dark-muted);
     background: rgba(52, 152, 219, 0.08);
-    padding: 0.4rem 0.8rem;
-    border-radius: 6px;
-    border-left: 3px solid var(--primary);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    border-left: 2px solid var(--primary);
 }
 
 .addon-card input[type="checkbox"]:disabled {
@@ -904,8 +829,8 @@
 
 .addon-selection-error {
     color: #e74c3c;
-    font-size: 0.85rem;
-    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    margin-top: 0.3rem;
     display: none;
 }
 
@@ -915,38 +840,25 @@
 
 @media (max-width: 480px) {
     .product-wrapper {
-        padding: 1rem;
-        gap: 1.5rem;
+        padding: 0.6rem;
+        gap: 0.5rem;
     }
 
     .product-title {
-        font-size: 1.4rem;
+        font-size: 1.05rem;
     }
 
     .section-title {
-        font-size: 0.95rem;
+        font-size: 0.8rem;
     }
 
     .size-options-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.4rem !important;
     }
 
-    .quantity-control {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .qty-input {
-        width: 60px;
-    }
-
-    .price-card {
-        padding: 1.2rem;
-    }
-
-    .btn {
-        font-size: 0.9rem;
-        padding: 0.9rem 1.2rem;
+    .action-buttons-group {
+        grid-template-columns: 1fr 1fr !important;
     }
 }
 </style>
@@ -1011,7 +923,7 @@ function validateAddonGroup(checkbox) {
     
     if (checkedCount > maxSelections) {
         checkbox.checked = false;
-        alert(`You can select maximum ${maxSelections} item(s) for this group`);
+        alert(window.t(`Vous pouvez sélectionner au maximum ${maxSelections} article(s) pour ce groupe`, `You can select maximum ${maxSelections} item(s) for this group`));
         return false;
     }
     
@@ -1050,7 +962,7 @@ function validateAddonGroup(checkbox) {
 
         // Validate that size is selected only if sizes exist
         if (hasSizes && !sizeInput) {
-            alert('Please select a size');
+            alert(window.t('Veuillez sélectionner une taille', 'Please select a size'));
             return;
         }
 
@@ -1104,12 +1016,12 @@ function validateAddonGroup(checkbox) {
                     closeProductModal();
                 }
             } else {
-                alert('Error: ' + res.message);
+                alert(res.message);
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred. Please try again.');
+            alert(window.t('Une erreur est survenue. Veuillez réessayer.', 'An error occurred. Please try again.'));
         });
     });
 })();

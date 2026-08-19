@@ -55,10 +55,10 @@
                 <img src="<?php echo base_url('assets/images/logo.png'); ?>" alt="Pizza One Logo">
             </div>
             <ul>
-                <li><a href="<?php echo base_url(); ?>">Accueil</a></li>
-                <li><a href="<?php echo base_url('menu'); ?>">Menu</a></li>
-                <li><a href="<?php echo base_url('about'); ?>">À propos</a></li>
-                <li><a href="<?php echo base_url('contact'); ?>">Contact</a></li>
+                <li><a href="<?php echo base_url(); ?>"><?php echo t('Accueil', 'Home'); ?></a></li>
+                <li><a href="<?php echo base_url('menu'); ?>"><?php echo t('Menu', 'Menu'); ?></a></li>
+                <li><a href="<?php echo base_url('about'); ?>"><?php echo t('À propos', 'About Us'); ?></a></li>
+                <li><a href="<?php echo base_url('contact'); ?>"><?php echo t('Contact', 'Contact'); ?></a></li>
             </ul>
         </nav>
 
@@ -67,12 +67,12 @@
                 $selected_shop_id = $this->session->userdata('selected_shop_id');
                 $selected_shop_name = $this->session->userdata('selected_shop_name');
                 if (!$selected_shop_name) {
-                    $selected_shop_name = 'Sélectionner le magasin';
+                    $selected_shop_name = t('Sélectionner le magasin', 'Select Shop Location');
                 }
                 $shop_color_class = ($selected_shop_id == '2') ? 'shop-2-active' : 'shop-1-active';
             ?>
             <div class="location-switcher">
-                <button class="location-icon-btn <?php echo $shop_color_class; ?>" onclick="openLocationModal()" title="Magasin actuel : <?php echo htmlspecialchars($selected_shop_name); ?>">
+                <button class="location-icon-btn <?php echo $shop_color_class; ?>" onclick="openLocationModal()" title="<?php echo t('Magasin actuel : ', 'Current Shop: ') . htmlspecialchars($selected_shop_name); ?>">
                     <i class="fas fa-map-marker-alt"></i>
                 </button>
             </div>
@@ -83,11 +83,11 @@
                 </button>
                 <div class="lang-dropdown" id="userDropdown">
                     <?php if($this->session->userdata('user_id')): ?>
-                        <a href="<?php echo base_url('user/account'); ?>">Mon Compte</a>
-                        <a href="<?php echo base_url('user/logout'); ?>">Déconnexion</a>
+                        <a href="<?php echo base_url('user/account'); ?>"><?php echo t('Mon Compte', 'My Account'); ?></a>
+                        <a href="<?php echo base_url('user/logout'); ?>"><?php echo t('Déconnexion', 'Logout'); ?></a>
                     <?php else: ?>
-                        <a href="<?php echo base_url('user/login'); ?>">Connexion</a>
-                        <a href="<?php echo base_url('user/register'); ?>">S'inscrire</a>
+                        <a href="<?php echo base_url('user/login'); ?>"><?php echo t('Connexion', 'Login'); ?></a>
+                        <a href="<?php echo base_url('user/register'); ?>"><?php echo t('S\'inscrire', 'Register'); ?></a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -95,7 +95,7 @@
             <div class="language-switcher">
                 <button class="lang-btn" id="lang-active" onclick="toggleLangDropdown(event)">
                     <i class="fas fa-globe"></i>
-                    <span class="active-lang">FR</span>
+                    <span class="active-lang"><?php echo strtoupper(current_lang()); ?></span>
                 </button>
                 <div class="lang-dropdown" id="langDropdown">
                     <a href="javascript:void(0);" onclick="changeLanguage('fr')">Français</a>
@@ -124,7 +124,7 @@
             </div>
 
             <form action="<?php echo base_url('search'); ?>" method="GET" class="search-container">
-                <input type="text" name="q" placeholder="Rechercher..." aria-label="Rechercher">
+                <input type="text" name="q" placeholder="<?php echo t('Rechercher...', 'Search...'); ?>" aria-label="<?php echo t('Rechercher', 'Search'); ?>">
                 <button type="submit" class="search-btn">
                     <i class="fas fa-search"></i>
                 </button>
@@ -142,28 +142,28 @@
                 <div class="location-modal-icon">
                     <i class="fas fa-store"></i>
                 </div>
-                <h3>Quelle localisation préférez-vous ?</h3>
-                <p>Sélectionnez votre magasin préféré pour voir les produits disponibles dans votre zone.</p>
+                <h3><?php echo t('Quelle localisation préférez-vous ?', 'Which location do you prefer?'); ?></h3>
+                <p><?php echo t('Sélectionnez votre magasin préféré pour voir les produits disponibles dans votre zone.', 'Select your preferred shop to view available products in your area.'); ?></p>
             </div>
             <div class="location-options">
                 <!-- Shop 1: Red Theme -->
                 <button type="button" class="location-option-card shop-card-vlb <?php echo ($selected_shop_id == '1') ? 'active' : ''; ?>" onclick="selectLocation('1', 'Villiers-le-bel')">
                     <div>
-                        <div class="loc-badge loc-badge-vlb"><i class="fas fa-map-pin"></i> Magasin 1</div>
+                        <div class="loc-badge loc-badge-vlb"><i class="fas fa-map-pin"></i> <?php echo t('Magasin 1', 'Shop 1'); ?></div>
                         <h4>Villiers-le-bel</h4>
                         <p><i class="fas fa-location-dot"></i> 11 Place de la Tolinette, 95400 Villiers Le Bel</p>
                     </div>
-                    <span class="loc-select-btn btn-vlb">Sélectionner ce magasin <i class="fas fa-arrow-right"></i></span>
+                    <span class="loc-select-btn btn-vlb"><?php echo t('Sélectionner ce magasin', 'Select this shop'); ?> <i class="fas fa-arrow-right"></i></span>
                 </button>
 
                 <!-- Shop 2: Blue Theme -->
                 <button type="button" class="location-option-card shop-card-lpb <?php echo ($selected_shop_id == '2') ? 'active' : ''; ?>" onclick="selectLocation('2', 'Le Plessis-Bouchard')">
                     <div>
-                        <div class="loc-badge loc-badge-lpb"><i class="fas fa-map-pin"></i> Magasin 2</div>
+                        <div class="loc-badge loc-badge-lpb"><i class="fas fa-map-pin"></i> <?php echo t('Magasin 2', 'Shop 2'); ?></div>
                         <h4>Le Plessis-Bouchard</h4>
                         <p><i class="fas fa-location-dot"></i> Commercial des Hauts de Saint-Nicolas, 95130 Le Plessis-Bouchard</p>
                     </div>
-                    <span class="loc-select-btn btn-lpb">Sélectionner ce magasin <i class="fas fa-arrow-right"></i></span>
+                    <span class="loc-select-btn btn-lpb"><?php echo t('Sélectionner ce magasin', 'Select this shop'); ?> <i class="fas fa-arrow-right"></i></span>
                 </button>
             </div>
         </div>

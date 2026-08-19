@@ -46,23 +46,23 @@
         <div class="features-grid">
             <div class="feature-item">
                 <i class="fas fa-truck"></i>
-                <h3>Free Delivery</h3>
-                <p>On all orders above $20</p>
+                <h3><?php echo t('Livraison Gratuite', 'Free Delivery'); ?></h3>
+                <p><?php echo t('Sur toutes les commandes dès 20€', 'On all orders above €20'); ?></p>
             </div>
             <div class="feature-item">
                 <i class="fas fa-leaf"></i>
-                <h3>Fresh Ingredients</h3>
-                <p>100% organic and locally sourced</p>
+                <h3><?php echo t('Ingrédients Frais', 'Fresh Ingredients'); ?></h3>
+                <p><?php echo t('100% frais et de qualité', '100% organic and locally sourced'); ?></p>
             </div>
             <div class="feature-item">
                 <i class="fas fa-clock"></i>
-                <h3>Quick Service</h3>
-                <p>Ready in just 15 minutes</p>
+                <h3><?php echo t('Service Rapide', 'Quick Service'); ?></h3>
+                <p><?php echo t('Prêt en seulement 15 min', 'Ready in just 15 minutes'); ?></p>
             </div>
             <div class="feature-item">
                 <i class="fas fa-medal"></i>
-                <h3>Best Taste</h3>
-                <p>Award winning recipes</p>
+                <h3><?php echo t('Meilleur Goût', 'Best Taste'); ?></h3>
+                <p><?php echo t('Recettes gourmandes savoureuses', 'Award winning recipes'); ?></p>
             </div>
         </div>
     </div>

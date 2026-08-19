@@ -11,8 +11,8 @@
     <!-- Menu Hero -->
     <section class="menu-hero" style="background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');">
         <div class="container">
-            <h1>Our Delicious Menu</h1>
-            <p>From classic Neapolitan to creative gourmet pizzas, we have something for everyone.</p>
+            <h1><?php echo t('Notre Délicieux Menu', 'Our Delicious Menu'); ?></h1>
+            <p><?php echo t('De la classique napolitaine aux pizzas gourmandes créatives, nous en avons pour tous les goûts.', 'From classic Neapolitan to creative gourmet pizzas, we have something for everyone.'); ?></p>
         </div>
     </section>
 
@@ -24,7 +24,7 @@
                     <div class="filter-icon">
                         <i class="fas fa-th-large"></i>
                     </div>
-                    <span>All Items</span>
+                    <span><?php echo t('Tous les articles', 'All Items'); ?></span>
                 </a>
                 <?php foreach($categories as $cat): ?>
                     <a href="<?php echo base_url('menu/'.$cat->id); ?>" class="filter-item <?php echo $current_cat_id == $cat->id && !isset($is_subcategory) ? 'active' : ''; ?>">
@@ -74,11 +74,11 @@
                         } 
                     }
                 ?>
-                <h2>Showing <?php echo $cat_name; ?></h2>
+                <h2><?php echo t('Affichage de ', 'Showing ') . $cat_name; ?></h2>
             <?php else: ?>
-                <h2>All Products</h2>
+                <h2><?php echo t('Tous les produits', 'All Products'); ?></h2>
             <?php endif; ?>
-            <p><?php echo count($products); ?> items found</p>
+            <p><?php echo count($products) . ' ' . t('articles trouvés', 'items found'); ?></p>
         </div>
 
         <div class="menu-grid">
@@ -87,19 +87,11 @@
                     <div class="menu-card">
                         <div class="menu-card-img">
                             <img src="<?php echo base_url('assets/images/products/'.($p->image ? $p->image : 'default.png')); ?>" alt="<?php echo $p->name; ?>">
-                            <div class="menu-card-badge">
-                                <?php if (!empty($p->offer_name)): ?>
-                                    <div style="background: #ff0000; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-bottom: 2px; text-align: center; font-weight: bold; box-shadow: 0 0 5px rgba(255,0,0,0.5);"><?php echo $p->offer_name; ?></div>
-                                <?php endif; ?>
-                                <?php if(!empty($p->subcategory_name)): ?>
-                                    <div style="display: flex; flex-direction: column; gap: 2px;">
-                                        <span style="font-size: 0.75rem; opacity: 0.8;"><?php echo $p->category_name; ?></span>
-                                        <span style="font-weight: 600;"><?php echo $p->subcategory_name; ?></span>
-                                    </div>
-                                <?php else: ?>
-                                    <span><?php echo $p->category_name; ?></span>
-                                <?php endif; ?>
-                            </div>
+                            <?php if (!empty($p->offer_name)): ?>
+                                <div class="menu-card-badge">
+                                    <div style="background: #ff0000; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; text-align: center; font-weight: bold; box-shadow: 0 0 5px rgba(255,0,0,0.5);"><?php echo $p->offer_name; ?></div>
+                                </div>
+                            <?php endif; ?>
                             <button class="wishlist-btn" onclick="toggleWishlist(<?php echo $p->id; ?>, this)" title="Add to Wishlist">
                                 <i class="<?php echo !empty($p->in_wishlist) ? 'fas' : 'far'; ?> fa-heart" style="color: <?php echo !empty($p->in_wishlist) ? '#ff4757' : '#fff'; ?>;"></i>
                             </button>
@@ -111,7 +103,7 @@
                             </div>
                             <p><?php echo $p->description; ?></p>
                             <div class="menu-card-footer">
-                                <a href="javascript:void(0)" onclick="openProductModal(<?php echo $p->id; ?>)" class="btn-details">View Details</a>
+                                <a href="javascript:void(0)" onclick="openProductModal(<?php echo $p->id; ?>)" class="btn-details"><?php echo t('Voir les détails', 'View Details'); ?></a>
                                 <a href="javascript:void(0)" onclick="openProductModal(<?php echo $p->id; ?>)" class="btn-add">
                                     <i class="fas fa-plus"></i>
                                 </a>
@@ -122,8 +114,8 @@
             <?php else: ?>
                 <div class="no-products">
                     <i class="fas fa-search"></i>
-                    <p>No products found in this category.</p>
-                    <a href="<?php echo base_url('menu'); ?>" class="btn-primary">Browse All</a>
+                    <p><?php echo t('Aucun produit trouvé dans cette catégorie.', 'No products found in this category.'); ?></p>
+                    <a href="<?php echo base_url('menu'); ?>" class="btn-primary"><?php echo t('Tout parcourir', 'Browse All'); ?></a>
                 </div>
             <?php endif; ?>
         </div>
@@ -150,9 +142,8 @@
     background: #fff;
     border-bottom: 1px solid #eee;
     padding: 2rem 0;
-    position: sticky;
-    top: 70px;
-    z-index: 100;
+    position: relative;
+    z-index: 10;
 }
 
 .filter-wrapper {
@@ -174,6 +165,7 @@
     color: var(--dark);
     transition: var(--transition);
     min-width: 80px;
+    flex-shrink: 0;
 }
 
 .filter-icon {
@@ -261,6 +253,9 @@
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0,0,0,0.05);
     transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .menu-card:hover {
@@ -269,20 +264,25 @@
 }
 
 .menu-card-img {
-    height: 220px;
+    height: 200px;
     position: relative;
     overflow: hidden;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
 }
 
 .menu-card-img img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     transition: var(--transition);
 }
 
 .menu-card:hover .menu-card-img img {
-    transform: scale(1.1);
+    transform: scale(1.08);
 }
 
 .menu-card-badge {
@@ -299,12 +299,17 @@
 
 .menu-card-body {
     padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: space-between;
 }
 
 .menu-card-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    gap: 0.5rem;
     margin-bottom: 10px;
 }
 
@@ -317,17 +322,19 @@
     font-size: 1.1rem;
     font-weight: 700;
     color: var(--primary);
+    white-space: nowrap;
 }
 
 .menu-card-body p {
     color: #666;
     font-size: 0.9rem;
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
+    line-height: 1.5;
+    margin-bottom: 1.2rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    min-height: 2.7em;
 }
 
 .menu-card-footer {
@@ -386,21 +393,29 @@
 }
 
 @media (max-width: 768px) {
-    .menu-hero { padding: 4rem 0; }
-    .menu-hero h1 { font-size: 2.2rem; }
-    .category-filter { padding: 1rem 0; }
+    .menu-hero { padding: 3rem 0; }
+    .menu-hero h1 { font-size: 2rem; }
+    .category-filter {
+        position: relative;
+        top: auto;
+        padding: 0.8rem 0;
+        z-index: 10;
+    }
     .filter-wrapper { 
         justify-content: flex-start; 
         padding: 5px 15px 15px; 
-        gap: 1.2rem; 
+        gap: 1rem; 
         scroll-behavior: smooth;
         -webkit-overflow-scrolling: touch;
     }
-    .filter-item { min-width: 65px; }
+    .filter-item { 
+        min-width: 65px; 
+        flex-shrink: 0;
+    }
     .filter-icon {
-        width: 55px;
-        height: 55px;
-        margin: 0 auto 8px;
+        width: 50px;
+        height: 50px;
+        margin: 0 auto 6px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
     .filter-item span {
@@ -408,16 +423,73 @@
         white-space: nowrap;
     }
     .filter-subitem .filter-icon {
-        width: 45px !important;
-        height: 45px !important;
+        width: 42px !important;
+        height: 42px !important;
     }
     .filter-item:hover .filter-icon, .filter-item.active .filter-icon {
         transform: translateY(-3px);
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
+    .products-header {
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .products-header h2 {
+        font-size: 1.4rem;
+    }
     .menu-grid { 
         grid-template-columns: repeat(2, 1fr); 
-        gap: 1rem; 
+        gap: 0.85rem; 
+        padding-bottom: 3rem;
+    }
+    .menu-card {
+        border-radius: 14px;
+    }
+    .menu-card-img {
+        height: 140px;
+        padding: 6px;
+    }
+    .menu-card-body {
+        padding: 0.85rem;
+    }
+    .menu-card-header {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.2rem;
+        margin-bottom: 8px;
+    }
+    .menu-card-header h3 {
+        font-size: 0.95rem;
+        line-height: 1.25;
+        word-break: break-word;
+    }
+    .menu-card-header .price {
+        font-size: 0.95rem;
+        font-weight: 800;
+    }
+    .menu-card-body p {
+        font-size: 0.8rem;
+        margin-bottom: 0.8rem;
+        -webkit-line-clamp: 2;
+        min-height: 2.5em;
+    }
+    .btn-details {
+        font-size: 0.8rem;
+    }
+    .btn-add {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+    }
+    .wishlist-btn {
+        top: 8px;
+        right: 8px;
+        width: 30px;
+        height: 30px;
+    }
+    .wishlist-btn i {
+        font-size: 1rem;
     }
 }
 

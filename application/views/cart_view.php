@@ -2,8 +2,8 @@
     <!-- Cart Header -->
     <section class="cart-header">
         <div class="container">
-            <h1><i class="fas fa-shopping-cart"></i> Shopping Cart</h1>
-            <p><?php echo count($cart_items); ?> item(s) in your cart</p>
+            <h1><i class="fas fa-shopping-cart"></i> <?php echo t('Mon Panier', 'Shopping Cart'); ?></h1>
+            <p><?php echo count($cart_items) . ' ' . t('article(s) dans votre panier', 'item(s) in your cart'); ?></p>
         </div>
     </section>
 
@@ -36,12 +36,12 @@
                                                 $size = $this->db->get()->row();
                                             ?>
                                             <span class="spec-item">
-                                                <strong>Size:</strong> <?php echo $size->name ?? 'Standard'; ?>
+                                                <strong><?php echo t('Taille :', 'Size:'); ?></strong> <?php echo $size->name ?? 'Standard'; ?>
                                             </span>
                                             
                                             <?php if (!empty($item['addon_ids'])): ?>
                                                 <span class="spec-item">
-                                                    <strong>Add-ons:</strong> <?php echo count($item['addon_ids']); ?> item(s)
+                                                    <strong><?php echo t('Suppléments :', 'Add-ons:'); ?></strong> <?php echo count($item['addon_ids']) . ' ' . t('article(s)', 'item(s)'); ?>
                                                 </span>
                                             <?php endif; ?>
                                         </div>
@@ -49,7 +49,7 @@
                                     <div class="item-price">
                                         <span class="price-label">€<?php echo number_format($item['size_price'], 2); ?></span>
                                         <?php if (!empty($item['addon_prices'])): ?>
-                                            <span class="addon-label">+ <?php echo count($item['addon_prices']); ?> add-ons</span>
+                                            <span class="addon-label">+ <?php echo count($item['addon_prices']) . ' ' . t('suppléments', 'add-ons'); ?></span>
                                         <?php endif; ?>
                                     </div>
                                     <div class="item-quantity">
@@ -74,7 +74,7 @@
                         <!-- Continue Shopping -->
                         <div class="continue-shopping">
                             <a href="<?php echo base_url('menu'); ?>" class="btn-link">
-                                <i class="fas fa-arrow-left"></i> Continue Shopping
+                                <i class="fas fa-arrow-left"></i> <?php echo t('Continuer mes achats', 'Continue Shopping'); ?>
                             </a>
                         </div>
                     <?php else: ?>
@@ -83,9 +83,9 @@
                             <div class="empty-icon">
                                 <i class="fas fa-shopping-cart"></i>
                             </div>
-                            <h2>Your cart is empty</h2>
-                            <p>Looks like you haven't added anything yet. Start exploring our menu!</p>
-                            <a href="<?php echo base_url('menu'); ?>" class="btn-primary">Browse Menu</a>
+                            <h2><?php echo t('Votre panier est vide', 'Your cart is empty'); ?></h2>
+                            <p><?php echo t('Il semble que vous n\'avez encore rien ajouté. Découvrez notre menu !', 'Looks like you haven\'t added anything yet. Start exploring our menu!'); ?></p>
+                            <a href="<?php echo base_url('menu'); ?>" class="btn-primary"><?php echo t('Parcourir le menu', 'Browse Menu'); ?></a>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -94,51 +94,51 @@
                 <?php if (!empty($cart_items)): ?>
                     <div class="cart-summary-section">
                         <div class="summary-card">
-                            <h3>Order Summary</h3>
+                            <h3><?php echo t('Récapitulatif de la commande', 'Order Summary'); ?></h3>
                             
                             <div class="summary-row">
-                                <span>Subtotal</span>
+                                <span><?php echo t('Sous-total', 'Subtotal'); ?></span>
                                 <span class="amount">€<?php echo number_format($subtotal, 2); ?></span>
                             </div>
 
                             <div class="summary-row">
-                                <span>Tax (10%)</span>
+                                <span><?php echo t('TVA (10%)', 'Tax (10%)'); ?></span>
                                 <span class="amount">€<?php echo number_format($tax, 2); ?></span>
                             </div>
 
                             <div class="summary-row">
-                                <span>Delivery</span>
+                                <span><?php echo t('Livraison', 'Delivery'); ?></span>
                                 <span class="amount">€5.00</span>
                             </div>
 
                             <div class="summary-row total">
-                                <span>Total</span>
+                                <span><?php echo t('Total', 'Total'); ?></span>
                                 <strong class="amount">€<?php echo number_format($total + 5, 2); ?></strong>
                             </div>
 
                             <div class="summary-actions">
                                 <button id="btnCheckout" class="btn-checkout">
-                                    <i class="fas fa-lock"></i> Proceed to Checkout
+                                    <i class="fas fa-lock"></i> <?php echo t('Passer la commande', 'Proceed to Checkout'); ?>
                                 </button>
                                 <button class="btn-clear-cart" onclick="clearCart()">
-                                    <i class="fas fa-times"></i> Clear Cart
+                                    <i class="fas fa-times"></i> <?php echo t('Vider le panier', 'Clear Cart'); ?>
                                 </button>
                             </div>
 
                             <div class="payment-methods">
-                                <h4>Payment Methods</h4>
+                                <h4><?php echo t('Moyens de paiement', 'Payment Methods'); ?></h4>
                                 <div class="methods-list">
                                     <div class="method">
                                         <i class="fas fa-credit-card"></i>
-                                        <span>Credit Card</span>
+                                        <span><?php echo t('Carte de crédit', 'Credit Card'); ?></span>
                                     </div>
                                     <div class="method">
                                         <i class="fas fa-wallet"></i>
-                                        <span>Debit Card</span>
+                                        <span><?php echo t('Carte de débit', 'Debit Card'); ?></span>
                                     </div>
                                     <div class="method">
                                         <i class="fas fa-money-bill"></i>
-                                        <span>Cash on Delivery</span>
+                                        <span><?php echo t('Espèces à la livraison', 'Cash on Delivery'); ?></span>
                                     </div>
                                 </div>
                             </div>
@@ -576,7 +576,7 @@ function updateQty(itemKey, amount) {
 }
 
 function removeItem(itemKey) {
-    if (confirm('Remove this item from cart?')) {
+    if (confirm(window.t('Voulez-vous retirer cet article du panier ?', 'Remove this item from cart?'))) {
         fetch('<?php echo base_url('cart/remove_item'); ?>', {
             method: 'POST',
             headers: {
@@ -598,7 +598,7 @@ function removeItem(itemKey) {
 }
 
 function clearCart() {
-    if (confirm('Clear your entire cart?')) {
+    if (confirm(window.t('Voulez-vous vider tout votre panier ?', 'Clear your entire cart?'))) {
         fetch('<?php echo base_url('cart/clear'); ?>', {
             method: 'POST',
             headers: {

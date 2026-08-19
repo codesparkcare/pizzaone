@@ -1,17 +1,17 @@
 <main class="cart-page">
     <!-- Product Header Hero -->
-    <section class="product-hero" style="background: linear-gradient(135deg, rgba(230, 126, 34, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%);">
+    <section class="product-hero" style="background: linear-gradient(135deg, rgba(230, 126, 34, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%); padding: 1rem 0; margin-bottom: 1rem;">
         <div class="container">
             <nav class="breadcrumb-nav">
                 <a href="<?php echo base_url('menu'); ?>" class="breadcrumb-link">
-                    <i class="fas fa-arrow-left"></i> Back to Menu
+                    <i class="fas fa-arrow-left"></i> <?php echo t('Retour au menu', 'Back to Menu'); ?>
                 </a>
             </nav>
         </div>
     </section>
 
     <!-- Product Section -->
-    <section class="product-section">
+    <section class="product-section" style="padding: 0 0 2rem 0;">
         <div class="container">
             <div class="product-wrapper">
                 <!-- Product Image Gallery -->
@@ -42,7 +42,7 @@
                         <div class="product-meta">
                             <div class="meta-item">
                                 <i class="fas fa-check-circle"></i>
-                                <span>100% Fresh Ingredients</span>
+                                <span><?php echo t('Ingrédients 100% Frais', '100% Fresh Ingredients'); ?></span>
                             </div>
                         </div>
                     </div>
@@ -56,8 +56,8 @@
                             <div class="form-section">
                                 <div class="section-header">
                                     <h3 class="section-title">
-                                        <i class="fas fa-expand"></i> Choose Size
-                                        <span class="required-badge">Required</span>
+                                        <i class="fas fa-expand"></i> <?php echo t('Choisir la taille', 'Choose Size'); ?>
+                                        <span class="required-badge"><?php echo t('Obligatoire', 'Required'); ?></span>
                                     </h3>
                                 </div>
                                 <div class="size-options-grid">
@@ -92,15 +92,15 @@
                                                     <i class="fas fa-plus-circle"></i> 
                                                     <?php echo $group->group_name; ?>
                                                     <?php if ($group->is_required): ?>
-                                                        <span class="required-badge">Required</span>
+                                                        <span class="required-badge"><?php echo t('Obligatoire', 'Required'); ?></span>
                                                     <?php endif; ?>
                                                 </h3>
                                                 <div class="addon-group-info">
                                                     <?php 
                                                         if ($group->min_selections == 0 && $group->max_selections == 1) {
-                                                            echo '<span class="selection-hint">Choose up to 1</span>';
+                                                            echo '<span class="selection-hint">' . t('Choisissez jusqu\'à 1', 'Choose up to 1') . '</span>';
                                                         } elseif ($group->max_selections > 1) {
-                                                            echo '<span class="selection-hint">Choose up to ' . $group->max_selections . '</span>';
+                                                            echo '<span class="selection-hint">' . t('Choisissez jusqu\'à ', 'Choose up to ') . $group->max_selections . '</span>';
                                                         }
                                                     ?>
                                                 </div>
@@ -127,7 +127,7 @@
                                                                     if ($addon->price > 0) {
                                                                         echo '+€' . number_format($addon->price, 2);
                                                                     } else {
-                                                                        echo 'Free';
+                                                                        echo t('Gratuit', 'Free');
                                                                     }
                                                                 ?>
                                                             </span>
@@ -142,8 +142,8 @@
                                     <div class="form-section">
                                         <div class="section-header">
                                             <h3 class="section-title">
-                                                <i class="fas fa-plus-circle"></i> Customize Your Order
-                                                <span class="optional-badge">Optional</span>
+                                                <i class="fas fa-plus-circle"></i> <?php echo t('Personnaliser votre commande', 'Customize Your Order'); ?>
+                                                <span class="optional-badge"><?php echo t('Optionnel', 'Optional'); ?></span>
                                             </h3>
                                         </div>
                                         <div class="addons-showcase">
@@ -163,9 +163,9 @@
                                                                 if ($addon->price > 0) {
                                                                     echo '+€' . number_format($addon->price, 2);
                                                                 } elseif ($addon->type == 'exclude') {
-                                                                    echo 'Remove';
+                                                                    echo t('Retirer', 'Remove');
                                                                 } else {
-                                                                    echo 'Free';
+                                                                    echo t('Gratuit', 'Free');
                                                                 }
                                                             ?>
                                                         </span>
@@ -182,7 +182,7 @@
                         <div class="form-section">
                             <div class="section-header">
                                 <h3 class="section-title">
-                                    <i class="fas fa-box"></i> Quantity
+                                    <i class="fas fa-box"></i> <?php echo t('Quantité', 'Quantity'); ?>
                                 </h3>
                             </div>
                             <div class="quantity-control">
@@ -200,21 +200,21 @@
                         <div class="price-card">
                             <div class="price-details">
                                 <div class="price-line">
-                                    <span class="price-label">Base Price:</span>
+                                    <span class="price-label"><?php echo t('Prix de base :', 'Base Price:'); ?></span>
                                     <span class="price-value" id="basePrice" data-base-price="<?php echo number_format($product->sizes[0]->price ?? $product->price, 2); ?>">€<?php echo number_format($product->sizes[0]->price ?? $product->price, 2); ?></span>
                                 </div>
                                 <div class="price-line" id="addonPriceRow" style="display: none;">
-                                    <span class="price-label">Add-ons:</span>
+                                    <span class="price-label"><?php echo t('Suppléments :', 'Add-ons:'); ?></span>
                                     <span class="price-value addon-sum" id="addonPrice">€0.00</span>
                                 </div>
                                 <div class="price-line">
-                                    <span class="price-label">Quantity:</span>
+                                    <span class="price-label"><?php echo t('Quantité :', 'Quantity:'); ?></span>
                                     <span class="price-value qty-count" id="qtyDisplay">1</span>
                                 </div>
                             </div>
                             <div class="price-divider"></div>
                             <div class="total-price-section">
-                                <span class="total-label">Total</span>
+                                <span class="total-label"><?php echo t('Total', 'Total'); ?></span>
                                 <span class="total-amount" id="totalPrice">€<?php echo number_format($product->sizes[0]->price ?? $product->price, 2); ?></span>
                             </div>
                         </div>
@@ -223,104 +223,59 @@
                         <div class="action-buttons-group">
                             <button type="submit" class="btn btn-primary btn-lg">
                                 <i class="fas fa-shopping-cart"></i>
-                                <span>Add to Cart</span>
+                                <span><?php echo t('Ajouter au panier', 'Add to Cart'); ?></span>
                             </button>
                             <a href="<?php echo base_url('menu'); ?>" class="btn btn-secondary btn-lg">
                                 <i class="fas fa-arrow-left"></i>
-                                <span>Continue Shopping</span>
+                                <span><?php echo t('Continuer mes achats', 'Continue Shopping'); ?></span>
                             </a>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
+    </section>
+
     <!-- Global Modal -->
     <div id="globalModal" class="modal-overlay">
         <div class="modal-content">
             <p id="modalMessage"></p>
-            <button class="close-btn">Close</button>
+            <button class="close-btn"><?php echo t('OK', 'OK'); ?></button>
         </div>
     </div>
-</section>
 </main>
 
 <style>
-/* Add to Cart Page - Professional Modern Design */
-
+/* Add to Cart Page - Compact Side-by-Side Design */
 .cart-page {
     min-height: 100vh;
     background: linear-gradient(135deg, #f5f7fa 0%, #f0f4f8 100%);
-    padding-top: 2rem;
-}
-
-/* Product Hero Section */
-.product-hero {
-    padding: 1.5rem 0;
-    margin-bottom: 2rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.breadcrumb-nav {
-    display: flex;
-    align-items: center;
-}
-
-.breadcrumb-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--primary);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.95rem;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-
-.breadcrumb-link:hover {
-    background: rgba(230, 126, 34, 0.1);
-    color: var(--secondary);
-    transform: translateX(-3px);
-}
-
-/* Product Section */
-.product-section {
-    padding: 3rem 0;
+    padding-top: 1rem;
 }
 
 .product-wrapper {
     display: grid;
-    grid-template-columns: 1.2fr 1fr;
-    gap: 4rem;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 1rem;
     background: var(--white);
-    padding: 3rem;
-    border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-/* Product Image Container */
-.product-image-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
 }
 
 .image-frame {
     position: relative;
     width: 100%;
     background: linear-gradient(135deg, rgba(230, 126, 34, 0.05) 0%, rgba(52, 152, 219, 0.05) 100%);
-    border-radius: 16px;
-    padding: 2rem;
+    border-radius: 12px;
+    padding: 0.75rem;
     overflow: hidden;
 }
 
 .product-image-main {
     width: 100%;
-    aspect-ratio: 1;
-    border-radius: 12px;
+    aspect-ratio: 1.2;
+    border-radius: 10px;
     overflow: hidden;
     background: var(--white);
 }
@@ -329,159 +284,83 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.image-frame:hover .product-image-main img {
-    transform: scale(1.05);
 }
 
 .badge-overlay {
     position: absolute;
-    top: 1.5rem;
-    left: 1.5rem;
+    top: 1rem;
+    left: 1rem;
     display: flex;
-    gap: 0.75rem;
-    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
 .badge {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 14px;
+    font-size: 0.7rem;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.badge-category {
-    background: rgba(230, 126, 34, 0.95);
-    color: var(--white);
-}
-
-.badge-subcategory {
-    background: rgba(52, 152, 219, 0.95);
-    color: var(--white);
-}
-
-/* Product Details Wrapper */
 .product-details-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 0.5rem;
 }
 
 .product-info-header {
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    padding-bottom: 2rem;
+    padding-bottom: 0.4rem;
 }
 
 .product-title {
-    font-size: 2.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: var(--dark);
-    margin-bottom: 1rem;
-    line-height: 1.2;
-    letter-spacing: -0.5px;
+    margin-bottom: 0.2rem;
 }
 
 .product-description {
     color: var(--dark-muted);
-    font-size: 1.05rem;
-    line-height: 1.8;
-    margin-bottom: 1.5rem;
+    font-size: 0.82rem;
+    line-height: 1.35;
+    margin-bottom: 0.3rem;
 }
 
 .product-meta {
     display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem;
+    gap: 0.6rem;
 }
 
 .meta-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+    font-size: 0.78rem;
     color: var(--dark-muted);
-    font-size: 0.95rem;
-    font-weight: 500;
 }
 
-.meta-item i {
-    color: var(--primary);
-    font-size: 1.1rem;
-}
-
-/* Customization Form */
 .customization-form {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 0.5rem;
 }
 
 .form-section {
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-    padding-bottom: 2rem;
-}
-
-.form-section:last-of-type {
-    border-bottom: none;
+    padding-bottom: 0.4rem;
 }
 
 .section-header {
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.35rem;
 }
 
 .section-title {
-    font-size: 1.1rem;
+    font-size: 0.85rem;
     font-weight: 700;
-    color: var(--dark);
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin: 0;
 }
 
-.section-title i {
-    font-size: 1.3rem;
-    color: var(--primary);
-}
-
-.required-badge,
-.optional-badge {
-    display: inline-block;
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 0.3rem 0.6rem;
-    border-radius: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    margin-left: auto;
-}
-
-.required-badge {
-    background: rgba(231, 76, 60, 0.1);
-    color: #e74c3c;
-}
-
-.optional-badge {
-    background: rgba(52, 152, 219, 0.1);
-    color: var(--primary);
-}
-
-/* Size Options Grid */
+/* Size Options Grid - Always 2 columns side-by-side */
 .size-options-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 1rem;
-}
-
-.size-card {
-    position: relative;
-    cursor: pointer;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
 }
 
 .size-card input[type="radio"] {
@@ -493,541 +372,128 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 1.5rem;
+    padding: 0.4rem 0.5rem;
     border: 2px solid rgba(0, 0, 0, 0.1);
-    border-radius: 12px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 8px;
     background: var(--white);
-    min-height: 120px;
     text-align: center;
-    position: relative;
+    cursor: pointer;
 }
 
 .size-card input[type="radio"]:checked + .size-card-content {
     border-color: var(--primary);
-    background: linear-gradient(135deg, rgba(230, 126, 34, 0.05) 0%, rgba(230, 126, 34, 0.02) 100%);
-    box-shadow: 0 4px 20px rgba(230, 126, 34, 0.15);
-    transform: translateY(-2px);
-}
-
-.size-card:hover .size-card-content {
-    border-color: rgba(230, 126, 34, 0.4);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    background: rgba(230, 126, 34, 0.05);
 }
 
 .size-name {
     font-weight: 700;
-    color: var(--dark);
-    margin-bottom: 0.6rem;
-    font-size: 1rem;
+    font-size: 0.8rem;
+    margin-bottom: 0.1rem;
 }
 
 .size-price {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--primary);
-}
-
-.checkmark {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: var(--primary);
-    color: var(--white);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.75rem;
-    opacity: 0;
-    transform: scale(0);
-    transition: all 0.3s ease;
-}
-
-.size-card input[type="radio"]:checked ~ .checkmark {
-    opacity: 1;
-    transform: scale(1);
-}
-
-/* Add-ons Showcase */
-.addons-showcase {
-    display: grid;
-    gap: 0.8rem;
-}
-
-.addon-card {
-    display: flex;
-    align-items: center;
-    gap: 1.2rem;
-    padding: 1.2rem;
-    border: 2px solid rgba(0, 0, 0, 0.08);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    background: var(--white);
-}
-
-.addon-card:hover {
-    border-color: rgba(230, 126, 34, 0.3);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-}
-
-.addon-checkbox {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.addon-checkbox input[type="checkbox"] {
-    display: none;
-}
-
-.checkbox-custom {
-    width: 24px;
-    height: 24px;
-    border: 2px solid rgba(0, 0, 0, 0.2);
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    background: var(--white);
-    position: relative;
-}
-
-.addon-checkbox input[type="checkbox"]:checked + .checkbox-custom {
-    background: var(--primary);
-    border-color: var(--primary);
-}
-
-.addon-checkbox input[type="checkbox"]:checked + .checkbox-custom::after {
-    content: '✓';
-    color: var(--white);
     font-size: 0.85rem;
-    font-weight: bold;
-}
-
-.addon-info {
-    flex: 1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.addon-name {
-    font-weight: 600;
-    color: var(--dark);
-    font-size: 0.95rem;
-}
-
-.addon-price {
     font-weight: 700;
     color: var(--primary);
-    font-size: 0.9rem;
-    white-space: nowrap;
 }
 
-/* Quantity Control */
 .quantity-control {
     display: flex;
     align-items: center;
-    gap: 0;
     width: fit-content;
     background: rgba(0, 0, 0, 0.03);
-    border-radius: 12px;
-    padding: 0.5rem;
+    border-radius: 8px;
+    padding: 0.15rem;
     border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .qty-btn {
-    width: 44px;
-    height: 44px;
+    width: 30px;
+    height: 30px;
     border: none;
     background: var(--white);
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     color: var(--primary);
-    font-size: 1rem;
-    font-weight: 600;
-}
-
-.qty-btn:hover {
-    background: var(--primary);
-    color: var(--white);
-    transform: scale(1.05);
+    font-size: 0.85rem;
 }
 
 .qty-input {
-    width: 80px;
-    padding: 0.8rem;
+    width: 45px;
+    padding: 0.2rem;
     text-align: center;
     border: none;
     background: transparent;
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     font-weight: 700;
-    color: var(--dark);
 }
 
-/* Price Card */
 .price-card {
     background: linear-gradient(135deg, rgba(230, 126, 34, 0.08) 0%, rgba(52, 152, 219, 0.08) 100%);
-    padding: 2rem;
-    border-radius: 14px;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
     border: 1px solid rgba(230, 126, 34, 0.2);
-}
-
-.price-details {
-    margin-bottom: 1.5rem;
 }
 
 .price-line {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    color: var(--dark);
-}
-
-.price-line:last-child {
-    margin-bottom: 0;
-}
-
-.price-label {
-    font-weight: 600;
-    font-size: 0.95rem;
-    color: var(--dark-muted);
-}
-
-.price-value {
-    font-weight: 600;
-    font-size: 1rem;
-    color: var(--dark);
-}
-
-.addon-sum {
-    color: var(--primary);
-}
-
-.qty-count {
-    background: rgba(230, 126, 34, 0.1);
-    color: var(--primary);
-    padding: 0.3rem 0.8rem;
-    border-radius: 6px;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    margin-bottom: 0.2rem;
 }
 
 .price-divider {
     height: 1px;
     background: rgba(230, 126, 34, 0.3);
-    margin: 1.5rem 0;
+    margin: 0.3rem 0;
 }
 
-.total-price-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+.total-label { font-size: 0.82rem; font-weight: 600; }
+.total-amount { font-size: 1.15rem; font-weight: 800; color: var(--primary); }
 
-.total-label {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--dark);
-}
-
-.total-amount {
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--primary);
-    letter-spacing: -0.5px;
-}
-
-/* Action Buttons */
 .action-buttons-group {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-top: 1rem;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
 }
 
 .btn {
-    padding: 1.1rem 2rem;
-    border: none;
-    border-radius: 12px;
-    font-size: 1rem;
+    padding: 0.55rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
+    gap: 0.4rem;
     text-decoration: none;
-    letter-spacing: 0.3px;
 }
 
-.btn-lg {
-    min-height: 56px;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, var(--primary) 0%, #e67e22 100%);
-    color: var(--white);
-    box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
-}
-
-.btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(230, 126, 34, 0.4);
-}
-
-.btn-primary:active {
-    transform: translateY(-1px);
-}
-
-.btn-secondary {
-    background: var(--white);
-    color: var(--dark);
-    border: 2px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-.btn-secondary:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-}
-
-.btn i {
-    font-size: 1.2rem;
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-    .product-wrapper {
-        grid-template-columns: 1fr;
-        gap: 3rem;
-        padding: 2.5rem;
-    }
-
-    .product-title {
-        font-size: 2rem;
-    }
-
-    .size-options-grid {
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    }
-}
+.btn-lg { min-height: 38px; }
+.btn-primary { background: var(--primary); color: #fff; border: none; }
+.btn-secondary { background: #fff; color: var(--dark); border: 1.5px solid #ccc; }
 
 @media (max-width: 768px) {
-    .cart-page {
-        padding-top: 1rem;
-    }
-
-    .product-section {
-        padding: 1.5rem 0;
-    }
-
-    .product-wrapper {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-        padding: 1.5rem;
-        border-radius: 12px;
-    }
-
-    .product-title {
-        font-size: 1.75rem;
-    }
-
-    .product-description {
-        font-size: 0.95rem;
-    }
-
-    .size-options-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.75rem;
-    }
-
-    .size-card-content {
-        min-height: 100px;
-        padding: 1.2rem;
-    }
-
-    .addons-showcase {
-        gap: 0.6rem;
-    }
-
-    .addon-card {
-        flex-direction: column;
-        text-align: center;
-        gap: 0.8rem;
-        padding: 1rem;
-    }
-
-    .addon-info {
-        flex-direction: column;
-        gap: 0.5rem;
-        width: 100%;
-    }
-
-    .action-buttons-group {
-        grid-template-columns: 1fr;
-        gap: 0.8rem;
-    }
-
-    .btn {
-        padding: 1rem 1.5rem;
-    }
-
-    .btn-lg {
-        min-height: 50px;
-    }
-
-    .section-title {
-        font-size: 1rem;
-    }
-
-    .price-card {
-        padding: 1.5rem;
-    }
-
-    .total-amount {
-        font-size: 1.5rem;
-    }
+    .product-wrapper { grid-template-columns: 1fr; gap: 0.6rem; padding: 0.75rem; }
+    .product-title { font-size: 1.1rem; }
+    .size-options-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 0.4rem !important; }
+    .action-buttons-group { grid-template-columns: 1fr 1fr !important; }
 }
 
-/* Addon Groups Styling */
-.addon-group-section {
-    margin-bottom: 2.5rem;
-    padding-bottom: 2rem;
-    border-bottom: 2px solid rgba(0, 0, 0, 0.06);
+/* Global Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.5);
+    display: none; align-items: center; justify-content: center; z-index: 1000;
 }
-
-.addon-group-section:last-child {
-    border-bottom: none;
-    margin-bottom: 2rem;
-    padding-bottom: 0;
+.modal-content {
+    background: #fff; padding: 1.2rem 1.5rem; border-radius: 8px;
+    max-width: 380px; width: 90%; text-align: center;
 }
-
-.addon-group-info {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-left: auto;
-}
-
-.selection-hint {
-    display: inline-block;
-    font-size: 0.85rem;
-    color: var(--dark-muted);
-    background: rgba(52, 152, 219, 0.08);
-    padding: 0.4rem 0.8rem;
-    border-radius: 6px;
-    border-left: 3px solid var(--primary);
-}
-
-.addon-card input[type="checkbox"]:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.addon-card.disabled {
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-.addon-selection-error {
-    color: #e74c3c;
-    font-size: 0.85rem;
-    margin-top: 0.5rem;
-    display: none;
-}
-
-.addon-selection-error.show {
-    display: block;
-}
-
-        /* Global Modal Styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background: #fff;
-            padding: 1.5rem 2rem;
-            border-radius: 8px;
-            max-width: 400px;
-            width: 90%;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            text-align: center;
-            font-family: 'Inter', sans-serif;
-        }
-        .modal-content p {
-            margin: 0 0 1rem;
-            font-size: 1rem;
-            color: #2c3e50;
-        }
-        .modal-content .close-btn {
-            background: #2ecc71;
-            color: #fff;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .modal-content.error p { color: #e74c3c; }
-
-@media (max-width: 480px) {
-    .product-wrapper {
-        padding: 1rem;
-        gap: 1.5rem;
-    }
-
-    .product-title {
-        font-size: 1.4rem;
-    }
-
-    .section-title {
-        font-size: 0.95rem;
-    }
-
-    .size-options-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .quantity-control {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .qty-input {
-        width: 60px;
-    }
-
-    .price-card {
-        padding: 1.2rem;
-    }
-
-    .btn {
-        font-size: 0.9rem;
-        padding: 0.9rem 1.2rem;
-    }
-}
+.modal-content.error p { color: #e74c3c; }
 </style>
 
 <script>
@@ -1040,28 +506,18 @@ function changeQuantity(amount) {
 }
 
 function updatePrice() {
-    // Get selected size price
     const sizeInput = document.querySelector('input[name="product_size"]:checked');
-const basePriceElement = document.getElementById('basePrice');
-const basePrice = sizeInput ? parseFloat(sizeInput.value) : parseFloat(basePriceElement.dataset.basePrice);
+    const basePriceElement = document.getElementById('basePrice');
+    const basePrice = sizeInput ? parseFloat(sizeInput.value) : parseFloat(basePriceElement.dataset.basePrice || 0);
 
-    // Get selected addons prices (old system)
     let addonPrice = 0;
     const addonInputs = document.querySelectorAll('input[name="product_addon"]:checked');
-    addonInputs.forEach(input => {
-        addonPrice += parseFloat(input.dataset.price);
-    });
+    addonInputs.forEach(input => { addonPrice += parseFloat(input.dataset.price); });
 
-    // Get selected addon group items prices (new system)
     const addonGroupInputs = document.querySelectorAll('input[name*="addon_group_"]:checked');
-    addonGroupInputs.forEach(input => {
-        addonPrice += parseFloat(input.dataset.price);
-    });
+    addonGroupInputs.forEach(input => { addonPrice += parseFloat(input.dataset.price); });
 
-    // Get quantity
     const quantity = parseInt(document.getElementById('quantity').value);
-
-    // Update display
     document.getElementById('basePrice').innerText = '€' + basePrice.toFixed(2);
     
     if (addonPrice > 0) {
@@ -1072,120 +528,81 @@ const basePrice = sizeInput ? parseFloat(sizeInput.value) : parseFloat(basePrice
     }
 
     document.getElementById('qtyDisplay').innerText = quantity;
-
-    // Calculate total
     const total = (basePrice + addonPrice) * quantity;
     document.getElementById('totalPrice').innerText = '€' + total.toFixed(2);
 }
 
-/**
- * Validate addon group selections
- */
 function validateAddonGroup(checkbox) {
     const groupId = checkbox.dataset.groupId;
     const maxSelections = parseInt(checkbox.dataset.maxSelections);
-    
-    // Get all checkboxes in this group
     const groupCheckboxes = document.querySelectorAll(`input[data-group-id="${groupId}"]`);
     const checkedCount = Array.from(groupCheckboxes).filter(cb => cb.checked).length;
     
     if (checkedCount > maxSelections) {
         checkbox.checked = false;
-        showModal(`You can select maximum ${maxSelections} item(s) for this group`, true);
+        showModal(window.t(`Vous pouvez sélectionner au maximum ${maxSelections} article(s) pour ce groupe`, `You can select maximum ${maxSelections} item(s) for this group`), true);
         return false;
     }
-    
-    // Update disabled state for unchecked boxes
-    groupCheckboxes.forEach(cb => {
-        if (!cb.checked && checkedCount >= maxSelections) {
-            cb.disabled = true;
-            cb.parentElement.parentElement.classList.add('disabled');
-        } else {
-            cb.disabled = false;
-            cb.parentElement.parentElement.classList.remove('disabled');
-        }
-    });
-    
     return true;
 }
 
-// Handle form submission
 document.getElementById('addToCartForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
-    // Get form data
     const productId = document.querySelector('input[name="product_id"]').value;
     const quantity = document.getElementById('quantity').value;
-    // Determine size price if applicable
     const sizeInput = document.querySelector('input[name="product_size"]:checked');
     const sizePrice = sizeInput ? parseFloat(sizeInput.value) : 0;
-    // If product has sizes but none selected, enforce selection
     const sizeOptions = document.querySelectorAll('input[name="product_size"]');
+
     if (sizeOptions.length > 0 && !sizeInput) {
-        showModal('Please select a size', true);
+        showModal(window.t('Veuillez sélectionner une taille', 'Please select a size'), true);
         return;
     }
 
-    // Get selected addons (old system)
     const addonInputs = document.querySelectorAll('input[name="product_addon"]:checked');
     const addonIds = Array.from(addonInputs).map(input => input.value);
     const addonPrices = Array.from(addonInputs).map(input => input.dataset.price);
 
-    // Get selected addon groups (new system)
     const addonGroupInputs = document.querySelectorAll('input[name*="addon_group_"]:checked');
     const addonGroupIds = Array.from(addonGroupInputs).map(input => input.value);
     const addonGroupPrices = Array.from(addonGroupInputs).map(input => input.dataset.price);
 
-    // Prepare FormData for proper array serialization
     const formData = new FormData();
     formData.append('product_id', productId);
     formData.append('quantity', quantity);
     formData.append('size_price', sizePrice);
     
-    // Add old addon system values
     addonIds.forEach(id => formData.append('addon_ids[]', id));
     addonPrices.forEach(price => formData.append('addon_prices[]', price));
 
-    // Add new addon group values
     addonGroupIds.forEach(id => formData.append('addon_group_ids[]', id));
     addonGroupPrices.forEach(price => formData.append('addon_group_prices[]', price));
 
-    // Send AJAX request
     fetch('<?php echo base_url('cart/add_item'); ?>', {
         method: 'POST',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        },
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
         body: formData
     })
     .then(response => response.json())
     .then(res => {
         if (res.status === 'success') {
-            // Update cart badge with animation
             const badge = document.getElementById('cartBadge');
             if (badge) {
                 badge.textContent = res.cart_count || 0;
-                // Trigger pulse animation
-                badge.classList.remove('pulse');
-                setTimeout(() => badge.classList.add('pulse'), 10);
-                // Remove animation class after animation completes
-                setTimeout(() => badge.classList.remove('pulse'), 610);
             }
-            // Show success message
             showModal(res.message);
-            // Redirect to cart or menu
             window.location.href = '<?php echo base_url('cart/view'); ?>';
         } else {
-            showModal('Error: ' + res.message, true);
+            showModal(res.message, true);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showModal('An error occurred. Please try again.', true);
+        showModal(window.t('Une erreur est survenue. Veuillez réessayer.', 'An error occurred. Please try again.'), true);
     });
 });
 
-// Show modal function
 function showModal(message, isError = false) {
     const overlay = document.getElementById('globalModal');
     const msgElem = document.getElementById('modalMessage');
@@ -1199,14 +616,13 @@ function showModal(message, isError = false) {
     overlay.style.display = 'flex';
 }
 
-// Close modal handler
 document.addEventListener('click', function(e) {
     if (e.target.id === 'globalModal' || e.target.classList.contains('close-btn')) {
-        e.target.closest('#globalModal').style.display = 'none';
+        const modal = document.getElementById('globalModal');
+        if (modal) modal.style.display = 'none';
     }
 });
 
-// Initialize price on page load
 document.addEventListener('DOMContentLoaded', function() {
     updatePrice();
 });
