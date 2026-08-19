@@ -100,6 +100,9 @@
                                     <span><?php echo $p->category_name; ?></span>
                                 <?php endif; ?>
                             </div>
+                            <button class="wishlist-btn" onclick="toggleWishlist(<?php echo $p->id; ?>, this)" title="Add to Wishlist">
+                                <i class="<?php echo !empty($p->in_wishlist) ? 'fas' : 'far'; ?> fa-heart" style="color: <?php echo !empty($p->in_wishlist) ? '#ff4757' : '#fff'; ?>;"></i>
+                            </button>
                         </div>
                         <div class="menu-card-body">
                             <div class="menu-card-header">
@@ -412,6 +415,36 @@
         transform: translateY(-3px);
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-    .menu-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+    .menu-grid { 
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 1rem; 
+    }
+}
+
+.wishlist-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0,0,0,0.4);
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    z-index: 10;
+}
+
+.wishlist-btn:hover {
+    background: rgba(0,0,0,0.7);
+    transform: scale(1.1);
+}
+
+.wishlist-btn i {
+    font-size: 1.2rem;
+    transition: var(--transition);
 }
 </style>

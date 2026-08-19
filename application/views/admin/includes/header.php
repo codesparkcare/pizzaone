@@ -299,6 +299,9 @@
         <a href="<?php echo base_url('admin/orders'); ?>" class="<?php echo ($this->uri->segment(2) == 'orders') ? 'active' : ''; ?>">
             <i class="fas fa-shopping-cart"></i> Orders
         </a>
+        <a href="<?php echo base_url('admin/customers'); ?>" class="<?php echo ($this->uri->segment(2) == 'customers') ? 'active' : ''; ?>">
+            <i class="fas fa-user-friends"></i> Manage Customers
+        </a>
         <a href="<?php echo base_url('admin/reviews'); ?>" class="<?php echo ($this->uri->segment(2) == 'reviews') ? 'active' : ''; ?>">
             <i class="fas fa-star"></i> Reviews
         </a>

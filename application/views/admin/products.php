@@ -15,6 +15,7 @@
                         <th>Category</th>
                         <th>Sub Category</th>
                         <th>Price</th>
+                        <th>Shops</th>
                         <th>Status</th>
                         <th>Action</th>
                     </tr>
@@ -33,6 +34,13 @@
                         <td><?php echo $p->category_name; ?></td>
                         <td><?php echo $p->subcategory_name ? $p->subcategory_name : '-'; ?></td>
                         <td>€<?php echo $p->price; ?></td>
+                        <td>
+                            <?php 
+                                $p_shops = isset($p->shops) && $p->shops !== '' ? explode(',', $p->shops) : ['1','2'];
+                                if (in_array('1', $p_shops)) echo '<span class="badge" style="background:#3498db; color:#fff; padding:3px 7px; border-radius:10px; font-size:0.7rem; margin-right:2px;">Villiers-le-bel</span> ';
+                                if (in_array('2', $p_shops)) echo '<span class="badge" style="background:#9b59b6; color:#fff; padding:3px 7px; border-radius:10px; font-size:0.7rem;">Le Plessis-Bouchard</span>';
+                            ?>
+                        </td>
                         <td>
                             <span class="badge" style="background: var(--success); color: #fff; padding: 5px 10px; border-radius: 15px; font-size: 0.75rem;">Active</span>
                         </td>
@@ -61,6 +69,21 @@
         </div>
         <div class="modal-body" style="max-height: 80vh; overflow-y: auto;">
             <?php echo form_open_multipart('admin/add_product'); ?>
+                <!-- Select Shop Locations -->
+                <div class="form-group" style="margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
+                    <label style="display:block; margin-bottom: 8px; color: #1e293b;"><strong>Available Shop Location(s)</strong></label>
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; background: #fff; padding: 8px 14px; border-radius: 8px; border: 1px solid #ddd; border-left: 4px solid #e74c3c;">
+                            <input type="checkbox" name="shops[]" value="1" checked style="width: 18px; height: 18px; accent-color: #e74c3c;">
+                            <span style="color: #c0392b;">Villiers-le-bel</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; background: #fff; padding: 8px 14px; border-radius: 8px; border: 1px solid #ddd; border-left: 4px solid #2563eb;">
+                            <input type="checkbox" name="shops[]" value="2" checked style="width: 18px; height: 18px; accent-color: #2563eb;">
+                            <span style="color: #2563eb;">Le Plessis-Bouchard</span>
+                        </label>
+                    </div>
+                    <small style="color: #7f8c8d; margin-top: 5px; display: block;"><i class="fas fa-info-circle"></i> Choose which shop(s) offer this product.</small>
+                </div>
                 <!-- Step 1: Select Category -->
                 <div class="form-group">
                     <label><strong>1. Category</strong></label>

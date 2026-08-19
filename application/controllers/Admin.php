@@ -314,6 +314,7 @@ class Admin extends CI_Controller
         $data['products'] = $this->Common_model->get_products_with_category();
         $data['categories'] = $this->Common_model->get_where('categories', ['parent_id' => 0]);
         $data['addons'] = $this->Common_model->get_all('addons');
+        $data['all_shops'] = $this->Common_model->get_all('shops');
 
         // Load addon groups with their linked addons for grouped display
         $groups = $this->Common_model->get_all('addon_groups');
@@ -350,6 +351,9 @@ class Admin extends CI_Controller
             $image = $upload_data['file_name'];
         }
 
+        $shops_input = $this->input->post('shops');
+        $shops_str = ($shops_input && is_array($shops_input)) ? implode(',', $shops_input) : '1,2';
+
         $data = [
             'category_id' => $this->input->post('category_id'),
             'subcategory_id' => $this->input->post('subcategory_id') ? $this->input->post('subcategory_id') : NULL,
@@ -358,6 +362,7 @@ class Admin extends CI_Controller
             'description' => $this->input->post('description'),
             'price' => $this->input->post('price') ? $this->input->post('price') : 0,
             'image' => $image,
+            'shops' => $shops_str,
             'status' => 1
         ];
 
@@ -512,6 +517,7 @@ class Admin extends CI_Controller
         $data['title'] = 'Edit Product';
         $data['product'] = $this->Common_model->get_single('products', ['id' => $id]);
         $data['categories'] = $this->Common_model->get_where('categories', ['parent_id' => 0]);
+        $data['all_shops'] = $this->Common_model->get_all('shops');
 
         // Get sizes for the product's category
         $this->db->select('sizes.*, product_sizes.price as size_price, product_sizes.id as ps_id');
@@ -574,13 +580,17 @@ class Admin extends CI_Controller
             }
         }
 
+        $shops_input = $this->input->post('shops');
+        $shops_str = ($shops_input && is_array($shops_input)) ? implode(',', $shops_input) : '';
+
         $data = [
             'category_id' => $this->input->post('category_id'),
             'subcategory_id' => $this->input->post('subcategory_id') ? $this->input->post('subcategory_id') : NULL,
             'offer_id' => $this->input->post('offer_id') ? $this->input->post('offer_id') : NULL,
             'name' => $this->input->post('name'),
             'description' => $this->input->post('description'),
-            'price' => $this->input->post('price') ? $this->input->post('price') : 0
+            'price' => $this->input->post('price') ? $this->input->post('price') : 0,
+            'shops' => $shops_str
         ];
         if ($image)
             $data['image'] = $image;
@@ -1378,6 +1388,144 @@ class Admin extends CI_Controller
             $this->session->set_flashdata('success', 'Slider Video deleted successfully');
         }
         redirect('admin/slider_videos');
+    }
+
+    // ==========================================
+    // Customer Management Methods
+    // ==========================================
+    public function customers()
+    {
+        $this->check_login();
+        $data['title'] = 'Manage Customers';
+
+        // Fetch customers with order statistics
+        $sql = "SELECT u.*, 
+                       COUNT(o.id) as total_orders, 
+                       IFNULL(SUM(o.total_amount), 0) as total_spent,
+                       MAX(o.created_at) as last_order_date
+                FROM users u
+                LEFT JOIN orders o ON (o.user_id = u.id OR (u.phone IS NOT NULL AND u.phone != '' AND o.customer_phone = u.phone))
+                GROUP BY u.id
+                ORDER BY u.id DESC";
+        $data['customers'] = $this->db->query($sql)->result();
+
+        $this->load->view('admin/includes/header', $data);
+        $this->load->view('admin/customers', $data);
+        $this->load->view('admin/includes/footer');
+    }
+
+    public function add_customer()
+    {
+        $this->check_login();
+
+        $this->form_validation->set_rules('first_name', 'First Name', 'required|trim');
+        $this->form_validation->set_rules('last_name', 'Last Name', 'required|trim');
+        $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email|is_unique[users.email]');
+        $this->form_validation->set_rules('password', 'Password', 'required|min_length[4]');
+
+        if ($this->form_validation->run() == FALSE) {
+            $this->session->set_flashdata('error', validation_errors());
+        } else {
+            $insert_data = [
+                'first_name' => $this->input->post('first_name'),
+                'last_name' => $this->input->post('last_name'),
+                'email' => $this->input->post('email'),
+                'phone' => $this->input->post('phone'),
+                'address' => $this->input->post('address'),
+                'password_hash' => password_hash($this->input->post('password'), PASSWORD_DEFAULT),
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+
+            $this->Common_model->insert('users', $insert_data);
+            $this->session->set_flashdata('success', 'Customer added successfully!');
+        }
+
+        redirect('admin/customers');
+    }
+
+    public function edit_customer($id)
+    {
+        $this->check_login();
+        $customer = $this->Common_model->get_single('users', ['id' => $id]);
+
+        if (!$customer) {
+            $this->session->set_flashdata('error', 'Customer not found.');
+            redirect('admin/customers');
+        }
+
+        $email = $this->input->post('email');
+        if ($email != $customer->email) {
+            $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email|is_unique[users.email]');
+        } else {
+            $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email');
+        }
+        $this->form_validation->set_rules('first_name', 'First Name', 'required|trim');
+        $this->form_validation->set_rules('last_name', 'Last Name', 'required|trim');
+
+        if ($this->form_validation->run() == FALSE) {
+            $this->session->set_flashdata('error', validation_errors());
+        } else {
+            $update_data = [
+                'first_name' => $this->input->post('first_name'),
+                'last_name' => $this->input->post('last_name'),
+                'email' => $email,
+                'phone' => $this->input->post('phone'),
+                'address' => $this->input->post('address')
+            ];
+
+            $password = $this->input->post('password');
+            if (!empty($password)) {
+                $update_data['password_hash'] = password_hash($password, PASSWORD_DEFAULT);
+            }
+
+            $this->Common_model->update('users', ['id' => $id], $update_data);
+            $this->session->set_flashdata('success', 'Customer details updated successfully!');
+        }
+
+        redirect('admin/customers');
+    }
+
+    public function delete_customer($id)
+    {
+        $this->check_login();
+        $customer = $this->Common_model->get_single('users', ['id' => $id]);
+        if ($customer) {
+            $this->Common_model->delete('users', ['id' => $id]);
+            $this->session->set_flashdata('success', 'Customer deleted successfully.');
+        } else {
+            $this->session->set_flashdata('error', 'Customer not found.');
+        }
+        redirect('admin/customers');
+    }
+
+    public function customer_details_json($id)
+    {
+        $this->check_login();
+        $customer = $this->Common_model->get_single('users', ['id' => $id]);
+        if (!$customer) {
+            echo json_encode(['status' => 'error', 'message' => 'Customer not found']);
+            return;
+        }
+
+        $sql = "SELECT o.*, s.name as shop_name 
+                FROM orders o 
+                LEFT JOIN shops s ON s.id = o.shop_id 
+                WHERE o.user_id = ? OR (o.customer_phone IS NOT NULL AND o.customer_phone != '' AND o.customer_phone = ?) 
+                ORDER BY o.id DESC";
+        $orders = $this->db->query($sql, [$id, $customer->phone])->result();
+
+        echo json_encode([
+            'status' => 'success',
+            'customer' => [
+                'id' => $customer->id,
+                'name' => $customer->first_name . ' ' . $customer->last_name,
+                'email' => $customer->email,
+                'phone' => $customer->phone ?: 'N/A',
+                'address' => $customer->address ?: 'N/A',
+                'created_at' => date('d M Y, h:i A', strtotime($customer->created_at))
+            ],
+            'orders' => $orders
+        ]);
     }
 }
 ?>

@@ -55,26 +55,39 @@
                 <img src="<?php echo base_url('assets/images/logo.png'); ?>" alt="Pizza One Logo">
             </div>
             <ul>
-                <li><a href="<?php echo base_url(); ?>">Home</a></li>
+                <li><a href="<?php echo base_url(); ?>">Accueil</a></li>
                 <li><a href="<?php echo base_url('menu'); ?>">Menu</a></li>
-                <li><a href="<?php echo base_url('about'); ?>">About Us</a></li>
+                <li><a href="<?php echo base_url('about'); ?>">À propos</a></li>
                 <li><a href="<?php echo base_url('contact'); ?>">Contact</a></li>
             </ul>
         </nav>
 
         <div class="header-actions">
+            <?php
+                $selected_shop_id = $this->session->userdata('selected_shop_id');
+                $selected_shop_name = $this->session->userdata('selected_shop_name');
+                if (!$selected_shop_name) {
+                    $selected_shop_name = 'Sélectionner le magasin';
+                }
+                $shop_color_class = ($selected_shop_id == '2') ? 'shop-2-active' : 'shop-1-active';
+            ?>
+            <div class="location-switcher">
+                <button class="location-icon-btn <?php echo $shop_color_class; ?>" onclick="openLocationModal()" title="Magasin actuel : <?php echo htmlspecialchars($selected_shop_name); ?>">
+                    <i class="fas fa-map-marker-alt"></i>
+                </button>
+            </div>
             
-            <div class="language-switcher" style="margin-right: 15px;">
+            <div class="language-switcher">
                 <button class="lang-btn" id="user-active" onclick="document.getElementById('userDropdown').classList.toggle('show'); event.stopPropagation();">
                     <i class="fas fa-user"></i>
                 </button>
                 <div class="lang-dropdown" id="userDropdown">
                     <?php if($this->session->userdata('user_id')): ?>
-                        <a href="<?php echo base_url('user/account'); ?>">My Account</a>
-                        <a href="<?php echo base_url('user/logout'); ?>">Logout</a>
+                        <a href="<?php echo base_url('user/account'); ?>">Mon Compte</a>
+                        <a href="<?php echo base_url('user/logout'); ?>">Déconnexion</a>
                     <?php else: ?>
-                        <a href="<?php echo base_url('user/login'); ?>">Login</a>
-                        <a href="<?php echo base_url('user/register'); ?>">Register</a>
+                        <a href="<?php echo base_url('user/login'); ?>">Connexion</a>
+                        <a href="<?php echo base_url('user/register'); ?>">S'inscrire</a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -82,17 +95,24 @@
             <div class="language-switcher">
                 <button class="lang-btn" id="lang-active" onclick="toggleLangDropdown(event)">
                     <i class="fas fa-globe"></i>
-                    <span class="active-lang">EN</span>
+                    <span class="active-lang">FR</span>
                 </button>
                 <div class="lang-dropdown" id="langDropdown">
+                    <a href="javascript:void(0);" onclick="changeLanguage('fr')">Français</a>
                     <a href="javascript:void(0);" onclick="changeLanguage('en')">English</a>
-                    <a href="javascript:void(0);" onclick="changeLanguage('fr')">French</a>
                 </div>
             </div>
 
-            <div class="wishlist-container" style="margin-right: 10px;">
+            <div class="wishlist-container">
                 <a href="<?php echo base_url('wishlist'); ?>" class="cart-btn">
                     <i class="fas fa-heart"></i>
+                    <?php 
+                        $wishlist_count = 0;
+                        if ($this->session->userdata('user_id')) {
+                            $wishlist_count = $this->db->where('user_id', $this->session->userdata('user_id'))->count_all_results('wishlists');
+                        }
+                    ?>
+                    <span class="cart-badge" id="wishlistBadge" style="background: #ff4757; display: <?php echo $wishlist_count > 0 ? 'flex' : 'none'; ?>;"><?php echo $wishlist_count; ?></span>
                 </a>
             </div>
 
@@ -104,7 +124,7 @@
             </div>
 
             <form action="<?php echo base_url('search'); ?>" method="GET" class="search-container">
-                <input type="text" name="q" placeholder="Search..." aria-label="Search">
+                <input type="text" name="q" placeholder="Rechercher..." aria-label="Rechercher">
                 <button type="submit" class="search-btn">
                     <i class="fas fa-search"></i>
                 </button>
@@ -112,10 +132,74 @@
         </div>
     </header>
 
+    <!-- Location Preference Modal -->
+    <div id="locationModal" class="location-modal-overlay" style="display: none;">
+        <div class="location-modal-card">
+            <?php if ($selected_shop_id): ?>
+                <button type="button" class="location-modal-close" onclick="closeLocationModal()">&times;</button>
+            <?php endif; ?>
+            <div class="location-modal-header">
+                <div class="location-modal-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <h3>Quelle localisation préférez-vous ?</h3>
+                <p>Sélectionnez votre magasin préféré pour voir les produits disponibles dans votre zone.</p>
+            </div>
+            <div class="location-options">
+                <!-- Shop 1: Red Theme -->
+                <button type="button" class="location-option-card shop-card-vlb <?php echo ($selected_shop_id == '1') ? 'active' : ''; ?>" onclick="selectLocation('1', 'Villiers-le-bel')">
+                    <div>
+                        <div class="loc-badge loc-badge-vlb"><i class="fas fa-map-pin"></i> Magasin 1</div>
+                        <h4>Villiers-le-bel</h4>
+                        <p><i class="fas fa-location-dot"></i> 11 Place de la Tolinette, 95400 Villiers Le Bel</p>
+                    </div>
+                    <span class="loc-select-btn btn-vlb">Sélectionner ce magasin <i class="fas fa-arrow-right"></i></span>
+                </button>
+
+                <!-- Shop 2: Blue Theme -->
+                <button type="button" class="location-option-card shop-card-lpb <?php echo ($selected_shop_id == '2') ? 'active' : ''; ?>" onclick="selectLocation('2', 'Le Plessis-Bouchard')">
+                    <div>
+                        <div class="loc-badge loc-badge-lpb"><i class="fas fa-map-pin"></i> Magasin 2</div>
+                        <h4>Le Plessis-Bouchard</h4>
+                        <p><i class="fas fa-location-dot"></i> Commercial des Hauts de Saint-Nicolas, 95130 Le Plessis-Bouchard</p>
+                    </div>
+                    <span class="loc-select-btn btn-lpb">Sélectionner ce magasin <i class="fas fa-arrow-right"></i></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Hidden Google Translate Element -->
     <div id="google_translate_element" style="visibility:hidden; height:0; width:0; overflow:hidden;"></div>
 
     <script>
+    function openLocationModal() {
+        document.getElementById('locationModal').style.display = 'flex';
+    }
+    function closeLocationModal() {
+        document.getElementById('locationModal').style.display = 'none';
+    }
+    function selectLocation(shopId, shopName) {
+        fetch('<?php echo base_url("welcome/set_location"); ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: 'shop_id=' + encodeURIComponent(shopId)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                window.location.reload();
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            window.location.href = '<?php echo base_url("welcome/set_location"); ?>';
+        });
+    }
+
     function toggleLangDropdown(e) {
         if (e) e.stopPropagation();
         document.getElementById('langDropdown').classList.toggle('show');
@@ -136,6 +220,10 @@
     });
 
     document.addEventListener('DOMContentLoaded', function() {
+        <?php if (!$selected_shop_id): ?>
+            openLocationModal();
+        <?php endif; ?>
+
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const navMenu = document.querySelector('.nav-menu');
         

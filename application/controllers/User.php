@@ -100,4 +100,41 @@ class User extends CI_Controller {
         $this->session->unset_userdata(array('user_id', 'user_name', 'user_email'));
         redirect('user/login');
     }
+
+    public function wishlist() {
+        if (!$this->session->userdata('user_id')) {
+            redirect('user/login');
+        }
+        
+        $user_id = $this->session->userdata('user_id');
+        $this->load->model('Common_model');
+        $data['wishlist_items'] = $this->Common_model->get_user_wishlist($user_id);
+
+        $this->load->view('includes/header');
+        $this->load->view('user/wishlist', $data);
+        $this->load->view('includes/footer');
+    }
+
+    public function toggle_wishlist($product_id) {
+        if (!$this->session->userdata('user_id')) {
+            echo json_encode(['status' => 'error', 'message' => 'Please login to add to wishlist']);
+            return;
+        }
+
+        $user_id = $this->session->userdata('user_id');
+        $this->load->model('Common_model');
+        
+        // Check if exists
+        $exists = $this->Common_model->get_single('wishlists', ['user_id' => $user_id, 'product_id' => $product_id]);
+        
+        if ($exists) {
+            $this->Common_model->delete('wishlists', ['id' => $exists->id]);
+            $count = $this->db->where('user_id', $user_id)->count_all_results('wishlists');
+            echo json_encode(['status' => 'removed', 'message' => 'Removed from wishlist', 'wishlist_count' => $count]);
+        } else {
+            $this->Common_model->insert('wishlists', ['user_id' => $user_id, 'product_id' => $product_id]);
+            $count = $this->db->where('user_id', $user_id)->count_all_results('wishlists');
+            echo json_encode(['status' => 'added', 'message' => 'Added to wishlist', 'wishlist_count' => $count]);
+        }
+    }
 }

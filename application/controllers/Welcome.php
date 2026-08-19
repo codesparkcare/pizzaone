@@ -27,6 +27,16 @@ class Welcome extends CI_Controller {
         $data['reviews'] = $this->Common_model->get_where('reviews', ['status' => 1]);
         $data['slider_videos'] = $this->Common_model->get_where('slider_videos', ['status' => 1]);
         
+        // Check wishlist status for logged in users
+        if ($this->session->userdata('user_id')) {
+            $user_id = $this->session->userdata('user_id');
+            $wishlist = $this->Common_model->get_where('wishlists', ['user_id' => $user_id]);
+            $wishlist_product_ids = array_map(function($w) { return $w->product_id; }, $wishlist);
+            foreach ($data['featured_products'] as &$product) {
+                $product->in_wishlist = in_array($product->id, $wishlist_product_ids);
+            }
+        }
+        
 		$this->load->view('includes/header');
 		$this->load->view('welcome_message', $data);
 		$this->load->view('includes/footer');
@@ -70,6 +80,16 @@ class Welcome extends CI_Controller {
             $data['current_cat_id'] = $category_id;
             $data['is_subcategory'] = false;
         }
+
+        // Check wishlist status for logged in users
+        if ($this->session->userdata('user_id')) {
+            $user_id = $this->session->userdata('user_id');
+            $wishlist = $this->Common_model->get_where('wishlists', ['user_id' => $user_id]);
+            $wishlist_product_ids = array_map(function($w) { return $w->product_id; }, $wishlist);
+            foreach ($data['products'] as &$product) {
+                $product->in_wishlist = in_array($product->id, $wishlist_product_ids);
+            }
+        }
         
         $this->load->view('includes/header', $data);
         $this->load->view('menu', $data);
@@ -104,6 +124,29 @@ class Welcome extends CI_Controller {
             echo json_encode(['status' => 'success', 'data' => $product]);
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Product not found']);
+        }
+    }
+
+    public function set_location()
+    {
+        $shop_id = $this->input->post('shop_id');
+        if ($shop_id == '1') {
+            $shop_name = 'Villiers-le-bel';
+        } elseif ($shop_id == '2') {
+            $shop_name = 'Le Plessis-Bouchard';
+        } else {
+            $shop_id = '1';
+            $shop_name = 'Villiers-le-bel';
+        }
+
+        $this->session->set_userdata('selected_shop_id', $shop_id);
+        $this->session->set_userdata('selected_shop_name', $shop_name);
+
+        if ($this->input->is_ajax_request()) {
+            echo json_encode(['status' => 'success', 'shop_id' => $shop_id, 'shop_name' => $shop_name]);
+        } else {
+            $redirect = $this->input->server('HTTP_REFERER') ? $this->input->server('HTTP_REFERER') : base_url();
+            redirect($redirect);
         }
     }
 }

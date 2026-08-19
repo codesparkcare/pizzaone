@@ -47,7 +47,10 @@ class Common_model extends CI_Model {
         return $this->db->get()->result();
     }
 
-    public function get_products_by_category($category_id = null) {
+    public function get_products_by_category($category_id = null, $shop_id = null) {
+        if ($shop_id === null && $this->session->userdata('selected_shop_id')) {
+            $shop_id = $this->session->userdata('selected_shop_id');
+        }
         $this->db->select('products.*, categories.name as category_name, COALESCE(subcats.name, "") as subcategory_name, offers.offer_name');
         $this->db->from('products');
         $this->db->join('categories', 'categories.id = products.category_id', 'left');
@@ -56,18 +59,35 @@ class Common_model extends CI_Model {
         if ($category_id) {
             $this->db->where('products.category_id', $category_id);
         }
+        if ($shop_id) {
+            $this->db->group_start();
+            $this->db->where('products.shops IS NULL', null, false);
+            $this->db->or_where("products.shops = ''", null, false);
+            $this->db->or_where("FIND_IN_SET(" . intval($shop_id) . ", products.shops) > 0", null, false);
+            $this->db->group_end();
+        }
         $this->db->where('products.status', 1);
         $this->db->order_by('products.id', 'DESC');
         return $this->db->get()->result();
     }
 
-    public function get_products_by_subcategory($subcategory_id) {
+    public function get_products_by_subcategory($subcategory_id, $shop_id = null) {
+        if ($shop_id === null && $this->session->userdata('selected_shop_id')) {
+            $shop_id = $this->session->userdata('selected_shop_id');
+        }
         $this->db->select('products.*, categories.name as category_name, COALESCE(subcats.name, "") as subcategory_name, offers.offer_name');
         $this->db->from('products');
         $this->db->join('categories', 'categories.id = products.category_id', 'left');
         $this->db->join('categories as subcats', 'subcats.id = products.subcategory_id AND products.subcategory_id IS NOT NULL', 'left');
         $this->db->join('offers', 'offers.id = products.offer_id', 'left');
         $this->db->where('products.subcategory_id', $subcategory_id);
+        if ($shop_id) {
+            $this->db->group_start();
+            $this->db->where('products.shops IS NULL', null, false);
+            $this->db->or_where("products.shops = ''", null, false);
+            $this->db->or_where("FIND_IN_SET(" . intval($shop_id) . ", products.shops) > 0", null, false);
+            $this->db->group_end();
+        }
         $this->db->where('products.status', 1);
         $this->db->order_by('products.id', 'DESC');
         return $this->db->get()->result();
@@ -108,6 +128,17 @@ class Common_model extends CI_Model {
         $this->db->from('addons');
         $this->db->join('addon_group_items', 'addon_group_items.addon_id = addons.id');
         $this->db->where('addon_group_items.group_id', $group_id);
+        return $this->db->get()->result();
+    }
+    public function get_user_wishlist($user_id) {
+        $this->db->select('products.*, categories.name as category_name, COALESCE(subcats.name, "") as subcategory_name, offers.offer_name, wishlists.id as wishlist_id');
+        $this->db->from('wishlists');
+        $this->db->join('products', 'products.id = wishlists.product_id');
+        $this->db->join('categories', 'categories.id = products.category_id', 'left');
+        $this->db->join('categories as subcats', 'subcats.id = products.subcategory_id AND products.subcategory_id IS NOT NULL', 'left');
+        $this->db->join('offers', 'offers.id = products.offer_id', 'left');
+        $this->db->where('wishlists.user_id', $user_id);
+        $this->db->order_by('wishlists.id', 'DESC');
         return $this->db->get()->result();
     }
 }

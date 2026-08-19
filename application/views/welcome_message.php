@@ -144,6 +144,9 @@
                 <div class="pizza-img-wrapper">
                     <div class="pizza-bg-shape"></div>
                     <img src="<?php echo base_url('assets/images/products/'.($p->image ? $p->image : 'default.png')); ?>" alt="<?php echo $p->name; ?>">
+                    <button class="wishlist-btn" onclick="toggleWishlist(<?php echo $p->id; ?>, this)" title="Add to Wishlist" style="position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.4); border: none; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; z-index: 10;">
+                        <i class="<?php echo !empty($p->in_wishlist) ? 'fas' : 'far'; ?> fa-heart" style="color: <?php echo !empty($p->in_wishlist) ? '#ff4757' : '#fff'; ?>; font-size: 1.2rem;"></i>
+                    </button>
                 </div>
                 <div class="pizza-info">
                     <h3 class="pizza-title"><?php echo $p->name; ?></h3>

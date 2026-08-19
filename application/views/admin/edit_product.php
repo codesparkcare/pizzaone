@@ -9,6 +9,26 @@
             </div>
             <div class="card-body" style="padding: 30px;">
                 <?php echo form_open_multipart('admin/update_product/'.$product->id); ?>
+                    <?php
+                        $product_shops = isset($product->shops) && $product->shops !== '' ? explode(',', $product->shops) : ['1','2'];
+                    ?>
+                    <div class="form-group" style="margin-bottom: 25px; background: #f8fafc; padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                        <label style="font-weight: 700; color: #1e293b; margin-bottom: 10px; display: block;">
+                            <i class="fas fa-store"></i> Available Shop Location(s)
+                        </label>
+                        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; background: #fff; padding: 10px 16px; border-radius: 8px; border: 1px solid #ddd; border-left: 4px solid #e74c3c;">
+                                <input type="checkbox" name="shops[]" value="1" <?php echo in_array('1', $product_shops) ? 'checked' : ''; ?> style="width: 18px; height: 18px; accent-color: #e74c3c;">
+                                <span style="color: #c0392b;">Villiers-le-bel</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; background: #fff; padding: 10px 16px; border-radius: 8px; border: 1px solid #ddd; border-left: 4px solid #2563eb;">
+                                <input type="checkbox" name="shops[]" value="2" <?php echo in_array('2', $product_shops) ? 'checked' : ''; ?> style="width: 18px; height: 18px; accent-color: #2563eb;">
+                                <span style="color: #2563eb;">Le Plessis-Bouchard</span>
+                            </label>
+                        </div>
+                        <small style="color: #7f8c8d; margin-top: 6px; display: block;"><i class="fas fa-info-circle"></i> Check which shops will offer this product on the menu.</small>
+                    </div>
+
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 40px;">
                         <!-- Left Column -->
                         <div>

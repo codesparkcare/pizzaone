@@ -120,6 +120,16 @@ class Cart extends CI_Controller {
             }
         }
 
+        // Check wishlist status for logged in users
+        $product->in_wishlist = false;
+        if ($this->session->userdata('user_id')) {
+            $user_id = $this->session->userdata('user_id');
+            $exists = $this->Common_model->get_single('wishlists', ['user_id' => $user_id, 'product_id' => $product_id]);
+            if ($exists) {
+                $product->in_wishlist = true;
+            }
+        }
+
         $data['product'] = $product;
         
         // Return HTML string

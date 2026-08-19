@@ -1,67 +1,107 @@
 <footer class="main-footer">
     <div class="footer-container">
         <div class="footer-content">
-            <div class="footer-section about">
+            <!-- Brand Column -->
+            <div class="footer-section footer-brand-col">
                 <div class="footer-logo">
                     <a href="<?php echo base_url(); ?>">
                         <img src="<?php echo base_url('assets/images/logo.png'); ?>" alt="Pizza One Logo">
                     </a>
                 </div>
+                <p class="brand-tagline">
+                    Des pizzas italiennes authentiques préparées chaque jour avec des ingrédients frais de qualité. Sélectionnez votre magasin et commandez en ligne !
+                </p>
                 <div class="social-icons">
-                    <a href="#" class="social-link facebook"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="social-link instagram"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="social-link twitter"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="social-link whatsapp"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" class="social-link facebook" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-link instagram" aria-label="Instagram"><i
+                            class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-link twitter" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-link whatsapp" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
                 </div>
             </div>
 
-            <style>
-                @media (min-width: 577px) {
-                    .footer-merged { grid-column: span 2; }
-                }
-            </style>
-            <div class="footer-section contact-item footer-merged">
-                <div class="section-header" style="margin-bottom: 20px; display: flex; justify-content: center;">
-                    <i class="fas fa-utensils"></i>
-                    <h3 style="text-align: center;">Book a Table</h3>
-                </div>
-                <div class="contact-details" style="display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; text-align: center;">
-                    <div style="flex: 1 1 40%; min-width: 200px;">
-                        <h4 style="color: var(--white); margin-bottom: 10px; font-size: 1.1rem;">1. Villiers-le-bel</h4>
-                        <p style="margin-bottom: 10px; opacity: 0.8; font-size: 0.95rem;">11 Place de la Tolinette, 95400</p>
-                        <p class="phone-number" style="margin-bottom: 15px; display: flex; justify-content: center;"><i class="fas fa-phone-alt"></i> <a href="tel:0134199456" style="color: inherit; text-decoration: none; margin-left: 8px;">01 34 19 94 56</a></p>
-                        <div style="display: flex; justify-content: center; align-items: center;">
-                            <a href="tel:0134199456" class="btn-footer-call">Call Now</a>
-                        </div>
+            <!-- Shop 1 Card: Villiers-le-bel (Red Theme) -->
+            <div class="footer-section footer-shop-card shop-vlb-card">
+                <div class="shop-card-header">
+                    <div class="shop-icon-wrapper vlb-icon">
+                        <i class="fas fa-store"></i>
                     </div>
-                    <div style="flex: 1 1 40%; min-width: 200px;">
-                        <h4 style="color: var(--white); margin-bottom: 10px; font-size: 1.1rem;">2. Le Plessis-Bouchard</h4>
-                        <p style="margin-bottom: 10px; opacity: 0.8; font-size: 0.95rem;">Commercial des hauts de saint-nicolas, 93700</p>
-                        <p class="phone-number" style="margin-bottom: 15px; display: flex; justify-content: center;"><i class="fas fa-phone-alt"></i> <a href="tel:0134141516" style="color: inherit; text-decoration: none; margin-left: 8px;">01 34 14 15 16</a></p>
-                        <div style="display: flex; justify-content: center; align-items: center;">
-                            <a href="tel:0134141516" class="btn-footer-call">Call Now</a>
+                    <div>
+                        <span class="shop-badge vlb-badge">Magasin 1</span>
+                        <h3 class="shop-title">Villiers-le-bel</h3>
+                    </div>
+                </div>
+
+                <div class="shop-card-body">
+                    <div class="info-row">
+                        <i class="fas fa-map-marker-alt icon-vlb"></i>
+                        <span>11 Place de la Tolinette, 95400 Villiers Le Bel</span>
+                    </div>
+
+                    <div class="info-row phone-row">
+                        <i class="fas fa-phone-alt icon-vlb"></i>
+                        <a href="tel:0134199456" class="phone-link">01 34 19 94 56</a>
+                    </div>
+
+                    <div class="action-row">
+                        <a href="tel:0134199456" class="btn-call-action btn-vlb-call">
+                            <i class="fas fa-phone"></i> Appelez maintenant
+                        </a>
+                    </div>
+
+                    <div class="hours-block">
+                        <h4 class="hours-title"><i class="fas fa-clock"></i> Horaires d'ouverture</h4>
+                        <div class="hour-item">
+                            <span class="day-label">Samedi - Jeudi</span>
+                            <span class="time-label">11h00 à 23h00</span>
+                        </div>
+                        <div class="hour-item">
+                            <span class="day-label">Vendredi</span>
+                            <span class="time-label">16h00 à 23h00</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="footer-section contact-item">
-                <div class="section-header">
-                    <i class="fas fa-clock"></i>
-                    <h3>Opening Hours</h3>
+            <!-- Shop 2 Card: Le Plessis-Bouchard (Blue Theme) -->
+            <div class="footer-section footer-shop-card shop-lpb-card">
+                <div class="shop-card-header">
+                    <div class="shop-icon-wrapper lpb-icon">
+                        <i class="fas fa-store"></i>
+                    </div>
+                    <div>
+                        <span class="shop-badge lpb-badge">Magasin 2</span>
+                        <h3 class="shop-title">Le Plessis-Bouchard</h3>
+                    </div>
                 </div>
-                <div class="opening-details">
-                    <div class="hour-row">
-                        <span>Monday – Friday:</span>
-                        <span class="time">8am – 4pm</span>
+
+                <div class="shop-card-body">
+                    <div class="info-row">
+                        <i class="fas fa-map-marker-alt icon-lpb"></i>
+                        <span>Commercial des Hauts de Saint-Nicolas, 95130 Le Plessis-Bouchard</span>
                     </div>
-                    <div class="hour-row">
-                        <span>Saturday:</span>
-                        <span class="time">9am – 5pm</span>
+
+                    <div class="info-row phone-row">
+                        <i class="fas fa-phone-alt icon-lpb"></i>
+                        <a href="tel:0134141516" class="phone-link">01 34 14 15 16</a>
                     </div>
-                    <div class="hour-row closed">
-                        <span>Sunday:</span>
-                        <span class="time">Closed</span>
+
+                    <div class="action-row">
+                        <a href="tel:0134141516" class="btn-call-action btn-lpb-call">
+                            <i class="fas fa-phone"></i> Appelez maintenant
+                        </a>
+                    </div>
+
+                    <div class="hours-block">
+                        <h4 class="hours-title"><i class="fas fa-clock"></i> Horaires d'ouverture</h4>
+                        <div class="hour-item">
+                            <span class="day-label">Samedi - Jeudi</span>
+                            <span class="time-label">11h00 à 14h00 et 18h00 à 23h00</span>
+                        </div>
+                        <div class="hour-item">
+                            <span class="day-label">Vendredi</span>
+                            <span class="time-label">18h00 à 23h00</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -69,20 +109,18 @@
 
         <div class="footer-bottom">
             <div class="footer-bottom-content">
-                <p>&copy; <?php echo date('Y'); ?> <a href="https://www.codespark.online" target="_blank">CODESPARK</a>
-                    All
-                    Rights Reserved.</p>
+                <p>&copy; <?php echo date('Y'); ?> <a href="https://www.codespark.online" target="_blank">CODESPARK</a> Tous droits réservés.</p>
                 <div class="footer-bottom-links">
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Terms of Service</a>
+                    <a href="#">Politique de confidentialité</a>
+                    <a href="#">Conditions d'utilisation</a>
                 </div>
-                <p class="crafted-by">Crafted with <i class="fas fa-heart"></i> for Pizza Lovers</p>
+                <p class="crafted-by">Fait avec <i class="fas fa-heart"></i> pour les amateurs de pizza</p>
             </div>
         </div>
     </div>
 </footer>
 
-<a href="tel:+33134199456" class="floating-call-btn" title="Call Us">
+<a href="tel:+33134199456" class="floating-call-btn" title="Appelez-nous">
     <i class="fas fa-phone-alt"></i>
     <span class="btn-text">+33 1 34 19 94 56</span>
 </a>
@@ -91,64 +129,59 @@
 <script type="text/javascript">
     function googleTranslateElementInit() {
         new google.translate.TranslateElement({
-            pageLanguage: 'en',
-            includedLanguages: 'en,fr',
+            pageLanguage: 'fr',
+            includedLanguages: 'fr,en',
             layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
             autoDisplay: false
         }, 'google_translate_element');
     }
 
-    var langRetries = 0;
     function changeLanguage(langCode) {
-        // Find the Google Translate select element
-        var selectField = document.querySelector('select.goog-te-combo');
+        var activeLangDisplay = document.querySelector('.active-lang');
+        if (activeLangDisplay) {
+            activeLangDisplay.innerText = langCode.toUpperCase();
+        }
 
-        if (selectField) {
-            // Set the value and trigger change event
-            selectField.value = langCode;
-
-            // Trigger both 'change' and 'click' events for better compatibility
-            selectField.dispatchEvent(new Event('change', { bubbles: true }));
-
-            // Update the button text
-            var activeLangDisplay = document.querySelector('.active-lang');
-            if (activeLangDisplay) {
-                activeLangDisplay.innerText = langCode.toUpperCase();
-            }
-
-            // Close dropdown if open
-            var langDropdown = document.getElementById('langDropdown');
-            if (langDropdown) {
-                langDropdown.classList.remove('show');
-            }
-            langRetries = 0;
+        var domain = window.location.hostname;
+        if (langCode === 'fr') {
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + domain + ";";
+            document.cookie = "googtrans=/fr/fr; path=/;";
+            document.cookie = "googtrans=/fr/fr; path=/; domain=" + domain + ";";
         } else {
-            if (langRetries < 5) {
-                langRetries++;
-                console.log("Translator still loading... retrying for: " + langCode);
-                setTimeout(function () {
-                    changeLanguage(langCode);
-                }, 500);
-            } else {
-                console.log("Translator failed to load. Setting cookie fallback.");
-                document.cookie = "googtrans=/en/" + langCode + "; path=/;";
-                document.cookie = "googtrans=/en/" + langCode + "; path=/; domain=" + window.location.hostname + ";";
-                location.reload();
-            }
+            document.cookie = "googtrans=/fr/" + langCode + "; path=/;";
+            document.cookie = "googtrans=/fr/" + langCode + "; path=/; domain=" + domain + ";";
+        }
+
+        var selectField = document.querySelector('select.goog-te-combo');
+        if (selectField) {
+            selectField.value = langCode;
+            selectField.dispatchEvent(new Event('change', { bubbles: true }));
+        } else {
+            location.reload();
+        }
+
+        var langDropdown = document.getElementById('langDropdown');
+        if (langDropdown) {
+            langDropdown.classList.remove('show');
         }
     }
 
-    // Optional: Auto-detect existing translation on page load
+    // Auto-detect existing translation on page load
     window.addEventListener('load', function () {
         setTimeout(function () {
             var selectField = document.querySelector('select.goog-te-combo');
+            var activeLangDisplay = document.querySelector('.active-lang');
             if (selectField && selectField.value) {
-                var activeLangDisplay = document.querySelector('.active-lang');
                 if (activeLangDisplay) {
                     activeLangDisplay.innerText = selectField.value.toUpperCase();
                 }
+            } else {
+                if (activeLangDisplay) {
+                    activeLangDisplay.innerText = 'FR';
+                }
             }
-        }, 1000);
+        }, 800);
     });
 </script>
 <!-- Product Quick View Modal -->
@@ -394,7 +427,7 @@
 
 <script>
     // Pizza Loader Script
-    window.addEventListener('load', function() {
+    window.addEventListener('load', function () {
         const loader = document.getElementById('pizza-loader');
         if (loader) {
             loader.classList.add('fade-out');
@@ -403,6 +436,48 @@
             }, 500); // Matches CSS transition duration
         }
     });
+
+    // Wishlist Toggle
+    function toggleWishlist(productId, btnElement) {
+        fetch('<?php echo base_url("user/toggle_wishlist/"); ?>' + productId)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'error') {
+                    alert(data.message);
+                    window.location.href = '<?php echo base_url("user/login"); ?>';
+                } else {
+                    // Update badge count
+                    let badge = document.getElementById('wishlistBadge');
+                    if (badge) {
+                        badge.textContent = data.wishlist_count;
+                        if (data.wishlist_count > 0) {
+                            badge.style.display = 'flex';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+
+                    if (data.status === 'added') {
+                        let icon = btnElement.querySelector('i');
+                        if (icon) {
+                            icon.classList.remove('far');
+                            icon.classList.add('fas');
+                            icon.style.color = '#ff4757';
+                        }
+                    } else if (data.status === 'removed') {
+                        let icon = btnElement.querySelector('i');
+                        if (icon) {
+                            icon.classList.remove('fas');
+                            icon.classList.add('far');
+                            icon.style.color = '#fff';
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error toggling wishlist:', error);
+            });
+    }
 </script>
 
 <script type="text/javascript"

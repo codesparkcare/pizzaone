@@ -18,6 +18,9 @@
                                 <span class="badge badge-subcategory"><?php echo $product->subcategory_name; ?></span>
                             <?php endif; ?>
                         </div>
+                        <button class="wishlist-btn" onclick="toggleWishlist(<?php echo $product->id; ?>, this)" title="Add to Wishlist" style="position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.4); border: none; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; z-index: 10;">
+                            <i class="<?php echo !empty($product->in_wishlist) ? 'fas' : 'far'; ?> fa-heart" style="color: <?php echo !empty($product->in_wishlist) ? '#ff4757' : '#fff'; ?>; font-size: 1.2rem;"></i>
+                        </button>
                     </div>
                 </div>
 

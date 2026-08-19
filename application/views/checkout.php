@@ -12,12 +12,13 @@
                     <label><input type="radio" name="order_type" value="delivery"> Delivery</label>
                 </div>
             </div>
+            <?php $selected_shop_id = $this->session->userdata('selected_shop_id') ?: '1'; ?>
             <div class="form-group">
-                <label for="shop">Select Shop</label>
+                <label for="shop">Select Shop Location</label>
                 <select name="shop_id" id="shop" required>
-                    <option value="" disabled selected>Choose a shop</option>
-                    <option value="1">11 Place de la Tolinette, 95400 Villiers Le Bel</option>
-                    <option value="2">Commercial des Hauts de Saint-Nicolas 95130 Le Plessis-Bouchard +33 1 34 14 15 16</option>
+                    <option value="" disabled>Choose a shop</option>
+                    <option value="1" <?php echo ($selected_shop_id == '1') ? 'selected' : ''; ?>>Villiers-le-bel (11 Place de la Tolinette, 95400 Villiers Le Bel)</option>
+                    <option value="2" <?php echo ($selected_shop_id == '2') ? 'selected' : ''; ?>>Le Plessis-Bouchard (Commercial des Hauts de Saint-Nicolas 95130 Le Plessis-Bouchard)</option>
                 </select>
             </div>
             <div class="form-group">
@@ -47,6 +48,23 @@
     </div>
     <div class="right">
         <h2>Order Summary</h2>
+        <?php 
+            $is_shop2 = ($selected_shop_id == '2');
+            $box_bg = $is_shop2 ? '#eff6ff' : '#fff5f5';
+            $box_border = $is_shop2 ? '#bfdbfe' : '#fecaca';
+            $box_color = $is_shop2 ? '#2563eb' : '#e74c3c';
+        ?>
+        <div style="background: <?php echo $box_bg; ?>; border: 1px solid <?php echo $box_border; ?>; border-radius: 12px; padding: 14px 16px; margin-bottom: 20px;">
+            <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: <?php echo $box_color; ?>; font-weight: 700;">
+                <i class="fas fa-store"></i> Selected Shop Location
+            </div>
+            <div style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-top: 4px;">
+                <?php echo $is_shop2 ? 'Le Plessis-Bouchard' : 'Villiers-le-bel'; ?>
+            </div>
+            <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">
+                <?php echo $is_shop2 ? 'Commercial des Hauts de Saint-Nicolas, 95130 Le Plessis-Bouchard' : '11 Place de la Tolinette, 95400 Villiers Le Bel'; ?>
+            </div>
+        </div>
         <div class="order-summary" id="orderSummary">
             <h3>Products</h3>
             <ul>
