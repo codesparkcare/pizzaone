@@ -3,6 +3,52 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Common_model extends CI_Model {
 
+    public function __construct() {
+        parent::__construct();
+        $this->check_and_migrate_schema();
+    }
+
+    private function check_and_migrate_schema() {
+        if ($this->session && $this->session->userdata('db_schema_migrated')) {
+            return;
+        }
+
+        try {
+            // 1. Check if 'shops' column exists in 'products' table
+            if ($this->db->table_exists('products') && !$this->db->field_exists('shops', 'products')) {
+                $this->db->query("ALTER TABLE products ADD COLUMN shops VARCHAR(255) NULL DEFAULT '1,2'");
+                $this->db->query("UPDATE products SET shops = '1,2' WHERE shops IS NULL OR shops = ''");
+            }
+
+            // 2. Check if 'user_id' column exists in 'orders' table
+            if ($this->db->table_exists('orders') && !$this->db->field_exists('user_id', 'orders')) {
+                $this->db->query("ALTER TABLE orders ADD COLUMN user_id INT(11) NULL DEFAULT NULL AFTER shop_id, ADD INDEX (user_id)");
+            }
+
+            // 3. Ensure 'shops' table exists
+            if (!$this->db->table_exists('shops')) {
+                $this->db->query("CREATE TABLE IF NOT EXISTS shops (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL,
+                    address TEXT,
+                    phone VARCHAR(50),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+
+                $this->db->query("INSERT INTO shops (id, name, address, phone) VALUES 
+                    (1, 'Villiers-le-bel', '11 Place de la Tolinette, 95400 Villiers Le Bel', '01 34 19 94 56'),
+                    (2, 'Le Plessis-Bouchard', 'Commercial des Hauts de Saint-Nicolas, 95130 Le Plessis-Bouchard', '01 34 14 15 16')
+                    ON DUPLICATE KEY UPDATE name=VALUES(name);");
+            }
+
+            if ($this->session) {
+                $this->session->set_userdata('db_schema_migrated', true);
+            }
+        } catch (Exception $e) {
+            log_message('error', 'Auto migration exception: ' . $e->getMessage());
+        }
+    }
+
     public function insert($table, $data) {
         $this->db->insert($table, $data);
         return $this->db->insert_id();
