@@ -315,12 +315,12 @@
 .product-title {
     font-size: 1.25rem;
     font-weight: 700;
-    color: var(--dark);
+    color: #e74c3c;
     margin-bottom: 0.2rem;
 }
 
 .product-description {
-    color: var(--dark-muted);
+    color: #222222;
     font-size: 0.82rem;
     line-height: 1.35;
     margin-bottom: 0.3rem;

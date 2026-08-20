@@ -84,13 +84,27 @@ class Common_model extends CI_Model {
         return $this->db->count_all_results($table);
     }
 
+    public function attach_sizes(&$products) {
+        if (empty($products)) return;
+        foreach ($products as &$product) {
+            $this->db->select('sizes.name as size_name, product_sizes.price as size_price');
+            $this->db->from('product_sizes');
+            $this->db->join('sizes', 'sizes.id = product_sizes.size_id');
+            $this->db->where('product_sizes.product_id', $product->id);
+            $this->db->order_by('product_sizes.price', 'ASC');
+            $product->sizes = $this->db->get()->result();
+        }
+    }
+
     public function get_products_with_category() {
         $this->db->select('products.*, categories.name as category_name, COALESCE(subcats.name, "") as subcategory_name');
         $this->db->from('products');
         $this->db->join('categories', 'categories.id = products.category_id', 'left');
         $this->db->join('categories as subcats', 'subcats.id = products.subcategory_id AND products.subcategory_id IS NOT NULL', 'left');
         $this->db->order_by('products.id', 'DESC');
-        return $this->db->get()->result();
+        $products = $this->db->get()->result();
+        $this->attach_sizes($products);
+        return $products;
     }
 
     public function get_products_by_category($category_id = null, $shop_id = null) {
@@ -114,7 +128,9 @@ class Common_model extends CI_Model {
         }
         $this->db->where('products.status', 1);
         $this->db->order_by('products.id', 'DESC');
-        return $this->db->get()->result();
+        $products = $this->db->get()->result();
+        $this->attach_sizes($products);
+        return $products;
     }
 
     public function get_products_by_subcategory($subcategory_id, $shop_id = null) {
@@ -136,7 +152,9 @@ class Common_model extends CI_Model {
         }
         $this->db->where('products.status', 1);
         $this->db->order_by('products.id', 'DESC');
-        return $this->db->get()->result();
+        $products = $this->db->get()->result();
+        $this->attach_sizes($products);
+        return $products;
     }
 
     /**
@@ -147,7 +165,9 @@ class Common_model extends CI_Model {
         $this->db->from('product_addon_groups as pag');
         $this->db->join('addon_groups as ag', 'ag.id = pag.group_id', 'left');
         $this->db->where('pag.product_id', $product_id);
+        $this->db->order_by("(CASE WHEN LOWER(ag.name) LIKE '%extra%' OR LOWER(ag.name) LIKE '%supplement%' THEN 1 ELSE 0 END)", "ASC", FALSE);
         $this->db->order_by('pag.sort_order', 'ASC');
+        $this->db->order_by('pag.id', 'DESC');
         
         $groups = $this->db->get()->result();
         
@@ -185,7 +205,9 @@ class Common_model extends CI_Model {
         $this->db->join('offers', 'offers.id = products.offer_id', 'left');
         $this->db->where('wishlists.user_id', $user_id);
         $this->db->order_by('wishlists.id', 'DESC');
-        return $this->db->get()->result();
+        $products = $this->db->get()->result();
+        $this->attach_sizes($products);
+        return $products;
     }
 }
 ?>

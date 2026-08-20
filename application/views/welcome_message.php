@@ -149,13 +149,30 @@
                     </button>
                 </div>
                 <div class="pizza-info">
-                    <h3 class="pizza-title"><?php echo $p->name; ?></h3>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 0.5rem;">
+                        <h3 class="pizza-title" style="margin: 0; flex: 1;"><?php echo $p->name; ?></h3>
+                        <div class="product-sizes-list">
+                            <?php if (!empty($p->sizes)): ?>
+                                <?php foreach ($p->sizes as $sz): ?>
+                                    <?php $short_size = ucfirst(strtolower(explode(' ', trim($sz->size_name))[0])); ?>
+                                    <div class="size-price-item">
+                                        <span class="size-badge"><?php echo htmlspecialchars($short_size); ?></span>
+                                        <span class="price-val">€<?php echo number_format($sz->size_price, 2); ?></span>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <div class="size-price-item">
+                                    <span class="price-val">€<?php echo number_format($p->price, 2); ?></span>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                     <p class="pizza-desc"><?php echo $p->description; ?></p>
                     
                     <div class="pizza-footer">
-                        <div class="pizza-price"><?php echo number_format($p->price, 2); ?> €</div>
+                        <a href="javascript:void(0)" onclick="openProductModal(<?php echo $p->id; ?>)" style="color: #111111; font-weight: 600; text-decoration: none; font-size: 0.9rem;"><?php echo t('Voir les détails', 'View Details'); ?></a>
                         <button class="btn-basket" onclick="openProductModal(<?php echo $p->id; ?>)">
-                            <i class="fas fa-shopping-basket"></i>
+                            <i class="fas fa-plus"></i>
                         </button>
                     </div>
                 </div>

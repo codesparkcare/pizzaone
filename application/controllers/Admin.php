@@ -321,6 +321,14 @@ class Admin extends CI_Controller
         foreach ($groups as $group) {
             $group->addons = $this->Common_model->get_addons_in_group($group->id);
         }
+        usort($groups, function ($a, $b) {
+            $a_extra = (stripos($a->name, 'extra') !== false || stripos($a->name, 'supplement') !== false) ? 1 : 0;
+            $b_extra = (stripos($b->name, 'extra') !== false || stripos($b->name, 'supplement') !== false) ? 1 : 0;
+            if ($a_extra !== $b_extra) {
+                return $a_extra - $b_extra;
+            }
+            return $b->id - $a->id;
+        });
         $data['addon_groups'] = $groups;
 
         // Load offers
@@ -517,6 +525,10 @@ class Admin extends CI_Controller
         $data['title'] = 'Edit Product';
         $data['product'] = $this->Common_model->get_single('products', ['id' => $id]);
         $data['categories'] = $this->Common_model->get_where('categories', ['parent_id' => 0]);
+        $data['subcategories'] = [];
+        if (!empty($data['product']->category_id)) {
+            $data['subcategories'] = $this->Common_model->get_where('categories', ['parent_id' => $data['product']->category_id]);
+        }
         $data['all_shops'] = $this->Common_model->get_all('shops');
 
         // Get sizes for the product's category
@@ -538,8 +550,11 @@ class Admin extends CI_Controller
         $data['product_addon_ids'] = array_map(function ($addon) {
             return $addon->addon_id; }, $linked_addons);
 
-        // Get all addon groups
-        $data['addon_groups'] = $this->Common_model->get_all('addon_groups');
+        // Get all addon groups and their items
+        $groups = $this->Common_model->get_all('addon_groups');
+        foreach ($groups as $group) {
+            $group->addons = $this->Common_model->get_addons_in_group($group->id);
+        }
 
         // Get product addon groups
         $this->db->select('*');
@@ -550,6 +565,22 @@ class Admin extends CI_Controller
         foreach ($linked_groups as $lg) {
             $data['product_addon_groups'][$lg->group_id] = $lg;
         }
+
+        // Sort addon_groups: Linked groups first (with product-specific on top and Extra/Supplement on bottom), then unlinked groups
+        usort($groups, function ($a, $b) use ($data) {
+            $a_linked = isset($data['product_addon_groups'][$a->id]) ? 1 : 0;
+            $b_linked = isset($data['product_addon_groups'][$b->id]) ? 1 : 0;
+            if ($a_linked !== $b_linked) {
+                return $b_linked - $a_linked;
+            }
+            $a_extra = (stripos($a->name, 'extra') !== false || stripos($a->name, 'supplement') !== false) ? 1 : 0;
+            $b_extra = (stripos($b->name, 'extra') !== false || stripos($b->name, 'supplement') !== false) ? 1 : 0;
+            if ($a_extra !== $b_extra) {
+                return $a_extra - $b_extra;
+            }
+            return $b->id - $a->id;
+        });
+        $data['addon_groups'] = $groups;
 
         // Get all offers
         $data['offers'] = $this->Common_model->get_all('offers');

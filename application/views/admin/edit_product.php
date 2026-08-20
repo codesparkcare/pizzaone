@@ -48,8 +48,15 @@
                             </div>
                             <div class="form-group">
                                 <label style="font-weight: 600; margin-bottom: 8px; display: block;">Sub Category</label>
-                                <select name="subcategory_id" id="subCategorySelectEdit" class="form-control" style="border-radius: 10px; padding: 12px;">
+                                <select name="subcategory_id" id="subCategorySelectEdit" class="form-control" style="border-radius: 10px; padding: 12px;" <?php echo empty($subcategories) ? 'disabled' : ''; ?>>
                                     <option value="">Select Sub Category</option>
+                                    <?php if (!empty($subcategories)): ?>
+                                        <?php foreach($subcategories as $sub): ?>
+                                            <option value="<?php echo $sub->id; ?>" <?php echo (isset($product->subcategory_id) && $product->subcategory_id == $sub->id) ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($sub->name); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -242,6 +249,7 @@ function loadSubCatsAndSizesEdit(categoryId) {
     
     // Reset subcategories
     subSelect.innerHTML = '<option value="">Select Sub Category</option>';
+    subSelect.disabled = true;
     
     if (!categoryId) {
         container.innerHTML = '';
@@ -257,11 +265,14 @@ function loadSubCatsAndSizesEdit(categoryId) {
                     const opt = document.createElement('option');
                     opt.value = sub.id;
                     opt.textContent = sub.name;
-                    if (<?php echo json_encode($product->subcategory_id); ?> == sub.id) {
+                    if (<?php echo json_encode($product->subcategory_id ?? null); ?> == sub.id) {
                         opt.selected = true;
                     }
                     subSelect.appendChild(opt);
                 });
+                subSelect.disabled = false;
+            } else {
+                subSelect.disabled = true;
             }
         })
         .catch(error => console.error('Error loading subcategories:', error));
@@ -279,12 +290,12 @@ function loadSubCatsAndSizesEdit(categoryId) {
                     html += `
                         <div style="display:grid; grid-template-columns: 1fr 120px; align-items:center; gap:15px; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0;">
                             <label style="display:flex; align-items:center; gap:12px; margin:0; font-size:1rem; cursor: pointer; font-weight: 500;">
-                                <input type="checkbox" name="size_ids[]" value="${size.id}" ${size.ps_id ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: var(--primary);">
+                                <input type="checkbox" name="size_ids[]" value="${size.id}" style="width: 18px; height: 18px; accent-color: var(--primary);">
                                 ${size.name}
                             </label>
                             <div style="position: relative;">
                                 <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #666; font-weight: 600;">€</span>
-                                <input type="number" step="0.01" name="size_prices[]" class="form-control" style="margin:0; padding:8px 8px 8px 25px; border-radius: 8px; font-weight: 600;" placeholder="0.00" value="${size.size_price || ''}">
+                                <input type="number" step="0.01" name="size_prices[]" class="form-control" style="margin:0; padding:8px 8px 8px 25px; border-radius: 8px; font-weight: 600;" placeholder="0.00">
                             </div>
                         </div>
                     `;
@@ -294,6 +305,7 @@ function loadSubCatsAndSizesEdit(categoryId) {
             } else {
                 container.innerHTML = '';
             }
-        });
+        })
+        .catch(error => console.error('Error loading sizes:', error));
 }
 </script>

@@ -23,7 +23,21 @@
                         <div class="menu-card-body">
                             <div class="menu-card-header">
                                 <h3><?php echo $p->name; ?></h3>
-                                <span class="price">€<?php echo $p->price; ?></span>
+                                <div class="product-sizes-list">
+                                    <?php if (!empty($p->sizes)): ?>
+                                        <?php foreach ($p->sizes as $sz): ?>
+                                            <?php $short_size = ucfirst(strtolower(explode(' ', trim($sz->size_name))[0])); ?>
+                                            <div class="size-price-item">
+                                                <span class="size-badge"><?php echo htmlspecialchars($short_size); ?></span>
+                                                <span class="price-val">€<?php echo number_format($sz->size_price, 2); ?></span>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <div class="size-price-item">
+                                            <span class="price-val">€<?php echo number_format($p->price, 2); ?></span>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                             <p><?php echo $p->description; ?></p>
                             <div class="menu-card-footer">
@@ -138,7 +152,7 @@
 }
 .btn-details {
     text-decoration: none;
-    color: var(--secondary);
+    color: #111111;
     font-weight: 600;
     font-size: 0.9rem;
     transition: var(--transition);

@@ -9,7 +9,8 @@
                     </a>
                 </div>
                 <p class="brand-tagline">
-                    Des pizzas italiennes authentiques préparées chaque jour avec des ingrédients frais de qualité. Sélectionnez votre magasin et commandez en ligne !
+                    Des pizzas artisanales et authentiques préparées chaque jour avec des ingrédients frais de qualité.
+                    Sélectionnez votre magasin et commandez en ligne !
                 </p>
                 <div class="social-icons">
                     <a href="#" class="social-link facebook" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
@@ -109,7 +110,8 @@
 
         <div class="footer-bottom">
             <div class="footer-bottom-content">
-                <p>&copy; <?php echo date('Y'); ?> <a href="https://www.codespark.online" target="_blank">CODESPARK</a> Tous droits réservés.</p>
+                <p>&copy; <?php echo date('Y'); ?> <a href="https://www.codespark.online" target="_blank">CODESPARK</a>
+                    Tous droits réservés.</p>
                 <div class="footer-bottom-links">
                     <a href="#">Politique de confidentialité</a>
                     <a href="#">Conditions d'utilisation</a>
@@ -127,7 +129,7 @@
 
 <script type="text/javascript">
     window.currentLang = '<?php echo current_lang(); ?>';
-    window.t = function(fr, en) {
+    window.t = function (fr, en) {
         return window.currentLang === 'en' ? (en || fr) : fr;
     };
 
@@ -165,8 +167,8 @@
         }
 
         fetch('<?php echo base_url("language/switch_lang/"); ?>' + langCode)
-            .then(function() { location.reload(); })
-            .catch(function() { location.reload(); });
+            .then(function () { location.reload(); })
+            .catch(function () { location.reload(); });
     }
 
     // Auto-detect existing translation on page load
