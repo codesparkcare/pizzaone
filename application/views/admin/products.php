@@ -1,10 +1,15 @@
 <div class="row">
     <div class="card">
-        <div class="card-header">
-            <h4>Manage Products</h4>
-            <button class="btn btn-primary" onclick="showModal('addProductModal')">
-                <i class="fas fa-plus"></i> Add Product
-            </button>
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h4 style="margin: 0;">Manage Products</h4>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-success" onclick="showModal('importProductsModal')" style="background: #27ae60; border-color: #27ae60; color: #fff;">
+                    <i class="fas fa-file-import"></i> Import CSV / Excel
+                </button>
+                <button class="btn btn-primary" onclick="showModal('addProductModal')">
+                    <i class="fas fa-plus"></i> Add Product
+                </button>
+            </div>
         </div>
         <div class="card-body">
             <table class="table datatable">
@@ -241,6 +246,57 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Save Product</button>
+            <?php echo form_close(); ?>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Import Products CSV -->
+<div id="importProductsModal" class="custom-modal">
+    <div class="modal-content" style="max-width: 650px;">
+        <div class="modal-header">
+            <h3><i class="fas fa-file-excel" style="color: #27ae60;"></i> Import Products from Excel / CSV</h3>
+            <span onclick="closeModal('importProductsModal')" class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body" style="max-height: 80vh; overflow-y: auto; padding: 20px;">
+            <?php echo form_open_multipart('admin/import_products'); ?>
+                
+                <!-- Sample Download Banner -->
+                <div style="background: #eef9f1; border: 1px solid #c8e6c9; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <strong style="color: #1e7e34; font-size: 0.95rem;"><i class="fas fa-download"></i> Download CSV Template</strong>
+                        <p style="margin: 3px 0 0 0; font-size: 0.8rem; color: #555;">Get pre-formatted sample file with columns & example products.</p>
+                    </div>
+                    <a href="<?php echo base_url('admin/download_product_sample_csv'); ?>" class="btn btn-sm" style="background: #27ae60; color: #fff; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 0.85rem;">
+                        <i class="fas fa-file-csv"></i> Download Template
+                    </a>
+                </div>
+
+                <!-- CSV File Field -->
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="font-weight: 600; margin-bottom: 8px; display: block;">Select CSV File (.csv)</label>
+                    <input type="file" name="csv_file" class="form-control" accept=".csv, text/csv, application/csv" required style="padding: 10px; border: 2px dashed #3498db; background: #f8fafc; border-radius: 8px; cursor: pointer;">
+                </div>
+
+                <!-- Formatting Guide Accordion -->
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+                    <h5 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 0.95rem;"><i class="fas fa-info-circle" style="color: #3498db;"></i> Column Format Guide</h5>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 0.82rem; color: #555; line-height: 1.6;">
+                        <li><strong>Name</strong>: Product Name (e.g. <code>Pizza Regina</code>) *Required</li>
+                        <li><strong>Category</strong>: Parent Category (e.g. <code>Pizzas</code>) *Required</li>
+                        <li><strong>Subcategory</strong>: Optional Subcategory (e.g. <code>Base Tomate</code>)</li>
+                        <li><strong>Description</strong>: Product ingredients/details</li>
+                        <li><strong>Base_Price</strong>: Price if no sizes (e.g. <code>10.50</code>)</li>
+                        <li><strong>Sizes</strong>: Size and price pairs (e.g. <code>Senior:9.00|Mega:13.50|Familiale:17.00</code>)</li>
+                        <li><strong>Addon_Groups</strong>: Choice Group names separated by comma (e.g. <code>Suppléments Ingrédients, Choix de Sauce</code>)</li>
+                        <li><strong>Direct_Addons</strong>: Specific extra names separated by comma (e.g. <code>Double Fromage, Olives</code>)</li>
+                        <li><strong>Shops</strong>: Shop IDs separated by comma (e.g. <code>1,2</code>)</li>
+                    </ul>
+                </div>
+
+                <button type="submit" class="btn btn-success" style="width: 100%; padding: 12px; font-weight: bold; background: #27ae60; border-color: #27ae60; font-size: 1rem;">
+                    <i class="fas fa-cloud-upload-alt"></i> Start Import
+                </button>
             <?php echo form_close(); ?>
         </div>
     </div>

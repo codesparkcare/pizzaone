@@ -421,6 +421,288 @@ class Admin extends CI_Controller
         redirect('admin/products');
     }
 
+    public function download_product_sample_csv()
+    {
+        $this->check_login();
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename=sample_products_import.csv');
+
+        $output = fopen('php://output', 'w');
+
+        // Add UTF-8 BOM for Excel compatibility
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+
+        // Column Headers
+        fputcsv($output, ['Name', 'Category', 'Subcategory', 'Description', 'Base_Price', 'Sizes', 'Addon_Groups', 'Direct_Addons', 'Shops']);
+
+        // Sample Data Rows
+        fputcsv($output, [
+            'Pizza Regina',
+            'Pizzas',
+            'Base Tomate',
+            'Sauce tomate, mozzarella, jambon, champignons',
+            '0',
+            'Senior:9.00|Mega:13.50|Familiale:17.00',
+            'Suppléments Ingrédients, Choix de Sauce',
+            'Double Fromage',
+            '1,2'
+        ]);
+
+        fputcsv($output, [
+            'Pizza Chèvre Miel',
+            'Pizzas',
+            'Base Crème',
+            'Crème fraîche, mozzarella, chèvre, miel, noix',
+            '0',
+            'Senior:10.00|Mega:14.50|Familiale:18.00',
+            'Suppléments Ingrédients',
+            'Extra Miel',
+            '1,2'
+        ]);
+
+        fputcsv($output, [
+            'Coca-Cola 33cl',
+            'Boissons',
+            '',
+            'Boisson rafraîchissante 33cl',
+            '2.00',
+            '',
+            '',
+            '',
+            '1,2'
+        ]);
+
+        fclose($output);
+        exit;
+    }
+
+    public function import_products()
+    {
+        $this->check_login();
+
+        if (empty($_FILES['csv_file']['name'])) {
+            $this->session->set_flashdata('error', 'Please select a CSV file to import.');
+            redirect('admin/products');
+        }
+
+        $file = $_FILES['csv_file']['tmp_name'];
+        $handle = fopen($file, "r");
+
+        if ($handle === FALSE) {
+            $this->session->set_flashdata('error', 'Failed to open CSV file.');
+            redirect('admin/products');
+        }
+
+        // Read header row
+        $raw_header = fgetcsv($handle, 4096, ",");
+        if (!$raw_header || count($raw_header) < 2) {
+            rewind($handle);
+            $raw_header = fgetcsv($handle, 4096, ";");
+        }
+
+        if (!$raw_header) {
+            $this->session->set_flashdata('error', 'Invalid CSV file format.');
+            fclose($handle);
+            redirect('admin/products');
+        }
+
+        // Normalize header keys
+        $headers = array_map(function($h) {
+            $h = preg_replace('/[\x00-\x1F\x7F-\xFF]/', '', $h);
+            return strtolower(trim($h, " \t\n\r\0\x0B\"'"));
+        }, $raw_header);
+
+        $col_map = [];
+        foreach ($headers as $idx => $name) {
+            if (strpos($name, 'name') !== false) $col_map['name'] = $idx;
+            elseif (strpos($name, 'subcategory') !== false) $col_map['subcategory'] = $idx;
+            elseif (strpos($name, 'category') !== false) $col_map['category'] = $idx;
+            elseif (strpos($name, 'desc') !== false) $col_map['description'] = $idx;
+            elseif (strpos($name, 'base_price') !== false || $name === 'price') $col_map['price'] = $idx;
+            elseif (strpos($name, 'size') !== false) $col_map['sizes'] = $idx;
+            elseif (strpos($name, 'addon_group') !== false || strpos($name, 'extra_group') !== false) $col_map['addon_groups'] = $idx;
+            elseif (strpos($name, 'direct_addon') !== false || strpos($name, 'addon') !== false) $col_map['direct_addons'] = $idx;
+            elseif (strpos($name, 'shop') !== false) $col_map['shops'] = $idx;
+        }
+
+        if (!isset($col_map['name']) || !isset($col_map['category'])) {
+            $this->session->set_flashdata('error', 'CSV must contain at least "Name" and "Category" columns.');
+            fclose($handle);
+            redirect('admin/products');
+        }
+
+        $imported = 0;
+        $skipped = 0;
+
+        $delimiter = (count($raw_header) > 1 && strpos(implode(',', $raw_header), ';') !== false) ? ';' : ',';
+
+        while (($row = fgetcsv($handle, 4096, $delimiter)) !== FALSE) {
+            if (empty($row) || (count($row) == 1 && empty($row[0]))) continue;
+
+            $name = isset($col_map['name']) && isset($row[$col_map['name']]) ? trim($row[$col_map['name']]) : '';
+            $cat_name = isset($col_map['category']) && isset($row[$col_map['category']]) ? trim($row[$col_map['category']]) : '';
+
+            if (empty($name) || empty($cat_name)) {
+                $skipped++;
+                continue;
+            }
+
+            // 1. Match or Create Parent Category
+            $cat = $this->Common_model->get_single('categories', ['name' => $cat_name, 'parent_id' => 0]);
+            if (!$cat) {
+                $this->db->where('LOWER(name)', strtolower($cat_name));
+                $this->db->where('parent_id', 0);
+                $cat = $this->db->get('categories')->row();
+            }
+            if (!$cat) {
+                $cat_id = $this->Common_model->insert('categories', [
+                    'name' => $cat_name,
+                    'parent_id' => 0,
+                    'status' => 1
+                ]);
+            } else {
+                $cat_id = $cat->id;
+            }
+
+            // 2. Match or Create Subcategory
+            $subcat_id = NULL;
+            $subcat_name = isset($col_map['subcategory']) && isset($row[$col_map['subcategory']]) ? trim($row[$col_map['subcategory']]) : '';
+            if (!empty($subcat_name)) {
+                $subcat = $this->Common_model->get_single('categories', ['name' => $subcat_name, 'parent_id' => $cat_id]);
+                if (!$subcat) {
+                    $this->db->where('LOWER(name)', strtolower($subcat_name));
+                    $this->db->where('parent_id', $cat_id);
+                    $subcat = $this->db->get('categories')->row();
+                }
+                if (!$subcat) {
+                    $subcat_id = $this->Common_model->insert('categories', [
+                        'name' => $subcat_name,
+                        'parent_id' => $cat_id,
+                        'status' => 1
+                    ]);
+                } else {
+                    $subcat_id = $subcat->id;
+                }
+            }
+
+            // 3. Main Product fields
+            $description = isset($col_map['description']) && isset($row[$col_map['description']]) ? trim($row[$col_map['description']]) : '';
+            $price = isset($col_map['price']) && isset($row[$col_map['price']]) ? floatval(str_replace(',', '.', trim($row[$col_map['price']]))) : 0;
+            $shops_str = isset($col_map['shops']) && isset($row[$col_map['shops']]) ? trim($row[$col_map['shops']]) : '1,2';
+            if (empty($shops_str)) $shops_str = '1,2';
+
+            $product_id = $this->Common_model->insert('products', [
+                'category_id' => $cat_id,
+                'subcategory_id' => $subcat_id,
+                'name' => $name,
+                'description' => $description,
+                'price' => $price,
+                'image' => 'default.png',
+                'shops' => $shops_str,
+                'status' => 1
+            ]);
+
+            // 4. Parse Sizes (e.g. Senior:9.00|Mega:13.50|Familiale:17.00)
+            $sizes_str = isset($col_map['sizes']) && isset($row[$col_map['sizes']]) ? trim($row[$col_map['sizes']]) : '';
+            if (!empty($sizes_str)) {
+                $size_pairs = explode('|', $sizes_str);
+                foreach ($size_pairs as $pair) {
+                    $parts = explode(':', trim($pair));
+                    if (count($parts) == 2) {
+                        $s_name = trim($parts[0]);
+                        $s_price = floatval(str_replace(',', '.', trim($parts[1])));
+
+                        $sz = $this->Common_model->get_single('sizes', ['name' => $s_name]);
+                        if (!$sz) {
+                            $this->db->where('LOWER(name)', strtolower($s_name));
+                            $sz = $this->db->get('sizes')->row();
+                        }
+                        if (!$sz) {
+                            $sz_id = $this->Common_model->insert('sizes', ['name' => $s_name]);
+                        } else {
+                            $sz_id = $sz->id;
+                        }
+
+                        $this->Common_model->insert('product_sizes', [
+                            'product_id' => $product_id,
+                            'size_id' => $sz_id,
+                            'price' => $s_price
+                        ]);
+                    }
+                }
+            }
+
+            // 5. Parse Addon Groups (e.g. Suppléments Ingrédients, Choix de Sauce)
+            $groups_str = isset($col_map['addon_groups']) && isset($row[$col_map['addon_groups']]) ? trim($row[$col_map['addon_groups']]) : '';
+            if (!empty($groups_str)) {
+                $group_names = preg_split('/[,|]/', $groups_str);
+                foreach ($group_names as $g_name) {
+                    $g_name = trim($g_name);
+                    if (empty($g_name)) continue;
+
+                    $grp = $this->Common_model->get_single('addon_groups', ['name' => $g_name]);
+                    if (!$grp) {
+                        $this->db->where('LOWER(name)', strtolower($g_name));
+                        $grp = $this->db->get('addon_groups')->row();
+                    }
+                    if (!$grp) {
+                        $grp_id = $this->Common_model->insert('addon_groups', ['name' => $g_name]);
+                    } else {
+                        $grp_id = $grp->id;
+                    }
+
+                    $this->Common_model->insert('product_addon_groups', [
+                        'product_id' => $product_id,
+                        'group_id' => $grp_id,
+                        'min_selections' => 0,
+                        'max_selections' => 1,
+                        'is_required' => 0,
+                        'sort_order' => 0
+                    ]);
+                }
+            }
+
+            // 6. Parse Direct Addons (e.g. Double Fromage, Olives)
+            $addons_str = isset($col_map['direct_addons']) && isset($row[$col_map['direct_addons']]) ? trim($row[$col_map['direct_addons']]) : '';
+            if (!empty($addons_str)) {
+                $addon_names = preg_split('/[,|]/', $addons_str);
+                foreach ($addon_names as $a_name) {
+                    $a_name = trim($a_name);
+                    if (empty($a_name)) continue;
+
+                    $adn = $this->Common_model->get_single('addons', ['name' => $a_name]);
+                    if (!$adn) {
+                        $this->db->where('LOWER(name)', strtolower($a_name));
+                        $adn = $this->db->get('addons')->row();
+                    }
+                    if (!$adn) {
+                        $adn_id = $this->Common_model->insert('addons', ['name' => $a_name, 'price' => 0]);
+                    } else {
+                        $adn_id = $adn->id;
+                    }
+
+                    $this->Common_model->insert('product_addons', [
+                        'product_id' => $product_id,
+                        'addon_id' => $adn_id
+                    ]);
+                }
+            }
+
+            $imported++;
+        }
+
+        fclose($handle);
+
+        $msg = "Successfully imported {$imported} product(s).";
+        if ($skipped > 0) {
+            $msg .= " Skipped {$skipped} row(s) due to missing required fields.";
+        }
+
+        $this->session->set_flashdata('success', $msg);
+        redirect('admin/products');
+    }
+
     public function delete_product($id)
     {
         $this->check_login();
