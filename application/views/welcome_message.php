@@ -9,32 +9,32 @@
                     Your browser does not support the video tag.
                 </video>
                 <div class="slide-content" style="position: relative; z-index: 1;">
-                    <h2><?php echo htmlspecialchars($video->title); ?></h2>
-                    <p>Experience the authentic taste of Pizza One</p>
-                    <a href="#menu" class="btn-hero">Order Now</a>
+                    <h2>Pizza One</h2>
+                    <p>Une pizza. Un moment à partager.<br>Du goût, de la générosité et du plaisir à chaque bouchée.</p>
+                    <a href="#menu" class="btn-hero">COMMANDER</a>
                 </div>
             </div>
         <?php endforeach; ?>
     <?php else: ?>
     <div class="slide active" style="background-image: url('<?php echo base_url('assets/images/slider/pizza1.png'); ?>');">
         <div class="slide-content">
-            <h2>The Perfect Slice</h2>
-            <p>Experience the authentic taste of Italy with our hand-tossed, wood-fired pizzas made from the freshest ingredients.</p>
-            <a href="#menu" class="btn-hero">Order Now</a>
+            <h2>Pizza One</h2>
+            <p>Une pizza. Un moment à partager.<br>Du goût, de la générosité et du plaisir à chaque bouchée.</p>
+            <a href="#menu" class="btn-hero">COMMANDER</a>
         </div>
     </div>
     <div class="slide" style="background-image: url('<?php echo base_url('assets/images/slider/pizza2.png'); ?>');">
         <div class="slide-content">
-            <h2>Fresh & Healthy</h2>
-            <p>Try our garden-fresh veggie pizzas loaded with premium toppings and organic herbs for a healthy treat.</p>
-            <a href="#menu" class="btn-hero">Explore Menu</a>
+            <h2>Pizza One</h2>
+            <p>Une pizza. Un moment à partager.<br>Du goût, de la générosité et du plaisir à chaque bouchée.</p>
+            <a href="#menu" class="btn-hero">COMMANDER</a>
         </div>
     </div>
     <div class="slide" style="background-image: url('<?php echo base_url('assets/images/slider/pizza3.png'); ?>');">
         <div class="slide-content">
-            <h2>Fast Delivery</h2>
-            <p>Hot, fresh pizzas delivered to your doorstep in 30 minutes. Satisfaction guaranteed or your next pizza is on us!</p>
-            <a href="#menu" class="btn-hero">Order Delivery</a>
+            <h2>Pizza One</h2>
+            <p>Une pizza. Un moment à partager.<br>Du goût, de la générosité et du plaisir à chaque bouchée.</p>
+            <a href="#menu" class="btn-hero">COMMANDER</a>
         </div>
     </div>
     <?php endif; ?>
@@ -71,7 +71,7 @@
 <!-- Menu Categories Section -->
 <section class="container section-padding" style="padding-top: 1rem;">
     <div class="section-title">
-        <h2>Our Menu Categories</h2>
+        <h2><?php echo t('Nos Catégories de Menu', 'Our Menu Categories'); ?></h2>
     </div>
     
     <!-- Swiper Categories Slider -->
@@ -133,7 +133,7 @@
 <!-- Featured Pizzas Section -->
 <section id="menu" class="container" style="padding-bottom: 1rem;">
     <div class="section-title">
-        <h2>Popular Pizzas</h2>
+        <h2><?php echo t('Pizzas Populaires', 'Popular Pizzas'); ?></h2>
     </div>
     <div class="pizza-grid">
         <?php foreach($featured_products as $p): ?>
@@ -211,8 +211,8 @@
 </style>
 <section class="container section-padding" style="padding-top: 1rem; padding-bottom: 5rem;">
     <div class="section-title" style="text-align: center;">
-        <h2>What Our Customers Say</h2>
-        <p style="color: #666; margin-top: 10px;">Real reviews from real pizza lovers.</p>
+        <h2><?php echo t('Ce que disent nos clients', 'What Our Customers Say'); ?></h2>
+        <p style="color: #666; margin-top: 10px;"><?php echo t('De vrais avis de passionnés de pizza.', 'Real reviews from real pizza lovers.'); ?></p>
     </div>
     
     <div class="reviews-grid">

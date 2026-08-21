@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <!-- Custom CSS -->
     <link rel="stylesheet"
-        href="<?php echo base_url('assets/css/style.css?v=' . filemtime('assets/css/style.css')); ?>">
+        href="<?php echo base_url('assets/css/style.css?v=' . (file_exists(FCPATH . 'assets/css/style.css') ? filemtime(FCPATH . 'assets/css/style.css') : '1')); ?>">
 </head>
 
 <body>
@@ -30,7 +30,7 @@
 
             <div class="logo" style="margin: 0 !important;">
                 <a href="<?php echo base_url(); ?>">
-                    <img src="<?php echo base_url('assets/images/logo.png'); ?>" alt="Pizza One Logo">
+                    <img src="<?php echo base_url('assets/images/logo.png?v=' . (file_exists(FCPATH . 'assets/images/logo.png') ? filemtime(FCPATH . 'assets/images/logo.png') : '1')); ?>" alt="Pizza One Logo">
                 </a>
             </div>
         </div>
@@ -57,7 +57,7 @@
                 }
             </style>
             <div class="nav-mobile-logo">
-                <img src="<?php echo base_url('assets/images/logo.png'); ?>" alt="Pizza One Logo">
+                <img src="<?php echo base_url('assets/images/logo.png?v=' . (file_exists(FCPATH . 'assets/images/logo.png') ? filemtime(FCPATH . 'assets/images/logo.png') : '1')); ?>" alt="Pizza One Logo">
             </div>
             <ul>
                 <li><a href="<?php echo base_url(); ?>"><?php echo t('Accueil', 'Home'); ?></a></li>

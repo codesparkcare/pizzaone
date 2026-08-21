@@ -2255,9 +2255,28 @@ body {
     margin-bottom: 1.2rem !important;
 }
 
+.footer-logo a {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #ffffff !important;
+    padding: 8px 18px !important;
+    border-radius: 14px !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25) !important;
+    transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+}
+
+.footer-logo a:hover {
+    transform: translateY(-2px) scale(1.03) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
 .footer-logo img {
-    height: 60px !important;
+    height: 52px !important;
+    width: auto !important;
     object-fit: contain !important;
+    display: block !important;
+    border-radius: 6px !important;
 }
 
 .brand-tagline {

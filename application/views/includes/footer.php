@@ -5,7 +5,7 @@
             <div class="footer-section footer-brand-col">
                 <div class="footer-logo">
                     <a href="<?php echo base_url(); ?>">
-                        <img src="<?php echo base_url('assets/images/logo.png'); ?>" alt="Pizza One Logo">
+                        <img src="<?php echo base_url('assets/images/footerlogo.jpeg?v=' . (file_exists(FCPATH . 'assets/images/footerlogo.jpeg') ? filemtime(FCPATH . 'assets/images/footerlogo.jpeg') : '1')); ?>" alt="Pizza One Logo">
                     </a>
                 </div>
                 <p class="brand-tagline">
@@ -111,12 +111,13 @@
         <div class="footer-bottom">
             <div class="footer-bottom-content">
                 <p>&copy; <?php echo date('Y'); ?> <a href="https://www.codespark.online" target="_blank">CODESPARK</a>
-                    Tous droits réservés.</p>
+                    <?php echo t('Tous droits réservés.', 'All rights reserved.'); ?></p>
                 <div class="footer-bottom-links">
-                    <a href="#">Politique de confidentialité</a>
-                    <a href="#">Conditions d'utilisation</a>
+                    <a href="#"><?php echo t('Politique de confidentialité', 'Privacy Policy'); ?></a>
+                    <a href="#"><?php echo t('Conditions d\'utilisation', 'Terms of Use'); ?></a>
+                    <span class="disclaimer-text" style="opacity: 0.75; font-size: 0.82rem; font-style: italic; color: #8b949e;"><?php echo t('* Visuels non contractuels', '* Non-binding visuals'); ?></span>
                 </div>
-                <p class="crafted-by">Fait avec <i class="fas fa-heart"></i> pour les amateurs de pizza</p>
+                <p class="crafted-by"><?php echo t('Fait avec', 'Made with'); ?> <i class="fas fa-heart" style="color: #e74c3c;"></i> <?php echo t('pour les amateurs de pizza', 'for pizza lovers'); ?></p>
             </div>
         </div>
     </div>
@@ -174,16 +175,19 @@
     // Auto-detect existing translation on page load
     window.addEventListener('load', function () {
         setTimeout(function () {
-            var selectField = document.querySelector('select.goog-te-combo');
             var activeLangDisplay = document.querySelector('.active-lang');
+            var lang = (window.currentLang && window.currentLang.toLowerCase() === 'en') ? 'EN' : 'FR';
+            var selectField = document.querySelector('select.goog-te-combo');
             if (selectField && selectField.value) {
-                if (activeLangDisplay) {
-                    activeLangDisplay.innerText = selectField.value.toUpperCase();
+                var val = selectField.value.toLowerCase();
+                if (val === 'en') {
+                    lang = 'EN';
+                } else if (val === 'fr') {
+                    lang = 'FR';
                 }
-            } else {
-                if (activeLangDisplay) {
-                    activeLangDisplay.innerText = 'FR';
-                }
+            }
+            if (activeLangDisplay) {
+                activeLangDisplay.innerText = lang;
             }
         }, 800);
     });

@@ -96,15 +96,15 @@
             <img src="<?php echo base_url('assets/images/about-pizza.jpg'); ?>" alt="About Pizza One" onerror="this.src='https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';">
         </div>
         <div class="about-content">
-            <h2>Our Story</h2>
-            <p>Welcome to Pizza One, where passion meets authenticity! We pride ourselves on delivering the true taste of Italian pizza, crafted with love, fresh ingredients, and traditional recipes.</p>
-            <p>Every pizza we make is a testament to our dedication to quality. From our hand-tossed dough to our rich, flavorful sauces and premium toppings, we ensure every bite is an unforgettable experience.</p>
+            <h2><?php echo t('Notre Histoire', 'Our Story'); ?></h2>
+            <p><?php echo t('Bienvenue chez Pizza One, où la passion rencontre l\'authenticité ! Nous sommes fiers de vous offrir le vrai goût de la pizza artisanale, préparée avec amour, des ingrédients frais et des recettes traditionnelles.', 'Welcome to Pizza One, where passion meets authenticity! We pride ourselves on delivering the true taste of Italian pizza, crafted with love, fresh ingredients, and traditional recipes.'); ?></p>
+            <p><?php echo t('Chaque pizza que nous préparons témoigne de notre engagement envers la qualité. De notre pâte pétrie à la main à nos sauces savoureuses et nos garnitures de qualité supérieure, nous veillons à ce que chaque bouchée soit une expérience inoubliable.', 'Every pizza we make is a testament to our dedication to quality. From our hand-tossed dough to our rich, flavorful sauces and premium toppings, we ensure every bite is an unforgettable experience.'); ?></p>
         </div>
     </div>
 
     <!-- Section 2 -->
     <div class="about-section-2">
-        <h2>Our Branches</h2>
+        <h2><?php echo t('Nos Magasins', 'Our Branches'); ?></h2>
         <div class="branches-container">
             <div class="branch-card">
                 <i class="fas fa-map-marker-alt"></i>
