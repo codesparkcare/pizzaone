@@ -42,8 +42,8 @@
                         <td>
                             <?php 
                                 $p_shops = isset($p->shops) && $p->shops !== '' ? explode(',', $p->shops) : ['1','2'];
-                                if (in_array('1', $p_shops)) echo '<span class="badge" style="background:#3498db; color:#fff; padding:3px 7px; border-radius:10px; font-size:0.7rem; margin-right:2px;">Villiers-le-bel</span> ';
-                                if (in_array('2', $p_shops)) echo '<span class="badge" style="background:#9b59b6; color:#fff; padding:3px 7px; border-radius:10px; font-size:0.7rem;">Le Plessis-Bouchard</span>';
+                                if (in_array('1', $p_shops)) echo '<span class="badge" style="background:#3498db; color:#fff; padding:4px 8px; border-radius:10px; font-size:0.7rem; margin-right:4px; margin-bottom:2px; display:inline-block; white-space:nowrap; vertical-align:middle;">Villiers-le-bel</span>';
+                                if (in_array('2', $p_shops)) echo '<span class="badge" style="background:#9b59b6; color:#fff; padding:4px 8px; border-radius:10px; font-size:0.7rem; margin-bottom:2px; display:inline-block; white-space:nowrap; vertical-align:middle;">Le Plessis-Bouchard</span>';
                             ?>
                         </td>
                         <td>

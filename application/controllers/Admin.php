@@ -589,8 +589,29 @@ class Admin extends CI_Controller
             // 3. Main Product fields
             $description = isset($col_map['description']) && isset($row[$col_map['description']]) ? trim($row[$col_map['description']]) : '';
             $price = isset($col_map['price']) && isset($row[$col_map['price']]) ? floatval(str_replace(',', '.', trim($row[$col_map['price']]))) : 0;
-            $shops_str = isset($col_map['shops']) && isset($row[$col_map['shops']]) ? trim($row[$col_map['shops']]) : '1,2';
-            if (empty($shops_str)) $shops_str = '1,2';
+            
+            $shops_raw = isset($col_map['shops']) && isset($row[$col_map['shops']]) ? trim($row[$col_map['shops']]) : '';
+            $shops_arr = [];
+            if (!empty($shops_raw)) {
+                $parts = explode(',', $shops_raw);
+                foreach ($parts as $part) {
+                    $p_clean = strtolower(trim($part));
+                    if ($p_clean === '1' || strpos($p_clean, 'villiers') !== false) {
+                        $shops_arr[] = '1';
+                    }
+                    if ($p_clean === '2' || strpos($p_clean, 'plessis') !== false || strpos($p_clean, 'bouchard') !== false) {
+                        $shops_arr[] = '2';
+                    }
+                }
+            }
+            if (empty($shops_arr)) {
+                if ($this->session->userdata('admin_role') === 'staff') {
+                    $shops_arr[] = (string)$this->session->userdata('shop_id');
+                } else {
+                    $shops_arr = ['1', '2'];
+                }
+            }
+            $shops_str = implode(',', array_unique($shops_arr));
 
             $product_id = $this->Common_model->insert('products', [
                 'category_id' => $cat_id,
