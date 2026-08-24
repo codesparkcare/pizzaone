@@ -41,6 +41,32 @@ class Common_model extends CI_Model {
                     ON DUPLICATE KEY UPDATE name=VALUES(name);");
             }
 
+            // 4. Auto repair products with price = 0 that have product_sizes
+            if ($this->db->table_exists('products') && $this->db->table_exists('product_sizes')) {
+                $zero_products = $this->db->query("SELECT id FROM products WHERE price = 0 OR price IS NULL")->result();
+                foreach ($zero_products as $zp) {
+                    $min_ps = $this->db->query("SELECT MIN(price) as min_p FROM product_sizes WHERE product_id = ?", [$zp->id])->row();
+                    if ($min_ps && $min_ps->min_p > 0) {
+                        $this->db->query("UPDATE products SET price = ? WHERE id = ?", [$min_ps->min_p, $zp->id]);
+                    }
+                }
+            }
+
+            // 5. Sync category_sizes for all product_sizes
+            if ($this->db->table_exists('products') && $this->db->table_exists('product_sizes') && $this->db->table_exists('category_sizes')) {
+                $missing_links = $this->db->query("
+                    SELECT DISTINCT p.category_id, ps.size_id 
+                    FROM product_sizes ps
+                    JOIN products p ON p.id = ps.product_id
+                    LEFT JOIN category_sizes cs ON cs.category_id = p.category_id AND cs.size_id = ps.size_id
+                    WHERE p.category_id IS NOT NULL AND p.category_id > 0 AND cs.category_id IS NULL
+                ")->result();
+
+                foreach ($missing_links as $ml) {
+                    $this->db->query("INSERT INTO category_sizes (category_id, size_id) VALUES (?, ?)", [$ml->category_id, $ml->size_id]);
+                }
+            }
+
             if ($this->session) {
                 $this->session->set_userdata('db_schema_migrated', true);
             }

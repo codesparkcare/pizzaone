@@ -4,11 +4,11 @@
     <?php if(!empty($slider_videos)): ?>
         <?php foreach($slider_videos as $index => $video): ?>
             <div class="slide <?php echo $index == 0 ? 'active' : ''; ?>">
-                <video autoplay muted loop playsinline class="slider-video" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;">
+                <video autoplay muted loop playsinline class="slider-video" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; pointer-events: none;">
                     <source src="<?php echo base_url('assets/videos/'.$video->video_url); ?>" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
-                <div class="slide-content" style="position: relative; z-index: 1;">
+                <div class="slide-content" style="position: relative; z-index: 3;">
                     <h2>Pizza One</h2>
                     <p>Une pizza. Un moment à partager.<br>Du goût, de la générosité et du plaisir à chaque bouchée.</p>
                     <a href="#menu" class="btn-hero">COMMANDER</a>
@@ -149,8 +149,8 @@
                     </button>
                 </div>
                 <div class="pizza-info">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 0.5rem;">
-                        <h3 class="pizza-title" style="margin: 0; flex: 1;"><?php echo $p->name; ?></h3>
+                    <div class="pizza-card-header">
+                        <h3 class="pizza-title"><?php echo $p->name; ?></h3>
                         <div class="product-sizes-list">
                             <?php if (!empty($p->sizes)): ?>
                                 <?php foreach ($p->sizes as $sz): ?>
@@ -186,9 +186,12 @@
 <style>
 .reviews-grid {
     display: grid; 
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
     gap: 30px; 
     margin-top: 30px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 .review-card {
     background: #fff; 
@@ -197,15 +200,17 @@
     box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
     border-bottom: 4px solid var(--primary); 
     transition: transform 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
 }
 @media (max-width: 768px) {
     .reviews-grid {
         grid-template-columns: 1fr;
         padding: 0 15px;
-        gap: 20px;
+        gap: 15px;
     }
     .review-card {
-        padding: 20px 15px;
+        padding: 18px 15px;
     }
 }
 </style>
@@ -245,14 +250,34 @@
 
 <!-- Slider JavaScript -->
 <script>
-    let currentSlide = 0;
-    const slides = document.querySelectorAll('.slide');
-    
-    function nextSlide() {
-        slides[currentSlide].classList.remove('active');
-        currentSlide = (currentSlide + 1) % slides.length;
-        slides[currentSlide].classList.add('active');
-    }
+    document.addEventListener('DOMContentLoaded', function() {
+        const slides = document.querySelectorAll('.slide');
+        if (!slides || slides.length === 0) return;
+        
+        let currentSlide = 0;
 
-    setInterval(nextSlide, 5000); // Change slide every 5 seconds
+        function playActiveVideo() {
+            const activeSlide = slides[currentSlide];
+            if (activeSlide) {
+                const video = activeSlide.querySelector('video');
+                if (video) {
+                    video.play().catch(function(e) {
+                        console.log('Video autoplay exception:', e);
+                    });
+                }
+            }
+        }
+
+        playActiveVideo();
+
+        function nextSlide() {
+            if (slides.length <= 1) return;
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+            playActiveVideo();
+        }
+
+        setInterval(nextSlide, 5000);
+    });
 </script>

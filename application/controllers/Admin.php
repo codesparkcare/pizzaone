@@ -515,15 +515,37 @@ class Admin extends CI_Controller
 
         $col_map = [];
         foreach ($headers as $idx => $name) {
-            if (strpos($name, 'name') !== false) $col_map['name'] = $idx;
-            elseif (strpos($name, 'subcategory') !== false) $col_map['subcategory'] = $idx;
-            elseif (strpos($name, 'category') !== false) $col_map['category'] = $idx;
-            elseif (strpos($name, 'desc') !== false) $col_map['description'] = $idx;
-            elseif (strpos($name, 'base_price') !== false || $name === 'price') $col_map['price'] = $idx;
-            elseif (strpos($name, 'size') !== false) $col_map['sizes'] = $idx;
-            elseif (strpos($name, 'addon_group') !== false || strpos($name, 'extra_group') !== false) $col_map['addon_groups'] = $idx;
-            elseif (strpos($name, 'direct_addon') !== false || strpos($name, 'addon') !== false) $col_map['direct_addons'] = $idx;
-            elseif (strpos($name, 'shop') !== false) $col_map['shops'] = $idx;
+            $name_clean = str_replace(['_', ' '], '', $name);
+            if (strpos($name_clean, 'name') !== false || strpos($name_clean, 'nom') !== false || strpos($name_clean, 'product') !== false) {
+                if (!isset($col_map['name'])) $col_map['name'] = $idx;
+            }
+            if (strpos($name_clean, 'subcategory') !== false || strpos($name_clean, 'subcat') !== false || strpos($name_clean, 'souscategorie') !== false) {
+                $col_map['subcategory'] = $idx;
+            } elseif (strpos($name_clean, 'category') !== false || strpos($name_clean, 'categorie') !== false || strpos($name_clean, 'cat') !== false) {
+                $col_map['category'] = $idx;
+            }
+            if (strpos($name_clean, 'desc') !== false) {
+                $col_map['description'] = $idx;
+            }
+            if (strpos($name_clean, 'price') !== false || strpos($name_clean, 'prix') !== false || strpos($name_clean, 'tarif') !== false) {
+                if (!isset($col_map['price']) || strpos($name_clean, 'base') !== false) {
+                    $col_map['price'] = $idx;
+                }
+            }
+            if (strpos($name_clean, 'size') !== false || strpos($name_clean, 'taille') !== false || strpos($name_clean, 'format') !== false) {
+                $col_map['sizes'] = $idx;
+            }
+            if (strpos($name_clean, 'addongroup') !== false || strpos($name_clean, 'extragroup') !== false || strpos($name_clean, 'group') !== false) {
+                $col_map['addon_groups'] = $idx;
+            }
+            if (strpos($name_clean, 'directaddon') !== false || strpos($name_clean, 'addon') !== false || strpos($name_clean, 'extra') !== false) {
+                if (!isset($col_map['addon_groups']) || $idx != ($col_map['addon_groups'] ?? -1)) {
+                    $col_map['direct_addons'] = $idx;
+                }
+            }
+            if (strpos($name_clean, 'shop') !== false || strpos($name_clean, 'magasin') !== false || strpos($name_clean, 'store') !== false) {
+                $col_map['shops'] = $idx;
+            }
         }
 
         if (!isset($col_map['name']) || !isset($col_map['category'])) {
@@ -588,7 +610,9 @@ class Admin extends CI_Controller
 
             // 3. Main Product fields
             $description = isset($col_map['description']) && isset($row[$col_map['description']]) ? trim($row[$col_map['description']]) : '';
-            $price = isset($col_map['price']) && isset($row[$col_map['price']]) ? floatval(str_replace(',', '.', trim($row[$col_map['price']]))) : 0;
+            $raw_price = isset($col_map['price']) && isset($row[$col_map['price']]) ? trim($row[$col_map['price']]) : '0';
+            $clean_price = preg_replace('/[^0-9\.]/', '', str_replace(',', '.', $raw_price));
+            $price = is_numeric($clean_price) ? floatval($clean_price) : 0;
             
             $shops_raw = isset($col_map['shops']) && isset($row[$col_map['shops']]) ? trim($row[$col_map['shops']]) : '';
             $shops_arr = [];
@@ -624,34 +648,57 @@ class Admin extends CI_Controller
                 'status' => 1
             ]);
 
-            // 4. Parse Sizes (e.g. Senior:9.00|Mega:13.50|Familiale:17.00)
+            // 4. Parse Sizes (e.g. Senior:9.00|Mega:13.50|Familiale:17.00 OR Senior:9,00 € ; Mega:13.50 €)
             $sizes_str = isset($col_map['sizes']) && isset($row[$col_map['sizes']]) ? trim($row[$col_map['sizes']]) : '';
+            $min_size_price = null;
             if (!empty($sizes_str)) {
-                $size_pairs = explode('|', $sizes_str);
+                $size_pairs = preg_split('/[|;\n\r]+/', $sizes_str);
                 foreach ($size_pairs as $pair) {
-                    $parts = explode(':', trim($pair));
+                    $pair = trim($pair);
+                    if (empty($pair)) continue;
+
+                    $parts = preg_split('/[:=\-]/', $pair, 2);
                     if (count($parts) == 2) {
                         $s_name = trim($parts[0]);
-                        $s_price = floatval(str_replace(',', '.', trim($parts[1])));
+                        $s_price_raw = trim($parts[1]);
+                        $clean_s_price = preg_replace('/[^0-9\.]/', '', str_replace(',', '.', $s_price_raw));
+                        $s_price = is_numeric($clean_s_price) ? floatval($clean_s_price) : 0;
 
-                        $sz = $this->Common_model->get_single('sizes', ['name' => $s_name]);
-                        if (!$sz) {
-                            $this->db->where('LOWER(name)', strtolower($s_name));
-                            $sz = $this->db->get('sizes')->row();
-                        }
-                        if (!$sz) {
-                            $sz_id = $this->Common_model->insert('sizes', ['name' => $s_name]);
-                        } else {
-                            $sz_id = $sz->id;
-                        }
+                        if ($s_name !== '') {
+                            $sz = $this->Common_model->get_single('sizes', ['name' => $s_name]);
+                            if (!$sz) {
+                                $this->db->where('LOWER(name)', strtolower($s_name));
+                                $sz = $this->db->get('sizes')->row();
+                            }
+                            if (!$sz) {
+                                $sz_id = $this->Common_model->insert('sizes', ['name' => $s_name]);
+                            } else {
+                                $sz_id = $sz->id;
+                            }
 
-                        $this->Common_model->insert('product_sizes', [
-                            'product_id' => $product_id,
-                            'size_id' => $sz_id,
-                            'price' => $s_price
-                        ]);
+                            // Link size to category in category_sizes table
+                            $cs = $this->Common_model->get_single('category_sizes', ['category_id' => $cat_id, 'size_id' => $sz_id]);
+                            if (!$cs) {
+                                $this->Common_model->insert('category_sizes', ['category_id' => $cat_id, 'size_id' => $sz_id]);
+                            }
+
+                            $this->Common_model->insert('product_sizes', [
+                                'product_id' => $product_id,
+                                'size_id' => $sz_id,
+                                'price' => $s_price
+                            ]);
+
+                            if ($min_size_price === null || $s_price < $min_size_price) {
+                                $min_size_price = $s_price;
+                            }
+                        }
                     }
                 }
+            }
+
+            // If base price was 0 or empty, but product has sizes, set product price to minimum size price
+            if ($price == 0 && $min_size_price !== null && $min_size_price > 0) {
+                $this->Common_model->update('products', ['id' => $product_id], ['price' => $min_size_price]);
             }
 
             // 5. Parse Addon Groups (e.g. Suppléments Ingrédients, Choix de Sauce)
