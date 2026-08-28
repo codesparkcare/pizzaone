@@ -232,6 +232,17 @@
                             <?php else: ?>
                                 <span class="price-pill price-free">Free</span>
                             <?php endif; ?>
+                            <?php if (!empty($addon->size_prices) && !empty($sizes)): ?>
+                                <div style="margin-top:4px; font-size:0.75rem; display:flex; flex-wrap:wrap; gap:4px;">
+                                    <?php foreach ($sizes as $sz): ?>
+                                        <?php if (isset($addon->size_prices[$sz->id])): ?>
+                                            <span style="background:#eef2ff; color:#4f46e5; border-radius:4px; padding:2px 6px; font-weight:600;">
+                                                <?php echo htmlspecialchars($sz->name); ?>: €<?php echo number_format($addon->size_prices[$sz->id], 2); ?>
+                                            </span>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
                         </td>
                         <td>
                             <?php
@@ -297,9 +308,25 @@
                         <input type="text" class="f-input" name="name" placeholder="e.g. Extra Cheese" required>
                     </div>
                     <div style="margin-bottom:18px;">
-                        <label class="f-label">Price (€) <span style="color:#aaa;font-weight:400;">— optional</span></label>
+                        <label class="f-label">Base Price (€) <span style="color:#aaa;font-weight:400;">— optional fallback</span></label>
                         <input type="number" class="f-input" name="price" step="0.01" min="0" placeholder="0.00">
-                        <p class="f-hint">Leave blank or 0 for a free addon.</p>
+                        <p class="f-hint">Default price if size price is not specified.</p>
+                    </div>
+                    <div style="margin-bottom:18px;">
+                        <label class="f-label"><i class="fas fa-expand-alt" style="margin-right:4px; opacity:0.7;"></i> Size-Wise Prices (€) <span style="color:#aaa;font-weight:400;">— optional</span></label>
+                        <?php if (!empty($sizes)): ?>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; background:#f9f9f9; padding:12px; border-radius:9px; border:1px solid #eee;">
+                                <?php foreach ($sizes as $sz): ?>
+                                    <div>
+                                        <label style="font-size:0.78rem; font-weight:600; color:#555; display:block; margin-bottom:3px;"><?php echo htmlspecialchars($sz->name); ?></label>
+                                        <input type="number" class="f-input" name="size_prices[<?php echo $sz->id; ?>]" step="0.01" min="0" placeholder="0.00" style="padding:7px 10px; font-size:0.85rem;">
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <p class="f-hint">Set size-specific prices (e.g. Senior: 0.80, Mega: 0.90).</p>
+                        <?php else: ?>
+                            <p class="f-hint">No size variants configured.</p>
+                        <?php endif; ?>
                     </div>
                     <div style="margin-bottom:18px;">
                         <label class="f-label">Type <span style="color:#e74c3c;">*</span></label>

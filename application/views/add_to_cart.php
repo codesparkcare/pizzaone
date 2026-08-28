@@ -66,7 +66,8 @@
                                             <input type="radio" name="product_size" 
                                                    value="<?php echo $size->price; ?>" 
                                                    data-id="<?php echo $size->ps_id; ?>"
-                                                   data-name="<?php echo $size->name; ?>"
+                                                   data-size-id="<?php echo $size->size_id ?? ''; ?>"
+                                                   data-name="<?php echo htmlspecialchars($size->name); ?>"
                                                    <?php echo $index === 0 ? 'checked' : ''; ?> 
                                                    onchange="updatePrice()">
                                             <div class="size-card-content">
@@ -114,7 +115,10 @@
                                                             <input type="checkbox" 
                                                                    name="addon_group_<?php echo $group->group_id; ?>" 
                                                                    value="<?php echo $addon->id; ?>"
+                                                                   data-base-price="<?php echo $addon->price; ?>"
                                                                    data-price="<?php echo $addon->price; ?>"
+                                                                   data-size-prices='<?php echo htmlspecialchars(json_encode($addon->size_prices_by_name ?? []), ENT_QUOTES, 'UTF-8'); ?>'
+                                                                   data-size-prices-id='<?php echo htmlspecialchars(json_encode($addon->size_prices ?? []), ENT_QUOTES, 'UTF-8'); ?>'
                                                                    data-group-id="<?php echo $group->group_id; ?>"
                                                                    data-max-selections="<?php echo $group->max_selections; ?>"
                                                                    onchange="updatePrice(); validateAddonGroup(this)">
@@ -152,7 +156,10 @@
                                                     <div class="addon-checkbox">
                                                         <input type="checkbox" name="product_addon" 
                                                                value="<?php echo $addon->id; ?>"
+                                                               data-base-price="<?php echo $addon->price; ?>"
                                                                data-price="<?php echo $addon->price; ?>"
+                                                               data-size-prices='<?php echo htmlspecialchars(json_encode($addon->size_prices_by_name ?? []), ENT_QUOTES, 'UTF-8'); ?>'
+                                                               data-size-prices-id='<?php echo htmlspecialchars(json_encode($addon->size_prices ?? []), ENT_QUOTES, 'UTF-8'); ?>'
                                                                onchange="updatePrice()">
                                                         <span class="checkbox-custom"></span>
                                                     </div>
@@ -508,28 +515,77 @@ function changeQuantity(amount) {
 function updatePrice() {
     const sizeInput = document.querySelector('input[name="product_size"]:checked');
     const basePriceElement = document.getElementById('basePrice');
-    const basePrice = sizeInput ? parseFloat(sizeInput.value) : parseFloat(basePriceElement.dataset.basePrice || 0);
+    const basePrice = sizeInput ? parseFloat(sizeInput.value) : parseFloat(basePriceElement ? (basePriceElement.dataset.basePrice || 0) : 0);
+    const selectedSizeName = sizeInput && sizeInput.dataset.name ? sizeInput.dataset.name.toLowerCase().trim() : '';
+    const selectedSizeId = sizeInput && sizeInput.dataset.sizeId ? sizeInput.dataset.sizeId : '';
+
+    const allAddonCheckboxes = document.querySelectorAll('input[name*="addon_group_"], input[name="product_addon"]');
+    allAddonCheckboxes.forEach(cb => {
+        let currentPrice = parseFloat(cb.dataset.basePrice || cb.dataset.price || 0);
+        
+        let sizePricesByName = {};
+        let sizePricesById = {};
+        try {
+            if (cb.dataset.sizePrices) sizePricesByName = JSON.parse(cb.dataset.sizePrices);
+            if (cb.dataset.sizePricesId) sizePricesById = JSON.parse(cb.dataset.sizePricesId);
+        } catch(e) {}
+
+        if (selectedSizeId && sizePricesById[selectedSizeId] !== undefined) {
+            currentPrice = parseFloat(sizePricesById[selectedSizeId]);
+        } else if (selectedSizeName) {
+            let matchedPrice = undefined;
+            for (let nameKey in sizePricesByName) {
+                if (selectedSizeName.includes(nameKey) || nameKey.includes(selectedSizeName)) {
+                    matchedPrice = sizePricesByName[nameKey];
+                    break;
+                }
+            }
+            if (matchedPrice !== undefined) {
+                currentPrice = parseFloat(matchedPrice);
+            }
+        }
+
+        cb.dataset.price = currentPrice;
+
+        const card = cb.closest('.addon-card');
+        const priceSpan = card ? card.querySelector('.addon-price') : null;
+        if (priceSpan) {
+            if (currentPrice > 0) {
+                priceSpan.innerText = '+€' + currentPrice.toFixed(2);
+            } else {
+                priceSpan.innerText = (typeof window.t === 'function') ? window.t('Gratuit', 'Free') : 'Free';
+            }
+        }
+    });
 
     let addonPrice = 0;
-    const addonInputs = document.querySelectorAll('input[name="product_addon"]:checked');
-    addonInputs.forEach(input => { addonPrice += parseFloat(input.dataset.price); });
+    const checkedAddons = document.querySelectorAll('input[name*="addon_group_"]:checked, input[name="product_addon"]:checked');
+    checkedAddons.forEach(input => {
+        addonPrice += parseFloat(input.dataset.price || 0);
+    });
 
-    const addonGroupInputs = document.querySelectorAll('input[name*="addon_group_"]:checked');
-    addonGroupInputs.forEach(input => { addonPrice += parseFloat(input.dataset.price); });
+    const qtyEl = document.getElementById('quantity');
+    const quantity = qtyEl ? parseInt(qtyEl.value) : 1;
 
-    const quantity = parseInt(document.getElementById('quantity').value);
-    document.getElementById('basePrice').innerText = '€' + basePrice.toFixed(2);
+    if (basePriceElement) basePriceElement.innerText = '€' + basePrice.toFixed(2);
     
-    if (addonPrice > 0) {
-        document.getElementById('addonPriceRow').style.display = 'flex';
-        document.getElementById('addonPrice').innerText = '€' + addonPrice.toFixed(2);
-    } else {
-        document.getElementById('addonPriceRow').style.display = 'none';
+    const addonPriceRow = document.getElementById('addonPriceRow');
+    const addonPriceEl = document.getElementById('addonPrice');
+    if (addonPriceRow && addonPriceEl) {
+        if (addonPrice > 0) {
+            addonPriceRow.style.display = 'flex';
+            addonPriceEl.innerText = '€' + addonPrice.toFixed(2);
+        } else {
+            addonPriceRow.style.display = 'none';
+        }
     }
 
-    document.getElementById('qtyDisplay').innerText = quantity;
+    const qtyDisplayEl = document.getElementById('qtyDisplay');
+    if (qtyDisplayEl) qtyDisplayEl.innerText = quantity;
+
     const total = (basePrice + addonPrice) * quantity;
-    document.getElementById('totalPrice').innerText = '€' + total.toFixed(2);
+    const totalPriceEl = document.getElementById('totalPrice');
+    if (totalPriceEl) totalPriceEl.innerText = '€' + total.toFixed(2);
 }
 
 function validateAddonGroup(checkbox) {

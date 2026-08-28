@@ -23,7 +23,7 @@ class Cart extends CI_Controller {
         }
 
         // Get product sizes
-        $this->db->select('sizes.name, product_sizes.price, product_sizes.id as ps_id');
+        $this->db->select('sizes.id as size_id, sizes.name, product_sizes.price, product_sizes.id as ps_id');
         $this->db->from('product_sizes');
         $this->db->join('sizes', 'sizes.id = product_sizes.size_id');
         $this->db->where('product_sizes.product_id', $product_id);
@@ -39,6 +39,7 @@ class Cart extends CI_Controller {
             $this->db->join('product_addons', 'product_addons.addon_id = addons.id');
             $this->db->where('product_addons.product_id', $product_id);
             $product->addons = $this->db->get()->result();
+            $this->Common_model->attach_size_prices($product->addons);
         } else {
             $product->addons = [];
         }
@@ -84,7 +85,7 @@ class Cart extends CI_Controller {
         }
 
         // Get product sizes
-        $this->db->select('sizes.name, product_sizes.price, product_sizes.id as ps_id');
+        $this->db->select('sizes.id as size_id, sizes.name, product_sizes.price, product_sizes.id as ps_id');
         $this->db->from('product_sizes');
         $this->db->join('sizes', 'sizes.id = product_sizes.size_id');
         $this->db->where('product_sizes.product_id', $product_id);
@@ -100,6 +101,7 @@ class Cart extends CI_Controller {
             $this->db->join('product_addons', 'product_addons.addon_id = addons.id');
             $this->db->where('product_addons.product_id', $product_id);
             $product->addons = $this->db->get()->result();
+            $this->Common_model->attach_size_prices($product->addons);
         } else {
             $product->addons = [];
         }

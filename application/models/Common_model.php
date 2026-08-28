@@ -9,7 +9,7 @@ class Common_model extends CI_Model {
     }
 
     private function check_and_migrate_schema() {
-        if ($this->session && $this->session->userdata('db_schema_migrated')) {
+        if ($this->session && $this->session->userdata('db_schema_migrated_v2')) {
             return;
         }
 
@@ -67,8 +67,19 @@ class Common_model extends CI_Model {
                 }
             }
 
+            // 6. Ensure 'addon_size_prices' table exists
+            if (!$this->db->table_exists('addon_size_prices')) {
+                $this->db->query("CREATE TABLE IF NOT EXISTS addon_size_prices (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    addon_id INT NOT NULL,
+                    size_id INT NOT NULL,
+                    price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                    UNIQUE KEY addon_size (addon_id, size_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+            }
+
             if ($this->session) {
-                $this->session->set_userdata('db_schema_migrated', true);
+                $this->session->set_userdata('db_schema_migrated_v2', true);
             }
         } catch (Exception $e) {
             log_message('error', 'Auto migration exception: ' . $e->getMessage());
@@ -213,6 +224,40 @@ class Common_model extends CI_Model {
     }
 
     /**
+     * Attach size-specific prices to addon objects/arrays
+     */
+    public function attach_size_prices(&$addons) {
+        if (empty($addons)) return;
+        if (!$this->db->table_exists('addon_size_prices')) return;
+
+        foreach ($addons as &$addon) {
+            $addon_id = is_object($addon) ? ($addon->id ?? null) : (isset($addon['id']) ? $addon['id'] : null);
+            if (!$addon_id) continue;
+
+            $prices = $this->db->query("
+                SELECT asp.size_id, asp.price, s.name as size_name 
+                FROM addon_size_prices asp 
+                JOIN sizes s ON s.id = asp.size_id 
+                WHERE asp.addon_id = ?
+            ", [$addon_id])->result();
+
+            $size_prices_map = [];
+            $size_prices_by_name = [];
+            foreach ($prices as $p) {
+                $size_prices_map[$p->size_id] = floatval($p->price);
+                $size_prices_by_name[strtolower(trim($p->size_name))] = floatval($p->price);
+            }
+            if (is_object($addon)) {
+                $addon->size_prices = $size_prices_map;
+                $addon->size_prices_by_name = $size_prices_by_name;
+            } else {
+                $addon['size_prices'] = $size_prices_map;
+                $addon['size_prices_by_name'] = $size_prices_by_name;
+            }
+        }
+    }
+
+    /**
      * Get all addons in a specific addon group
      */
     public function get_addons_in_group($group_id) {
@@ -220,7 +265,9 @@ class Common_model extends CI_Model {
         $this->db->from('addons');
         $this->db->join('addon_group_items', 'addon_group_items.addon_id = addons.id');
         $this->db->where('addon_group_items.group_id', $group_id);
-        return $this->db->get()->result();
+        $addons = $this->db->get()->result();
+        $this->attach_size_prices($addons);
+        return $addons;
     }
     public function get_user_wishlist($user_id) {
         $this->db->select('products.*, categories.name as category_name, COALESCE(subcats.name, "") as subcategory_name, offers.offer_name, wishlists.id as wishlist_id');

@@ -88,12 +88,32 @@
                 </div>
 
                 <div style="margin-bottom:20px;">
-                    <label class="f-label">Price (€) <span style="color:#aaa; font-weight:400;">— optional</span></label>
+                    <label class="f-label">Base Price (€) <span style="color:#aaa; font-weight:400;">— optional fallback</span></label>
                     <input type="number" class="f-input" name="price"
                            step="0.01" min="0"
                            value="<?php echo $addon->price; ?>"
                            placeholder="0.00">
-                    <p class="f-hint">Leave 0 for a free addon.</p>
+                    <p class="f-hint">Default price if size price is not specified.</p>
+                </div>
+
+                <div style="margin-bottom:24px;">
+                    <label class="f-label"><i class="fas fa-expand-alt" style="margin-right:4px; opacity:0.7;"></i> Size-Wise Prices (€) <span style="color:#aaa;font-weight:400;">— optional</span></label>
+                    <?php if (!empty($sizes)): ?>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; background:#f9f9f9; padding:14px; border-radius:10px; border:1px solid #eee;">
+                            <?php foreach ($sizes as $sz): ?>
+                                <?php $val = isset($addon->size_prices[$sz->id]) ? $addon->size_prices[$sz->id] : ''; ?>
+                                <div>
+                                    <label style="font-size:0.8rem; font-weight:600; color:#555; display:block; margin-bottom:4px;"><?php echo htmlspecialchars($sz->name); ?></label>
+                                    <input type="number" class="f-input" name="size_prices[<?php echo $sz->id; ?>]"
+                                           step="0.01" min="0" value="<?php echo ($val !== '') ? $val : ''; ?>"
+                                           placeholder="0.00" style="padding:8px 11px; font-size:0.88rem;">
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <p class="f-hint">Specify prices for specific sizes (e.g. Senior: 0.80, Mega: 0.90).</p>
+                    <?php else: ?>
+                        <p class="f-hint">No sizes configured in system.</p>
+                    <?php endif; ?>
                 </div>
 
                 <div style="margin-bottom:28px;">

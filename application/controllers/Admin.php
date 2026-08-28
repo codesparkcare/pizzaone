@@ -1202,6 +1202,8 @@ class Admin extends CI_Controller
         $this->check_login();
         $data['title'] = 'Manage Addons';
         $data['addons'] = $this->Common_model->get_all('addons');
+        $data['sizes'] = $this->Common_model->get_all('sizes');
+        $this->Common_model->attach_size_prices($data['addons']);
 
         $this->load->view('admin/includes/header', $data);
         $this->load->view('admin/addons', $data);
@@ -1216,7 +1218,21 @@ class Admin extends CI_Controller
             'price' => ($this->input->post('price') !== '' && $this->input->post('price') !== null) ? $this->input->post('price') : 0,
             'type' => $this->input->post('type')
         ];
-        $this->Common_model->insert('addons', $data);
+        $addon_id = $this->Common_model->insert('addons', $data);
+
+        $size_prices = $this->input->post('size_prices');
+        if (!empty($size_prices) && is_array($size_prices)) {
+            foreach ($size_prices as $size_id => $p) {
+                if ($p !== '' && $p !== null) {
+                    $this->Common_model->insert('addon_size_prices', [
+                        'addon_id' => $addon_id,
+                        'size_id' => $size_id,
+                        'price' => floatval($p)
+                    ]);
+                }
+            }
+        }
+
         $this->session->set_flashdata('success', 'Addon added successfully');
         redirect('admin/addons');
     }
@@ -1225,7 +1241,13 @@ class Admin extends CI_Controller
     {
         $this->check_login();
         $data['title'] = 'Edit Addon';
-        $data['addon'] = $this->Common_model->get_single('addons', ['id' => $id]);
+        $addon = $this->Common_model->get_single('addons', ['id' => $id]);
+        if ($addon) {
+            $addon_arr = [$addon];
+            $this->Common_model->attach_size_prices($addon_arr);
+        }
+        $data['addon'] = $addon;
+        $data['sizes'] = $this->Common_model->get_all('sizes');
 
         $this->load->view('admin/includes/header', $data);
         $this->load->view('admin/edit_addon', $data);
@@ -1241,6 +1263,21 @@ class Admin extends CI_Controller
             'type' => $this->input->post('type')
         ];
         $this->Common_model->update('addons', ['id' => $id], $data);
+
+        $this->Common_model->delete('addon_size_prices', ['addon_id' => $id]);
+        $size_prices = $this->input->post('size_prices');
+        if (!empty($size_prices) && is_array($size_prices)) {
+            foreach ($size_prices as $size_id => $p) {
+                if ($p !== '' && $p !== null) {
+                    $this->Common_model->insert('addon_size_prices', [
+                        'addon_id' => $id,
+                        'size_id' => $size_id,
+                        'price' => floatval($p)
+                    ]);
+                }
+            }
+        }
+
         $this->session->set_flashdata('success', 'Addon updated successfully');
         redirect('admin/addons');
     }
@@ -1249,6 +1286,9 @@ class Admin extends CI_Controller
     {
         $this->check_login();
         $this->Common_model->delete('addons', ['id' => $id]);
+        if ($this->db->table_exists('addon_size_prices')) {
+            $this->Common_model->delete('addon_size_prices', ['addon_id' => $id]);
+        }
         $this->session->set_flashdata('success', 'Addon deleted successfully');
         redirect('admin/addons');
     }
@@ -1268,6 +1308,9 @@ class Admin extends CI_Controller
             foreach ($addon_ids as $id) {
                 if (!empty($id)) {
                     $this->Common_model->delete('addons', ['id' => $id]);
+                    if ($this->db->table_exists('addon_size_prices')) {
+                        $this->Common_model->delete('addon_size_prices', ['addon_id' => $id]);
+                    }
                 }
             }
             $this->session->set_flashdata('success', 'Selected addons deleted successfully');
