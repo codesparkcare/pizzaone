@@ -1955,9 +1955,86 @@ class Admin extends CI_Controller
     // ==========================================
     // SMTP Settings Management
     // ==========================================
+    private function ensure_smtp_table_exists()
+    {
+        if (!$this->db->table_exists('smtp_settings')) {
+            $this->load->dbforge();
+            $fields = [
+                'id' => [
+                    'type' => 'INT',
+                    'constraint' => 10,
+                    'unsigned' => TRUE,
+                    'auto_increment' => TRUE
+                ],
+                'smtp_host' => [
+                    'type' => 'VARCHAR',
+                    'constraint' => 255,
+                    'default' => ''
+                ],
+                'smtp_port' => [
+                    'type' => 'INT',
+                    'constraint' => 11,
+                    'default' => 587
+                ],
+                'smtp_crypto' => [
+                    'type' => 'VARCHAR',
+                    'constraint' => 10,
+                    'default' => 'tls'
+                ],
+                'smtp_user' => [
+                    'type' => 'VARCHAR',
+                    'constraint' => 255,
+                    'default' => ''
+                ],
+                'smtp_pass' => [
+                    'type' => 'VARCHAR',
+                    'constraint' => 255,
+                    'default' => ''
+                ],
+                'from_email' => [
+                    'type' => 'VARCHAR',
+                    'constraint' => 255,
+                    'default' => ''
+                ],
+                'from_name' => [
+                    'type' => 'VARCHAR',
+                    'constraint' => 255,
+                    'default' => 'Pizza One'
+                ],
+                'is_active' => [
+                    'type' => 'TINYINT',
+                    'constraint' => 1,
+                    'default' => 1
+                ],
+                'created_at' => [
+                    'type' => 'DATETIME',
+                    'null' => FALSE
+                ],
+                'updated_at' => [
+                    'type' => 'DATETIME',
+                    'null' => TRUE,
+                    'default' => NULL
+                ]
+            ];
+            $this->dbforge->add_key('id', TRUE);
+            $this->dbforge->add_field($fields);
+            $this->dbforge->create_table('smtp_settings', TRUE);
+
+            $this->db->insert('smtp_settings', [
+                'smtp_host' => 'smtp.gmail.com',
+                'smtp_port' => 587,
+                'smtp_crypto' => 'tls',
+                'from_name' => 'Pizza One',
+                'is_active' => 1,
+                'created_at' => date('Y-m-d H:i:s')
+            ]);
+        }
+    }
+
     public function smtp_settings()
     {
         $this->check_login();
+        $this->ensure_smtp_table_exists();
         $data['title'] = 'SMTP Settings';
         
         // Fetch current SMTP settings
@@ -2009,6 +2086,7 @@ class Admin extends CI_Controller
     public function test_smtp()
     {
         $this->check_login();
+        $this->ensure_smtp_table_exists();
         $test_email = $this->input->post('test_email', true);
 
         if (!filter_var($test_email, FILTER_VALIDATE_EMAIL)) {
