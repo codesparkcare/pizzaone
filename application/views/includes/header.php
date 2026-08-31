@@ -62,6 +62,7 @@
             <ul>
                 <li><a href="<?php echo base_url(); ?>"><?php echo t('Accueil', 'Home'); ?></a></li>
                 <li><a href="<?php echo base_url('menu'); ?>"><?php echo t('Menu', 'Menu'); ?></a></li>
+                <li><a href="<?php echo $this->session->userdata('user_id') ? base_url('user/account') : base_url('cart/my_orders'); ?>"><?php echo t('Mes Commandes', 'My Orders'); ?></a></li>
                 <li><a href="<?php echo base_url('about'); ?>"><?php echo t('À propos', 'About Us'); ?></a></li>
                 <li><a href="<?php echo base_url('contact'); ?>"><?php echo t('Contact', 'Contact'); ?></a></li>
             </ul>
@@ -91,10 +92,12 @@
                 <div class="lang-dropdown" id="userDropdown">
                     <?php if ($this->session->userdata('user_id')): ?>
                         <a href="<?php echo base_url('user/account'); ?>"><?php echo t('Mon Compte', 'My Account'); ?></a>
+                        <a href="<?php echo base_url('user/account#orders-section'); ?>"><?php echo t('Mes Commandes', 'My Orders'); ?></a>
                         <a href="<?php echo base_url('user/logout'); ?>"><?php echo t('Déconnexion', 'Logout'); ?></a>
                     <?php else: ?>
                         <a href="<?php echo base_url('user/login'); ?>"><?php echo t('Connexion', 'Login'); ?></a>
                         <a href="<?php echo base_url('user/register'); ?>"><?php echo t('S\'inscrire', 'Register'); ?></a>
+                        <a href="<?php echo base_url('cart/my_orders'); ?>"><?php echo t('Mes Commandes', 'My Orders'); ?></a>
                     <?php endif; ?>
                 </div>
             </div>
