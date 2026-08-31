@@ -58,7 +58,7 @@ html, body {
 .main-header {
     background: var(--glass);
     backdrop-filter: blur(10px);
-    padding: 0.8rem 5%;
+    padding: 0.75rem 3%;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -70,7 +70,7 @@ html, body {
 }
 
 .logo img {
-    height: 60px;
+    height: 52px;
     object-fit: contain;
     transition: var(--transition);
 }
@@ -81,23 +81,35 @@ html, body {
 
 .nav-menu ul {
     display: flex;
+    align-items: center;
     list-style: none;
-    gap: 2rem;
+    gap: 1.25rem;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-menu ul li {
+    display: flex;
+    align-items: center;
 }
 
 .nav-menu ul li a {
     text-decoration: none;
     color: var(--dark);
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
     transition: var(--transition);
     position: relative;
+    padding: 4px 0;
 }
 
 .nav-menu ul li a::after {
     content: '';
     position: absolute;
-    bottom: -5px;
+    bottom: -2px;
     left: 0;
     width: 0;
     height: 2px;
@@ -116,7 +128,7 @@ html, body {
 .header-actions {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
 .mobile-menu-btn {
