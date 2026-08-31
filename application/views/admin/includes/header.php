@@ -308,6 +308,9 @@
         <a href="<?php echo base_url('admin/slider_videos'); ?>" class="<?php echo ($this->uri->segment(2) == 'slider_videos') ? 'active' : ''; ?>">
             <i class="fas fa-video"></i> Slider Videos
         </a>
+        <a href="<?php echo base_url('admin/smtp_settings'); ?>" class="<?php echo ($this->uri->segment(2) == 'smtp_settings') ? 'active' : ''; ?>">
+            <i class="fas fa-envelope-open-text"></i> SMTP Settings
+        </a>
         <a href="<?php echo base_url('admin/logout'); ?>" style="margin-top: 50px; color: #e74c3c;">
             <i class="fas fa-sign-out-alt"></i> Logout
         </a>

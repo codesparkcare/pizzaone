@@ -1951,5 +1951,117 @@ class Admin extends CI_Controller
             'orders' => $orders
         ]);
     }
+
+    // ==========================================
+    // SMTP Settings Management
+    // ==========================================
+    public function smtp_settings()
+    {
+        $this->check_login();
+        $data['title'] = 'SMTP Settings';
+        
+        // Fetch current SMTP settings
+        $smtp = $this->db->get('smtp_settings')->row();
+        if (!$smtp) {
+            $smtp = (object)[
+                'smtp_host' => 'smtp.gmail.com',
+                'smtp_port' => 587,
+                'smtp_crypto' => 'tls',
+                'smtp_user' => '',
+                'smtp_pass' => '',
+                'from_email' => '',
+                'from_name' => 'Pizza One',
+                'is_active' => 1
+            ];
+        }
+        $data['smtp'] = $smtp;
+
+        if ($this->input->server('REQUEST_METHOD') === 'POST') {
+            $update_data = [
+                'smtp_host' => trim($this->input->post('smtp_host', true)),
+                'smtp_port' => intval($this->input->post('smtp_port', true)),
+                'smtp_crypto' => trim($this->input->post('smtp_crypto', true)),
+                'smtp_user' => trim($this->input->post('smtp_user', true)),
+                'smtp_pass' => trim($this->input->post('smtp_pass', true)),
+                'from_email' => trim($this->input->post('from_email', true)),
+                'from_name' => trim($this->input->post('from_name', true)),
+                'is_active' => $this->input->post('is_active') ? 1 : 0,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            $check = $this->db->get('smtp_settings')->row();
+            if ($check) {
+                $this->db->where('id', $check->id)->update('smtp_settings', $update_data);
+            } else {
+                $update_data['created_at'] = date('Y-m-d H:i:s');
+                $this->db->insert('smtp_settings', $update_data);
+            }
+
+            $this->session->set_flashdata('success', 'SMTP settings updated successfully!');
+            redirect('admin/smtp_settings');
+        }
+
+        $this->load->view('admin/includes/header', $data);
+        $this->load->view('admin/smtp_settings', $data);
+        $this->load->view('admin/includes/footer');
+    }
+
+    public function test_smtp()
+    {
+        $this->check_login();
+        $test_email = $this->input->post('test_email', true);
+
+        if (!filter_var($test_email, FILTER_VALIDATE_EMAIL)) {
+            echo json_encode(['status' => 'error', 'message' => 'Invalid test recipient email address.']);
+            return;
+        }
+
+        $smtp = $this->db->get('smtp_settings')->row();
+        if (!$smtp || !$smtp->is_active) {
+            echo json_encode(['status' => 'error', 'message' => 'SMTP is currently disabled or not configured.']);
+            return;
+        }
+
+        // Configure CodeIgniter Email Library with SMTP
+        $config = [
+            'protocol'   => 'smtp',
+            'smtp_host'  => $smtp->smtp_host,
+            'smtp_port'  => $smtp->smtp_port,
+            'smtp_crypto'=> $smtp->smtp_crypto,
+            'smtp_user'  => $smtp->smtp_user,
+            'smtp_pass'  => $smtp->smtp_pass,
+            'mailtype'   => 'html',
+            'charset'    => 'utf-8',
+            'wordwrap'   => TRUE,
+            'newline'    => "\r\n",
+            'crlf'       => "\r\n"
+        ];
+
+        $this->load->library('email');
+        $this->email->initialize($config);
+
+        $from_email = !empty($smtp->from_email) ? $smtp->from_email : $smtp->smtp_user;
+        $from_name  = !empty($smtp->from_name) ? $smtp->from_name : 'Pizza One';
+
+        $this->email->from($from_email, $from_name);
+        $this->email->to($test_email);
+        $this->email->subject('🍕 SMTP Connection Test - Pizza One');
+        
+        $body = "<div style='font-family: Arial, sans-serif; padding: 20px; color: #333;'>";
+        $body .= "<h2 style='color: #e74c3c;'>Pizza One SMTP Test</h2>";
+        $body .= "<p>Congratulations! Your SMTP settings are working properly.</p>";
+        $body .= "<p><strong>Sent at:</strong> " . date('Y-m-d H:i:s') . "</p>";
+        $body .= "<p><strong>Host:</strong> " . htmlspecialchars($smtp->smtp_host) . ":" . $smtp->smtp_port . "</p>";
+        $body .= "</div>";
+
+        $this->email->message($body);
+
+        if ($this->email->send()) {
+            echo json_encode(['status' => 'success', 'message' => 'Test email sent successfully to ' . $test_email]);
+        } else {
+            $debugger = $this->email->print_debugger(['headers']);
+            echo json_encode(['status' => 'error', 'message' => 'Failed to send email. Error: ' . strip_tags($debugger)]);
+        }
+    }
 }
 ?>
