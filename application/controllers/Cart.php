@@ -420,6 +420,7 @@ class Cart extends CI_Controller {
         $order_data = [
             'order_type'      => $order_type,
             'shop_id'         => $shop_id,
+            'user_id'         => $this->session->userdata('user_id') ?: null,
             'customer_name'   => $customer_name,
             'customer_phone'  => $customer_phone,
             'customer_address'=> $customer_addr ?? '',
@@ -456,6 +457,40 @@ class Cart extends CI_Controller {
         $order = $this->session->userdata('last_order');
         if (!$order) { redirect('menu'); }
 
+        // Test WhatsApp target number provided by user (+91 9790587155)
+        $test_whatsapp_number = '919790587155';
+        
+        $order_id = $order['id'] ?? 'N/A';
+        $shop_name = (isset($order['shop']) && is_object($order['shop'])) ? $order['shop']->name : 'Pizza One';
+        $order_type = ($order['order_type'] === 'collect') ? t('À emporter', 'Collect') : t('Livraison', 'Delivery');
+        $payment = ($order['payment_method'] === 'cash') ? t('Espèces', 'Cash') : t('Carte bancaire', 'Credit / Debit Card');
+        
+        $msg = "🍕 *NOUVELLE COMMANDE #" . $order_id . "*\n";
+        $msg .= "-----------------------------\n";
+        $msg .= "📍 *Magasin:* " . $shop_name . "\n";
+        $msg .= "👤 *Nom:* " . $order['customer_name'] . "\n";
+        $msg .= "📞 *Téléphone:* " . $order['customer_phone'] . "\n";
+        $msg .= "🛵 *Type:* " . $order_type . "\n";
+        if (!empty($order['customer_address'])) {
+            $msg .= "🏠 *Adresse:* " . $order['customer_address'] . "\n";
+        }
+        $msg .= "💳 *Paiement:* " . $payment . "\n";
+        if (!empty($order['notes'])) {
+            $msg .= "📝 *Notes:* " . $order['notes'] . "\n";
+        }
+        $msg .= "\n📋 *Articles:*\n";
+        
+        if (!empty($order['cart_items'])) {
+            foreach ($order['cart_items'] as $item) {
+                $msg .= "• " . $item['quantity'] . "x " . $item['product_name'] . " (€" . number_format($item['item_total'], 2) . ")\n";
+            }
+        }
+        
+        $msg .= "\n💰 *TOTAL:* €" . number_format($order['total'], 2) . "\n";
+        $msg .= "-----------------------------";
+
+        $data['whatsapp_url'] = 'https://api.whatsapp.com/send?phone=' . $test_whatsapp_number . '&text=' . urlencode($msg);
+        $data['whatsapp_phone'] = '+91 9790587155';
         $data['order'] = $order;
         $data['title'] = t('Commande confirmée !', 'Order Confirmed!');
 

@@ -1826,46 +1826,81 @@ body {
     }
 }
 
-/* Floating Call Button */
+/* Floating Call Button - Icon Only Default, Expands on Click/Hover */
 .floating-call-btn {
     position: fixed;
     bottom: 30px;
     right: 30px;
-    background: var(--accent);
-    /* Basil Green for call */
-    color: var(--white);
-    padding: 15px 20px;
+    width: 56px;
+    height: 56px;
     border-radius: 50px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: center;
+    color: #ffffff;
     text-decoration: none;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     z-index: 9999;
-    transition: var(--transition);
-    font-weight: 600;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    overflow: hidden;
+    padding: 0 16px;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.floating-call-btn.shop-1-call {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    box-shadow: 0 8px 25px rgba(231, 76, 60, 0.45);
+}
+
+.floating-call-btn.shop-1-call:hover,
+.floating-call-btn.shop-1-call.expanded {
+    background: linear-gradient(135deg, #d63031, #b71540);
+    box-shadow: 0 12px 35px rgba(231, 76, 60, 0.65);
+}
+
+.floating-call-btn.shop-2-call {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.45);
+}
+
+.floating-call-btn.shop-2-call:hover,
+.floating-call-btn.shop-2-call.expanded {
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    box-shadow: 0 12px 35px rgba(37, 99, 235, 0.65);
 }
 
 .floating-call-btn i {
-    font-size: 1.2rem;
-    animation: phoneShake 2s infinite;
-}
-
-.floating-call-btn:hover {
-    background: var(--primary);
-    transform: translateY(-5px) scale(1.05);
-    box-shadow: 0 15px 40px rgba(211, 47, 47, 0.4);
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    animation: phoneShake 2.5s infinite;
 }
 
 .floating-call-btn .btn-text {
     max-width: 0;
+    opacity: 0;
     overflow: hidden;
     white-space: nowrap;
-    transition: all 0.5s ease;
+    transition: max-width 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-left: 0;
 }
 
-.floating-call-btn:hover .btn-text {
-    max-width: 200px;
+.floating-call-btn:hover,
+.floating-call-btn.expanded {
+    width: auto;
+    padding: 0 22px;
+    height: 54px;
+    border-radius: 50px;
+}
+
+.floating-call-btn:hover .btn-text,
+.floating-call-btn.expanded .btn-text {
+    max-width: 220px;
+    opacity: 1;
+    margin-left: 10px;
 }
 
 @keyframes phoneShake {
@@ -1898,11 +1933,18 @@ body {
     .floating-call-btn {
         bottom: 20px;
         right: 20px;
-        padding: 15px;
+        width: 50px;
+        height: 50px;
+    }
+
+    .floating-call-btn:hover,
+    .floating-call-btn.expanded {
+        height: 48px;
+        padding: 0 18px;
     }
 
     .floating-call-btn .btn-text {
-        display: none;
+        font-size: 0.88rem;
     }
 }
 

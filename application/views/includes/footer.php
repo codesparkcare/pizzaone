@@ -123,9 +123,22 @@
     </div>
 </footer>
 
-<a href="tel:+33134199456" class="floating-call-btn" title="Appelez-nous">
+<?php
+$selected_shop_id = $this->session->userdata('selected_shop_id');
+if ($selected_shop_id == '2') {
+    $call_phone_num = '+33 1 34 14 15 16';
+    $call_tel_href = 'tel:0134141516';
+    $call_btn_theme_class = 'shop-2-call';
+} else {
+    // Default to Villiers-le-bel (Shop 1)
+    $call_phone_num = '+33 1 34 19 94 56';
+    $call_tel_href = 'tel:0134199456';
+    $call_btn_theme_class = 'shop-1-call';
+}
+?>
+<a href="<?php echo $call_tel_href; ?>" class="floating-call-btn <?php echo $call_btn_theme_class; ?>" id="floatingCallBtn" title="<?php echo t('Appelez-nous', 'Call Us'); ?>">
     <i class="fas fa-phone-alt"></i>
-    <span class="btn-text">+33 1 34 19 94 56</span>
+    <span class="btn-text" id="floatingCallText"><?php echo $call_phone_num; ?></span>
 </a>
 
 <script type="text/javascript">
@@ -133,6 +146,24 @@
     window.t = function (fr, en) {
         return window.currentLang === 'en' ? (en || fr) : fr;
     };
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var callBtn = document.getElementById('floatingCallBtn');
+        if (callBtn) {
+            callBtn.addEventListener('click', function (e) {
+                if (!callBtn.classList.contains('expanded')) {
+                    e.preventDefault();
+                    callBtn.classList.add('expanded');
+                }
+            });
+
+            document.addEventListener('click', function (e) {
+                if (callBtn && !callBtn.contains(e.target)) {
+                    callBtn.classList.remove('expanded');
+                }
+            });
+        }
+    });
 
     function googleTranslateElementInit() {
         new google.translate.TranslateElement({

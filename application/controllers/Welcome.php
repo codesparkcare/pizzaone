@@ -130,20 +130,28 @@ class Welcome extends CI_Controller {
     public function set_location()
     {
         $shop_id = $this->input->post('shop_id');
-        if ($shop_id == '1') {
-            $shop_name = 'Villiers-le-bel';
-        } elseif ($shop_id == '2') {
+        $shop = $this->Common_model->get_single('shops', ['id' => $shop_id]);
+
+        if ($shop_id == '2') {
             $shop_name = 'Le Plessis-Bouchard';
+            $shop_phone = ($shop && !empty($shop->phone)) ? $shop->phone : '01 34 14 15 16';
         } else {
             $shop_id = '1';
             $shop_name = 'Villiers-le-bel';
+            $shop_phone = ($shop && !empty($shop->phone)) ? $shop->phone : '01 34 19 94 56';
         }
 
         $this->session->set_userdata('selected_shop_id', $shop_id);
         $this->session->set_userdata('selected_shop_name', $shop_name);
+        $this->session->set_userdata('selected_shop_phone', $shop_phone);
 
         if ($this->input->is_ajax_request()) {
-            echo json_encode(['status' => 'success', 'shop_id' => $shop_id, 'shop_name' => $shop_name]);
+            echo json_encode([
+                'status' => 'success',
+                'shop_id' => $shop_id,
+                'shop_name' => $shop_name,
+                'shop_phone' => $shop_phone
+            ]);
         } else {
             $redirect = $this->input->server('HTTP_REFERER') ? $this->input->server('HTTP_REFERER') : base_url();
             redirect($redirect);

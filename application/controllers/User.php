@@ -89,9 +89,40 @@ class User extends CI_Controller {
         }
         
         $user_id = $this->session->userdata('user_id');
-        $data['user'] = $this->User_model->get_user_by_id($user_id);
+        $user = $this->User_model->get_user_by_id($user_id);
+        $data['user'] = $user;
 
-        $this->load->view('includes/header');
+        // Fetch user's orders by user_id OR matching customer_phone
+        $this->db->order_by('id', 'DESC');
+        if (!empty($user->phone)) {
+            $clean_phone = preg_replace('/[^0-9]/', '', $user->phone);
+            $alt_phone = (substr($clean_phone, 0, 1) === '0') ? substr($clean_phone, 1) : '0' . $clean_phone;
+
+            $this->db->group_start();
+            $this->db->where('user_id', $user_id);
+            $this->db->or_where('customer_phone', $user->phone);
+            $this->db->or_where('customer_phone', $clean_phone);
+            $this->db->or_where('customer_phone', $alt_phone);
+            $this->db->group_end();
+        } else {
+            $this->db->where('user_id', $user_id);
+        }
+        $orders = $this->db->get('orders')->result();
+
+        // Get shop names for orders
+        foreach ($orders as &$ord) {
+            if ($ord->shop_id) {
+                $shop = $this->db->get_where('shops', ['id' => $ord->shop_id])->row();
+                $ord->shop_name = $shop ? $shop->name : ($ord->shop_id == 2 ? 'Le Plessis-Bouchard' : 'Villiers-le-bel');
+            } else {
+                $ord->shop_name = 'Villiers-le-bel';
+            }
+        }
+
+        $data['orders'] = $orders;
+        $data['title'] = t('Mon Compte & Mes Commandes', 'My Account & Orders');
+
+        $this->load->view('includes/header', $data);
         $this->load->view('user/account', $data);
         $this->load->view('includes/footer');
     }
