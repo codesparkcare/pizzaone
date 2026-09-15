@@ -120,8 +120,8 @@
                 <p class="crafted-by"><?php echo t('Fait avec', 'Made with'); ?> <i class="fas fa-heart" style="color: #e74c3c;"></i> <?php echo t('pour les amateurs de pizza', 'for pizza lovers'); ?></p>
             </div>
 
-            <!-- Developer Attribution & Services -->
-            <div class="footer-developer-box" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.06); text-align: center;">
+            <!-- Developer Attribution & Services (Hidden visually for clean UI, preserved for SEO) -->
+            <div class="footer-developer-box" style="display: none;">
                 <p style="margin: 0 0 5px 0; font-size: 0.88rem; color: #d0d4dc;">
                     <strong>CODESPARK SOFTWARE DEVELOPMENT</strong> — <a href="https://codespark.online/" target="_blank" rel="noopener noreferrer" style="color: #ff4757; text-decoration: none; font-weight: 600;">https://codespark.online/</a>
                 </p>
