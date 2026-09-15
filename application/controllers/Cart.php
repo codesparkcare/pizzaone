@@ -358,10 +358,21 @@ class Cart extends CI_Controller {
         // Get all active shops
         $shops = $this->db->get_where('shops', ['is_active' => 1])->result();
 
+        $user_id = $this->session->userdata('user_id');
+        $user = null;
+        $user_addresses = [];
+        if ($user_id) {
+            $this->load->model('User_model');
+            $user = $this->User_model->get_user_by_id($user_id);
+            $user_addresses = $this->Common_model->get_user_addresses($user_id);
+        }
+
         $data['cart_items']      = $cart;
         $data['subtotal']        = $subtotal;
         $data['shops']           = $shops;
         $data['payment_methods'] = $this->Common_model->get_active_payment_methods();
+        $data['user']            = $user;
+        $data['user_addresses']  = $user_addresses;
         $data['title']           = t('Commande', 'Checkout');
 
         $this->load->view('includes/header', $data);
@@ -396,13 +407,16 @@ class Cart extends CI_Controller {
             redirect('cart');
         }
 
-        $order_type    = $this->input->post('order_type');   // collect or delivery
-        $shop_id       = $this->input->post('shop_id');
-        $customer_name = $this->input->post('customer_name', true);
-        $customer_phone= $this->input->post('customer_phone', true);
-        $customer_addr = $this->input->post('customer_address', true);
-        $notes         = $this->input->post('notes', true);
-        $payment       = $this->input->post('payment_method', true);
+        $order_type          = $this->input->post('order_type');   // collect or delivery
+        $shop_id             = $this->input->post('shop_id');
+        $customer_name       = $this->input->post('customer_name', true);
+        $customer_phone      = $this->input->post('customer_phone', true);
+        $customer_addr       = $this->input->post('customer_address', true);
+        $selected_address_id = $this->input->post('selected_address_id');
+        $save_new_address    = $this->input->post('save_new_address');
+        $address_label       = $this->input->post('address_label', true) ?: 'Maison';
+        $notes               = $this->input->post('notes', true);
+        $payment             = $this->input->post('payment_method', true);
 
         // Basic validation
         if (!$customer_name || !$customer_phone || !$order_type || !$payment) {
@@ -417,6 +431,36 @@ class Cart extends CI_Controller {
         if (!in_array($payment, $allowed_payment_keys)) {
             $this->session->set_flashdata('checkout_error', t('Ce moyen de paiement n\'est pas disponible actuellement.', 'This payment method is currently disabled.'));
             redirect('cart/checkout');
+        }
+
+        // Determine final delivery address
+        $user_id = $this->session->userdata('user_id');
+        $shop = $shop_id ? $this->db->get_where('shops', ['id' => $shop_id])->row() : null;
+
+        if ($order_type === 'delivery') {
+            if ($user_id && !empty($selected_address_id) && $selected_address_id !== 'new') {
+                $saved = $this->db->get_where('user_addresses', ['id' => intval($selected_address_id), 'user_id' => $user_id])->row();
+                if ($saved) {
+                    $customer_addr = $saved->address;
+                }
+            } else {
+                $customer_addr = trim($customer_addr);
+                // Save new address to account if requested
+                if ($user_id && !empty($customer_addr) && $save_new_address) {
+                    $this->Common_model->add_user_address($user_id, [
+                        'label'   => $address_label,
+                        'address' => $customer_addr
+                    ]);
+                }
+            }
+
+            if (empty($customer_addr)) {
+                $this->session->set_flashdata('checkout_error', t('Veuillez indiquer une adresse de livraison.', 'Please provide a delivery address.'));
+                redirect('cart/checkout');
+            }
+        } else {
+            // Collect at store
+            $customer_addr = $shop ? ('Retrait : ' . $shop->name . ' (' . $shop->address . ')') : 'Retrait en magasin';
         }
 
         $subtotal = 0;

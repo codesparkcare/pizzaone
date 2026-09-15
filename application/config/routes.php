@@ -86,6 +86,9 @@ $route['menu/(:any)'] = 'welcome/menu/$1';
 $route['search'] = 'welcome/search';
 $route['api/product-details/(:any)'] = 'welcome/get_product_details/$1';
 $route['wishlist'] = 'user/wishlist';
+$route['user/add_address'] = 'user/add_address';
+$route['user/delete_address/(:any)'] = 'user/delete_address/$1';
+$route['user/set_default_address/(:any)'] = 'user/set_default_address/$1';
 
 // Cart routes
 $route['cart/add/(:any)'] = 'cart/add/$1';

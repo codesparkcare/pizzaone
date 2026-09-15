@@ -158,13 +158,96 @@
                             </div>
                         </div>
 
-                        <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 0 0 1rem 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem;">
-                            <i class="fas fa-map-marked-alt" style="color: #e74c3c; margin-right: 8px;"></i>
-                            <?php echo t('Adresse de livraison', 'Delivery Address'); ?>
-                        </h3>
-                        <div style="background: #f8fafc; padding: 1.25rem; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 0.95rem; color: #334155; line-height: 1.6;">
-                            <?= $user->address ? nl2br(htmlspecialchars($user->address)) : t('Aucune adresse de livraison enregistrée.', 'No delivery address saved.'); ?>
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin: 0 0 1rem 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem; flex-wrap: wrap; gap: 10px;">
+                            <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0;">
+                                <i class="fas fa-map-marked-alt" style="color: #e74c3c; margin-right: 8px;"></i>
+                                <?php echo t('Mes adresses de livraison', 'My Delivery Addresses'); ?>
+                            </h3>
+                            <button type="button" onclick="document.getElementById('addAddressFormBlock').style.display = (document.getElementById('addAddressFormBlock').style.display === 'none' ? 'block' : 'none');" style="background: #e74c3c; color: #ffffff; border: none; padding: 8px 18px; border-radius: 50px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                <i class="fas fa-plus"></i> <?php echo t('Ajouter une adresse', 'Add New Address'); ?>
+                            </button>
                         </div>
+
+                        <!-- Add New Address Form (collapsible) -->
+                        <div id="addAddressFormBlock" style="display: none; background: #fff5f5; border: 1px solid #fecaca; border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem;">
+                            <h4 style="margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 700; color: #991b1b;">
+                                <?php echo t('Nouvelle adresse de livraison', 'New Delivery Address'); ?>
+                            </h4>
+                            <form action="<?php echo base_url('user/add_address'); ?>" method="POST">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px;">
+                                    <div>
+                                        <label style="font-size: 0.82rem; font-weight: 600; color: #374151; display: block; margin-bottom: 4px;"><?php echo t('Libellé (ex: Maison, Bureau)', 'Label (e.g. Home, Work)'); ?></label>
+                                        <input type="text" name="label" placeholder="<?php echo t('Maison, Bureau, etc.', 'Home, Work, etc.'); ?>" required style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; box-sizing: border-box;">
+                                    </div>
+                                    <div>
+                                        <label style="font-size: 0.82rem; font-weight: 600; color: #374151; display: block; margin-bottom: 4px;"><?php echo t('Ville (optionnel)', 'City (optional)'); ?></label>
+                                        <input type="text" name="city" placeholder="<?php echo t('ex: Villiers-le-Bel', 'e.g. Paris'); ?>" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; box-sizing: border-box;">
+                                    </div>
+                                </div>
+                                <div style="margin-bottom: 12px;">
+                                    <label style="font-size: 0.82rem; font-weight: 600; color: #374151; display: block; margin-bottom: 4px;"><?php echo t('Adresse complète', 'Full Address'); ?> <span style="color: #ef4444;">*</span></label>
+                                    <textarea name="address" required rows="2" placeholder="<?php echo t('Numéro, rue, bâtiment, code postal...', 'Street name, building, apartment, postal code...'); ?>" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; box-sizing: border-box; font-family: inherit;"></textarea>
+                                </div>
+                                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                                    <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #4b5563; cursor: pointer;">
+                                        <input type="checkbox" name="is_default" value="1" style="accent-color: #e74c3c;">
+                                        <?php echo t('Définir comme adresse principale', 'Set as default address'); ?>
+                                    </label>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button type="button" onclick="document.getElementById('addAddressFormBlock').style.display='none';" style="background: #e2e8f0; border: none; padding: 8px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; color: #475569;">
+                                            <?php echo t('Annuler', 'Cancel'); ?>
+                                        </button>
+                                        <button type="submit" style="background: #e74c3c; color: #ffffff; border: none; padding: 8px 20px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                                            <?php echo t('Enregistrer l\'adresse', 'Save Address'); ?>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Saved Addresses Cards Grid -->
+                        <?php if (!empty($addresses) && is_array($addresses)): ?>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
+                                <?php foreach ($addresses as $addr): ?>
+                                    <div style="background: #f8fafc; border: 1px solid <?php echo $addr->is_default ? '#e74c3c' : '#e2e8f0'; ?>; border-radius: 12px; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between; transition: all 0.2s ease;">
+                                        <div>
+                                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                                <span style="background: <?php echo $addr->is_default ? '#fee2e2' : '#e2e8f0'; ?>; color: <?php echo $addr->is_default ? '#b91c1c' : '#475569'; ?>; padding: 3px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; text-transform: uppercase;">
+                                                    <i class="fas fa-tag"></i> <?= htmlspecialchars($addr->label ?: 'Maison'); ?>
+                                                </span>
+                                                <?php if ($addr->is_default): ?>
+                                                    <span style="font-size: 0.75rem; color: #16a34a; font-weight: 700;">
+                                                        <i class="fas fa-check-circle"></i> <?php echo t('Par défaut', 'Default'); ?>
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
+                                            <p style="margin: 0 0 12px 0; font-size: 0.92rem; color: #334155; line-height: 1.5;">
+                                                <?= nl2br(htmlspecialchars($addr->address)); ?>
+                                            </p>
+                                        </div>
+                                        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; border-top: 1px dashed #cbd5e1; padding-top: 10px;">
+                                            <?php if (!$addr->is_default): ?>
+                                                <a href="<?= base_url('user/set_default_address/' . $addr->id); ?>" style="font-size: 0.8rem; color: #2563eb; text-decoration: none; font-weight: 600;">
+                                                    <?php echo t('Définir par défaut', 'Set Default'); ?>
+                                                </a>
+                                                <span style="color: #cbd5e1;">|</span>
+                                            <?php endif; ?>
+                                            <a href="<?= base_url('user/delete_address/' . $addr->id); ?>" onclick="return confirm('<?php echo t('Supprimer cette adresse ?', 'Delete this address?'); ?>');" style="font-size: 0.8rem; color: #ef4444; text-decoration: none; font-weight: 600;">
+                                                <i class="fas fa-trash-alt"></i> <?php echo t('Supprimer', 'Delete'); ?>
+                                            </a>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php else: ?>
+                            <div style="background: #f8fafc; padding: 1.5rem; border-radius: 12px; border: 1px dashed #cbd5e1; text-align: center; color: #64748b;">
+                                <i class="fas fa-map-marker-alt" style="font-size: 1.8rem; color: #cbd5e1; margin-bottom: 8px; display: block;"></i>
+                                <p style="margin: 0 0 8px 0; font-size: 0.95rem;"><?php echo t('Aucune adresse de livraison enregistrée.', 'No delivery address saved.'); ?></p>
+                                <button type="button" onclick="document.getElementById('addAddressFormBlock').style.display='block';" style="background: #e74c3c; color: #ffffff; border: none; padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                                    <?php echo t('Ajouter ma première adresse', 'Add My First Address'); ?>
+                                </button>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 

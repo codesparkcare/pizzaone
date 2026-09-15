@@ -83,12 +83,106 @@ class Common_model extends CI_Model {
             // 8. Ensure payment_settings table exists
             $this->ensure_payment_settings_table();
 
+            // 9. Ensure user_addresses table exists
+            $this->ensure_user_addresses_table();
+
             if ($this->session) {
-                $this->session->set_userdata('db_schema_migrated_v4', true);
+                $this->session->set_userdata('db_schema_migrated_v5', true);
             }
         } catch (Exception $e) {
             log_message('error', 'Auto migration exception: ' . $e->getMessage());
         }
+    }
+
+    public function ensure_user_addresses_table() {
+        if (!$this->db->table_exists('user_addresses')) {
+            $this->db->query("CREATE TABLE IF NOT EXISTS user_addresses (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                label VARCHAR(50) DEFAULT 'Maison',
+                address TEXT NOT NULL,
+                city VARCHAR(100) DEFAULT NULL,
+                postal_code VARCHAR(20) DEFAULT NULL,
+                is_default TINYINT(1) DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                KEY user_id (user_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+            // Migrate existing addresses from users table
+            $this->db->query("INSERT INTO user_addresses (user_id, label, address, is_default)
+                SELECT u.id, 'Maison', u.address, 1
+                FROM users u
+                WHERE u.address IS NOT NULL AND TRIM(u.address) != ''
+                  AND NOT EXISTS (
+                    SELECT 1 FROM user_addresses ua WHERE ua.user_id = u.id
+                  );");
+        }
+    }
+
+    public function get_user_addresses($user_id) {
+        $this->ensure_user_addresses_table();
+        return $this->db->where('user_id', $user_id)->order_by('is_default', 'DESC')->order_by('id', 'DESC')->get('user_addresses')->result();
+    }
+
+    public function add_user_address($user_id, $data) {
+        $this->ensure_user_addresses_table();
+        // If this is set as default or is the user's first address, set is_default = 1
+        $count = $this->db->where('user_id', $user_id)->count_all_results('user_addresses');
+        $is_default = (!empty($data['is_default']) || $count === 0) ? 1 : 0;
+        
+        if ($is_default) {
+            $this->db->where('user_id', $user_id)->update('user_addresses', ['is_default' => 0]);
+        }
+
+        $insert_data = [
+            'user_id'     => $user_id,
+            'label'       => !empty($data['label']) ? trim($data['label']) : 'Maison',
+            'address'     => trim($data['address']),
+            'city'        => !empty($data['city']) ? trim($data['city']) : null,
+            'postal_code' => !empty($data['postal_code']) ? trim($data['postal_code']) : null,
+            'is_default'  => $is_default,
+        ];
+        $this->db->insert('user_addresses', $insert_data);
+        $new_id = $this->db->insert_id();
+
+        // Also sync to users.address if default
+        if ($is_default) {
+            $this->db->where('id', $user_id)->update('users', ['address' => trim($data['address'])]);
+        }
+
+        return $new_id;
+    }
+
+    public function delete_user_address($user_id, $address_id) {
+        $this->ensure_user_addresses_table();
+        $addr = $this->db->get_where('user_addresses', ['id' => $address_id, 'user_id' => $user_id])->row();
+        if ($addr) {
+            $was_default = $addr->is_default;
+            $this->db->delete('user_addresses', ['id' => $address_id, 'user_id' => $user_id]);
+            
+            // If the deleted address was default, promote another one
+            if ($was_default) {
+                $next = $this->db->where('user_id', $user_id)->order_by('id', 'DESC')->get('user_addresses')->row();
+                if ($next) {
+                    $this->db->where('id', $next->id)->update('user_addresses', ['is_default' => 1]);
+                    $this->db->where('id', $user_id)->update('users', ['address' => $next->address]);
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public function set_default_user_address($user_id, $address_id) {
+        $this->ensure_user_addresses_table();
+        $addr = $this->db->get_where('user_addresses', ['id' => $address_id, 'user_id' => $user_id])->row();
+        if ($addr) {
+            $this->db->where('user_id', $user_id)->update('user_addresses', ['is_default' => 0]);
+            $this->db->where('id', $address_id)->update('user_addresses', ['is_default' => 1]);
+            $this->db->where('id', $user_id)->update('users', ['address' => $addr->address]);
+            return true;
+        }
+        return false;
     }
 
     public function ensure_wishlists_table() {

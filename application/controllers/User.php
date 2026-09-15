@@ -120,11 +120,92 @@ class User extends CI_Controller {
         }
 
         $data['orders'] = $orders;
+        $data['addresses'] = $this->Common_model->get_user_addresses($user_id);
         $data['title'] = t('Mon Compte & Mes Commandes', 'My Account & Orders');
 
         $this->load->view('includes/header', $data);
         $this->load->view('user/account', $data);
         $this->load->view('includes/footer');
+    }
+
+    public function add_address() {
+        if (!$this->session->userdata('user_id')) {
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'error', 'message' => 'Please login']);
+                return;
+            }
+            redirect('user/login');
+        }
+
+        $user_id = $this->session->userdata('user_id');
+        $label = $this->input->post('label', true) ?: 'Maison';
+        $address = $this->input->post('address', true);
+        $city = $this->input->post('city', true);
+        $postal_code = $this->input->post('postal_code', true);
+        $is_default = $this->input->post('is_default') ? 1 : 0;
+
+        if (empty(trim($address))) {
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'error', 'message' => t('L\'adresse ne peut pas être vide.', 'Address cannot be empty.')]);
+                return;
+            }
+            $this->session->set_flashdata('error', t('L\'adresse ne peut pas être vide.', 'Address cannot be empty.'));
+            redirect('user/account#profile-section');
+        }
+
+        $new_id = $this->Common_model->add_user_address($user_id, [
+            'label'       => $label,
+            'address'     => $address,
+            'city'        => $city,
+            'postal_code' => $postal_code,
+            'is_default'  => $is_default
+        ]);
+
+        if ($this->input->is_ajax_request()) {
+            $addresses = $this->Common_model->get_user_addresses($user_id);
+            echo json_encode([
+                'status' => 'success',
+                'address_id' => $new_id,
+                'address' => trim($address),
+                'label' => $label,
+                'addresses' => $addresses,
+                'message' => t('Adresse enregistrée avec succès !', 'Address saved successfully!')
+            ]);
+            return;
+        }
+
+        $this->session->set_flashdata('success', t('Adresse ajoutée avec succès !', 'Address added successfully!'));
+        redirect('user/account#profile-section');
+    }
+
+    public function delete_address($id) {
+        if (!$this->session->userdata('user_id')) {
+            redirect('user/login');
+        }
+        $user_id = $this->session->userdata('user_id');
+        $this->Common_model->delete_user_address($user_id, intval($id));
+
+        if ($this->input->is_ajax_request()) {
+            echo json_encode(['status' => 'success', 'message' => t('Adresse supprimée.', 'Address removed.')]);
+            return;
+        }
+        $this->session->set_flashdata('success', t('Adresse supprimée.', 'Address removed.'));
+        redirect('user/account#profile-section');
+    }
+
+    public function set_default_address($id) {
+        if (!$this->session->userdata('user_id')) {
+            redirect('user/login');
+        }
+        $user_id = $this->session->userdata('user_id');
+        $this->Common_model->set_default_user_address($user_id, intval($id));
+
+        if ($this->input->is_ajax_request()) {
+            echo json_encode(['status' => 'success', 'message' => t('Adresse par défaut mise à jour.', 'Default address updated.')]);
+            return;
+        }
+        $this->session->set_flashdata('success', t('Adresse par défaut mise à jour.', 'Default address updated.'));
+        redirect('user/account#profile-section');
     }
 
     public function logout() {
@@ -169,3 +250,4 @@ class User extends CI_Controller {
         }
     }
 }
+?>
