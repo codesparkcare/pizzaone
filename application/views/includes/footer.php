@@ -110,7 +110,7 @@
 
         <div class="footer-bottom">
             <div class="footer-bottom-content">
-                <p>&copy; <?php echo date('Y'); ?> <a href="https://www.codespark.online" target="_blank">CODESPARK</a>
+                <p>&copy; <?php echo date('Y'); ?> <a href="https://codespark.online/" target="_blank" rel="noopener noreferrer" style="color: inherit; font-weight: 700;">CODESPARK SOFTWARE DEVELOPMENT</a>.
                     <?php echo t('Tous droits réservés.', 'All rights reserved.'); ?></p>
                 <div class="footer-bottom-links">
                     <a href="#"><?php echo t('Politique de confidentialité', 'Privacy Policy'); ?></a>
@@ -118,6 +118,19 @@
                     <span class="disclaimer-text" style="opacity: 0.75; font-size: 0.82rem; font-style: italic; color: #8b949e;"><?php echo t('* Visuels non contractuels', '* Non-binding visuals'); ?></span>
                 </div>
                 <p class="crafted-by"><?php echo t('Fait avec', 'Made with'); ?> <i class="fas fa-heart" style="color: #e74c3c;"></i> <?php echo t('pour les amateurs de pizza', 'for pizza lovers'); ?></p>
+            </div>
+
+            <!-- Developer Attribution & Services -->
+            <div class="footer-developer-box" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.06); text-align: center;">
+                <p style="margin: 0 0 5px 0; font-size: 0.88rem; color: #d0d4dc;">
+                    <strong>CODESPARK SOFTWARE DEVELOPMENT</strong> — <a href="https://codespark.online/" target="_blank" rel="noopener noreferrer" style="color: #ff4757; text-decoration: none; font-weight: 600;">https://codespark.online/</a>
+                </p>
+                <p style="margin: 0; font-size: 0.8rem; color: #9aa0a6; line-height: 1.5; max-width: 750px; margin-left: auto; margin-right: auto;">
+                    <?php echo t(
+                        'Fourniture de développement de logiciels, conception de sites Web sur mesure et applications mobiles à Tirunelveli. Nous proposons également une formation de stage gratuite pour les étudiants universitaires.',
+                        'Providing software development, custom website design, and mobile apps in Tirunelveli. We also offer free internship training for college students.'
+                    ); ?>
+                </p>
             </div>
         </div>
     </div>

@@ -5,6 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pizza One - Pizzas artisanales</title>
+    <!-- SEO & Developer Meta Tags -->
+    <meta name="author" content="CODESPARK SOFTWARE DEVELOPMENT - https://codespark.online/">
+    <meta name="description" content="CODESPARK SOFTWARE DEVELOPMENT: Providing software development, custom website design, and mobile apps in Tirunelveli. We also offer free internship training for college students. - Pizza One, pizzas artisanales.">
+    <meta name="keywords" content="CODESPARK SOFTWARE DEVELOPMENT, software development Tirunelveli, custom website design, mobile apps, free internship training for college students, Pizza One, pizza restaurant">
+    <meta property="og:title" content="Pizza One - Pizzas artisanales | Developed by CODESPARK SOFTWARE DEVELOPMENT">
+    <meta property="og:description" content="Providing software development, custom website design, and mobile apps in Tirunelveli. We also offer free internship training for college students.">
+    <meta property="og:url" content="https://codespark.online/">
+    <meta name="designer" content="CODESPARK SOFTWARE DEVELOPMENT">
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Lobster&display=swap"
         rel="stylesheet">
@@ -22,6 +31,16 @@
     <div id="pizza-loader" class="pizza-loader-container">
         <div class="pizza-slice"></div>
     </div>
+
+    <!-- Developer Topbar -->
+    <div class="header-topbar" style="background: #111111; color: #b0b0b0; font-size: 0.78rem; padding: 6px 15px; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Poppins', sans-serif;">
+        <div class="container" style="display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; text-align: center;">
+            <span><?php echo t('Développé par', 'Developed by'); ?> <a href="https://codespark.online/" target="_blank" rel="noopener noreferrer" style="color: #ff4757; font-weight: 700; text-decoration: none;">CODESPARK SOFTWARE DEVELOPMENT</a></span>
+            <span style="opacity: 0.4;">|</span>
+            <span style="opacity: 0.88;"><?php echo t('Logiciels, Web & Applications mobiles à Tirunelveli • Stage gratuit pour étudiants', 'Software development, custom website design & mobile apps in Tirunelveli • Free internship training for college students'); ?></span>
+        </div>
+    </div>
+
     <header class="main-header">
         <div class="header-left" style="display: flex; align-items: center; gap: 15px;">
             <button class="mobile-menu-btn" id="mobileMenuBtn" style="margin: 0 !important;">
