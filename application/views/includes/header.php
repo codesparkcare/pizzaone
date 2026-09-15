@@ -32,8 +32,8 @@
         <div class="pizza-slice"></div>
     </div>
 
-    <!-- Developer Topbar -->
-    <div class="header-topbar" style="background: #111111; color: #b0b0b0; font-size: 0.78rem; padding: 6px 15px; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Poppins', sans-serif;">
+    <!-- Developer Topbar (Hidden visually as requested, retained in code) -->
+    <div class="header-topbar" style="display: none; background: #111111; color: #b0b0b0; font-size: 0.78rem; padding: 6px 15px; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Poppins', sans-serif;">
         <div class="container" style="display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; text-align: center;">
             <span><?php echo t('Développé par', 'Developed by'); ?> <a href="https://codespark.online/" target="_blank" rel="noopener noreferrer" style="color: #ff4757; font-weight: 700; text-decoration: none;">CODESPARK SOFTWARE DEVELOPMENT</a></span>
             <span style="opacity: 0.4;">|</span>
