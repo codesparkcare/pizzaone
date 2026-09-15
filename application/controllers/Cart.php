@@ -255,6 +255,7 @@ class Cart extends CI_Controller {
         $data['subtotal'] = $subtotal;
         $data['tax'] = $subtotal * 0.1; // 10% tax
         $data['total'] = $subtotal + $data['tax'];
+        $data['payment_methods'] = $this->Common_model->get_active_payment_methods();
 
         $this->load->view('includes/header', $data);
         $this->load->view('cart_view', $data);
@@ -357,10 +358,11 @@ class Cart extends CI_Controller {
         // Get all active shops
         $shops = $this->db->get_where('shops', ['is_active' => 1])->result();
 
-        $data['cart_items']  = $cart;
-        $data['subtotal']    = $subtotal;
-        $data['shops']       = $shops;
-        $data['title']       = t('Commande', 'Checkout');
+        $data['cart_items']      = $cart;
+        $data['subtotal']        = $subtotal;
+        $data['shops']           = $shops;
+        $data['payment_methods'] = $this->Common_model->get_active_payment_methods();
+        $data['title']           = t('Commande', 'Checkout');
 
         $this->load->view('includes/header', $data);
         $this->load->view('checkout', $data);
@@ -405,6 +407,15 @@ class Cart extends CI_Controller {
         // Basic validation
         if (!$customer_name || !$customer_phone || !$order_type || !$payment) {
             $this->session->set_flashdata('checkout_error', t('Veuillez remplir tous les champs obligatoires.', 'Please fill in all required fields.'));
+            redirect('cart/checkout');
+        }
+
+        // Validate that payment method is currently active
+        $active_methods = $this->Common_model->get_active_payment_methods();
+        $allowed_payment_keys = !empty($active_methods) ? array_map(function($m) { return $m->payment_key; }, $active_methods) : ['cash', 'card'];
+        
+        if (!in_array($payment, $allowed_payment_keys)) {
+            $this->session->set_flashdata('checkout_error', t('Ce moyen de paiement n\'est pas disponible actuellement.', 'This payment method is currently disabled.'));
             redirect('cart/checkout');
         }
 

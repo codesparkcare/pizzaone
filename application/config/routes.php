@@ -76,6 +76,8 @@ $route['admin/admins'] = 'admin/admins';
 $route['admin/add_admin'] = 'admin/add_admin';
 $route['admin/edit_admin/(:num)'] = 'admin/edit_admin/$1';
 $route['admin/delete_admin/(:num)'] = 'admin/delete_admin/$1';
+$route['admin/payment_settings'] = 'admin/payment_settings';
+$route['admin/toggle_payment_method/(:any)'] = 'admin/toggle_payment_method/$1';
 
 $route['about'] = 'welcome/about';
 $route['contact'] = 'welcome/contact';

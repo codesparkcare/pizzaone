@@ -2141,5 +2141,63 @@ class Admin extends CI_Controller
             echo json_encode(['status' => 'error', 'message' => 'Failed to send email. Error: ' . strip_tags($debugger)]);
         }
     }
+
+    /**
+     * Manage payment methods (Enable/Disable dynamically)
+     */
+    public function payment_settings()
+    {
+        $this->check_login();
+        $this->Common_model->ensure_payment_settings_table();
+        $data['title'] = 'Payment Methods';
+
+        if ($this->input->server('REQUEST_METHOD') === 'POST') {
+            $methods = $this->input->post('methods');
+            if (is_array($methods)) {
+                foreach ($methods as $id => $method_data) {
+                    $is_enabled = isset($method_data['is_enabled']) ? 1 : 0;
+                    $update_data = [
+                        'name_fr'        => $method_data['name_fr'] ?? '',
+                        'name_en'        => $method_data['name_en'] ?? '',
+                        'description_fr' => $method_data['description_fr'] ?? '',
+                        'description_en' => $method_data['description_en'] ?? '',
+                        'is_enabled'     => $is_enabled,
+                    ];
+                    $this->db->where('id', intval($id))->update('payment_settings', $update_data);
+                }
+                $this->session->set_flashdata('success', 'Payment methods updated successfully!');
+            }
+            redirect('admin/payment_settings');
+        }
+
+        $data['payment_methods'] = $this->Common_model->get_all_payment_methods();
+        $this->load->view('admin/includes/header', $data);
+        $this->load->view('admin/payment_settings', $data);
+        $this->load->view('admin/includes/footer');
+    }
+
+    /**
+     * Instant toggle payment method status via AJAX
+     */
+    public function toggle_payment_method($id = null)
+    {
+        $this->check_login();
+        $this->Common_model->ensure_payment_settings_table();
+        
+        $method = $this->db->get_where('payment_settings', ['id' => intval($id)])->row();
+        if (!$method) {
+            echo json_encode(['status' => 'error', 'message' => 'Payment method not found']);
+            return;
+        }
+
+        $new_status = $method->is_enabled ? 0 : 1;
+        $this->db->where('id', $method->id)->update('payment_settings', ['is_enabled' => $new_status]);
+
+        echo json_encode([
+            'status' => 'success',
+            'is_enabled' => $new_status,
+            'message' => $method->name_en . ' is now ' . ($new_status ? 'Enabled (ON)' : 'Disabled (OFF)')
+        ]);
+    }
 }
 ?>

@@ -128,18 +128,19 @@
                             <div class="payment-methods">
                                 <h4><?php echo t('Moyens de paiement', 'Payment Methods'); ?></h4>
                                 <div class="methods-list">
-                                    <div class="method">
-                                        <i class="fas fa-credit-card"></i>
-                                        <span><?php echo t('Carte de crédit', 'Credit Card'); ?></span>
-                                    </div>
-                                    <div class="method">
-                                        <i class="fas fa-wallet"></i>
-                                        <span><?php echo t('Carte de débit', 'Debit Card'); ?></span>
-                                    </div>
-                                    <div class="method">
-                                        <i class="fas fa-money-bill"></i>
-                                        <span><?php echo t('Espèces à la livraison', 'Cash on Delivery'); ?></span>
-                                    </div>
+                                    <?php if (!empty($payment_methods)): ?>
+                                        <?php foreach ($payment_methods as $pm): ?>
+                                            <div class="method">
+                                                <i class="<?php echo htmlspecialchars($pm->icon ?: 'fas fa-credit-card'); ?>"></i>
+                                                <span><?php echo t($pm->name_fr, $pm->name_en); ?></span>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <div class="method">
+                                            <i class="fas fa-info-circle"></i>
+                                            <span><?php echo t('Contactez le restaurant', 'Contact store'); ?></span>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>

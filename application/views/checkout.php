@@ -44,10 +44,20 @@
             </div>
             <div class="form-group">
                 <label><?php echo t('Moyen de paiement', 'Payment Method'); ?></label>
-                <label><input type="radio" name="payment_method" value="cash" checked> <?php echo t('Espèces à la livraison / retrait', 'Cash on Delivery / Pickup'); ?></label><br>
-                <label><input type="radio" name="payment_method" value="card"> <?php echo t('Carte bancaire', 'Credit / Debit Card'); ?></label>
+                <?php if (!empty($payment_methods)): ?>
+                    <?php foreach ($payment_methods as $idx => $pm): ?>
+                        <label style="display: block; margin-bottom: 8px; cursor: pointer;">
+                            <input type="radio" name="payment_method" value="<?php echo htmlspecialchars($pm->payment_key); ?>" <?php echo ($idx === 0) ? 'checked' : ''; ?> required>
+                            <?php echo t($pm->name_fr, $pm->name_en); ?>
+                        </label>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div style="padding: 10px 14px; background: #fff1f2; border: 1px solid #fecdd3; border-radius: 8px; color: #e11d48; font-size: 0.9rem; margin-bottom: 10px;">
+                        <i class="fas fa-exclamation-circle"></i> <?php echo t('Aucun moyen de paiement disponible actuellement. Veuillez contacter le restaurant.', 'No payment methods are currently available. Please contact the restaurant.'); ?>
+                    </div>
+                <?php endif; ?>
             </div>
-            <button type="submit" class="btn"><?php echo t('Valider la commande', 'Place Order'); ?></button>
+            <button type="submit" class="btn" <?php echo empty($payment_methods) ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''; ?>><?php echo t('Valider la commande', 'Place Order'); ?></button>
         </form>
     </div>
     <div class="right">

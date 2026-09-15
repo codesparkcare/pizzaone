@@ -80,8 +80,11 @@ class Common_model extends CI_Model {
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
             }
 
+            // 8. Ensure payment_settings table exists
+            $this->ensure_payment_settings_table();
+
             if ($this->session) {
-                $this->session->set_userdata('db_schema_migrated_v3', true);
+                $this->session->set_userdata('db_schema_migrated_v4', true);
             }
         } catch (Exception $e) {
             log_message('error', 'Auto migration exception: ' . $e->getMessage());
@@ -100,6 +103,38 @@ class Common_model extends CI_Model {
                 UNIQUE KEY unique_user_product (user_id, product_id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
         }
+    }
+
+    public function ensure_payment_settings_table() {
+        if (!$this->db->table_exists('payment_settings')) {
+            $this->db->query("CREATE TABLE IF NOT EXISTS payment_settings (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                payment_key VARCHAR(50) NOT NULL UNIQUE,
+                name_fr VARCHAR(100) NOT NULL,
+                name_en VARCHAR(100) NOT NULL,
+                description_fr VARCHAR(255) DEFAULT NULL,
+                description_en VARCHAR(255) DEFAULT NULL,
+                icon VARCHAR(50) DEFAULT 'fas fa-credit-card',
+                is_enabled TINYINT(1) NOT NULL DEFAULT 1,
+                sort_order INT NOT NULL DEFAULT 0,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+            $this->db->query("INSERT INTO payment_settings (payment_key, name_fr, name_en, description_fr, description_en, icon, is_enabled, sort_order) VALUES 
+                ('cash', 'Espèces à la livraison / retrait', 'Cash on Delivery / Pickup', 'Paiement en espèces lors de la livraison ou au comptoir', 'Pay with cash upon delivery or pickup at the store', 'fas fa-money-bill-wave', 1, 1),
+                ('card', 'Carte bancaire', 'Credit / Debit Card', 'Paiement sécurisé par carte bancaire au livreur ou au comptoir', 'Secure payment by card to the driver or at the counter', 'fas fa-credit-card', 1, 2)
+                ON DUPLICATE KEY UPDATE payment_key=payment_key;");
+        }
+    }
+
+    public function get_active_payment_methods() {
+        $this->ensure_payment_settings_table();
+        return $this->db->where('is_enabled', 1)->order_by('sort_order', 'ASC')->get('payment_settings')->result();
+    }
+
+    public function get_all_payment_methods() {
+        $this->ensure_payment_settings_table();
+        return $this->db->order_by('sort_order', 'ASC')->get('payment_settings')->result();
     }
 
     public function insert($table, $data) {
