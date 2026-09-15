@@ -60,6 +60,13 @@
                     display: none;
                 }
 
+                @media (min-width: 993px) {
+                    .nav-menu {
+                        margin-left: 2.5rem !important;
+                        margin-right: auto !important;
+                    }
+                }
+
                 @media (max-width: 992px) {
                     .nav-mobile-logo {
                         display: block;
@@ -155,7 +162,7 @@
             </div>
 
             <form action="<?php echo base_url('search'); ?>" method="GET" class="search-container">
-                <input type="text" name="q" placeholder="<?php echo t('Rechercher...', 'Search...'); ?>"
+                <input type="text" name="q" value="<?php echo isset($search_query) ? htmlspecialchars($search_query) : ''; ?>" placeholder="<?php echo t('Rechercher...', 'Search...'); ?>"
                     aria-label="<?php echo t('Rechercher', 'Search'); ?>">
                 <button type="submit" class="search-btn">
                     <i class="fas fa-search"></i>

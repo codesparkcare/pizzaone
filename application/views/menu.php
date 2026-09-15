@@ -64,7 +64,9 @@
     <!-- Product Grid -->
     <section class="products-section container">
         <div class="products-header">
-            <?php if($current_cat_id): ?>
+            <?php if(!empty($search_query)): ?>
+                <h2 id="categoryHeaderTitle"><?php echo t('Résultats pour : ', 'Search results for: ') . '"' . htmlspecialchars($search_query) . '"'; ?></h2>
+            <?php elseif($current_cat_id): ?>
                 <?php 
                     $cat_name = "";
                     foreach($all_categories as $cat) { 

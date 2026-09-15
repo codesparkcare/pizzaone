@@ -160,6 +160,45 @@ class Welcome extends CI_Controller {
         $this->load->view('includes/footer');
     }
 
+    public function search()
+    {
+        $query = trim($this->input->get('q', true));
+        $data['title'] = $query ? ('Search: ' . htmlspecialchars($query)) : 'Our Menu';
+        $data['search_query'] = $query;
+        $data['categories'] = $this->Common_model->get_where('categories', ['parent_id' => 0]);
+        $data['all_categories'] = $this->Common_model->get_all('categories');
+        $data['current_cat_id'] = null;
+        $data['is_subcategory'] = false;
+
+        $shop_id = $this->session->userdata('selected_shop_id');
+        $data['products'] = $this->Common_model->search_products($query, $shop_id);
+
+        // Check wishlist status for logged in users
+        if ($this->session->userdata('user_id')) {
+            $user_id = $this->session->userdata('user_id');
+            $wishlist = $this->Common_model->get_where('wishlists', ['user_id' => $user_id]);
+            $wishlist_product_ids = array_map(function($w) { return $w->product_id; }, $wishlist);
+            foreach ($data['products'] as &$product) {
+                $product->in_wishlist = in_array($product->id, $wishlist_product_ids);
+            }
+        }
+
+        if ($this->input->is_ajax_request()) {
+            $html = $this->load->view('partials/menu_products_grid', $data, true);
+            echo json_encode([
+                'status' => 'success',
+                'html' => $html,
+                'cat_name' => $query,
+                'count' => count($data['products'])
+            ]);
+            return;
+        }
+
+        $this->load->view('includes/header', $data);
+        $this->load->view('menu', $data);
+        $this->load->view('includes/footer');
+    }
+
     public function get_product_details($id)
     {
         $product = $this->Common_model->get_single('products', ['id' => $id]);
