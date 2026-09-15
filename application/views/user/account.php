@@ -125,7 +125,7 @@
                                 <div style="width: 70px; height: 70px; background: #f1f5f9; color: #94a3b8; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1rem auto;">
                                     <i class="fas fa-shopping-bag"></i>
                                 </div>
-                                <h3 style="font-size: 1.15rem; font-weight: 700; color: #334155; margin-bottom: 0.5rem;"><?php echo t('Aucune commande enregistrée', 'No orders found'); ?></h3>
+                                <h3 style="font-size: 1.15rem; font-weight: 700; color: #334155; margin-bottom: 0.5rem;"><?php echo t('Aucune commande enregistrée', 'My Order is Empty'); ?></h3>
                                 <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1.5rem;"><?php echo t('Vous n\'avez pas encore effectué de commande.', 'You have not placed any orders yet.'); ?></p>
                                 <a href="<?php echo base_url('menu'); ?>" style="display: inline-block; padding: 12px 26px; background: #e74c3c; color: #ffffff; border-radius: 50px; text-decoration: none; font-weight: 600; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);">
                                     <?php echo t('Découvrir notre menu', 'Browse Our Menu'); ?>

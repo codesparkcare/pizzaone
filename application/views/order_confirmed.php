@@ -68,8 +68,14 @@
     </div>
 
     <div style="text-align: center; margin-top: 2rem;">
-        <a href="<?php echo base_url('cart/my_orders'); ?>" class="btn" style="display: inline-block; padding: 12px 28px; background: #e74c3c; color: #ffffff; border-radius: 50px; text-decoration: none; font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3); transition: all 0.2s ease;">
-            <i class="fas fa-list-ul"></i> <?php echo t('Voir mes commandes', 'View My Orders'); ?>
-        </a>
+        <?php if ($this->session->userdata('user_id')): ?>
+            <a href="<?php echo base_url('user/account'); ?>" class="btn" style="display: inline-block; padding: 12px 28px; background: #e74c3c; color: #ffffff; border-radius: 50px; text-decoration: none; font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3); transition: all 0.2s ease;">
+                <i class="fas fa-list-ul"></i> <?php echo t('Voir mes commandes', 'View My Orders'); ?>
+            </a>
+        <?php else: ?>
+            <a href="<?php echo base_url('menu'); ?>" class="btn" style="display: inline-block; padding: 12px 28px; background: #e74c3c; color: #ffffff; border-radius: 50px; text-decoration: none; font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3); transition: all 0.2s ease;">
+                <i class="fas fa-utensils"></i> <?php echo t('Continuer mes achats', 'Continue Shopping'); ?>
+            </a>
+        <?php endif; ?>
     </div>
 </div>

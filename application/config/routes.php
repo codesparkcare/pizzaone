@@ -94,3 +94,5 @@ $route['cart/update_quantity'] = 'cart/update_quantity';
 $route['cart'] = 'cart/view';
 $route['cart/clear'] = 'cart/clear';
 $route['cart/my_orders'] = 'cart/my_orders';
+$route['my_orders'] = 'cart/my_orders';
+$route['my-orders'] = 'cart/my_orders';

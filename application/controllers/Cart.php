@@ -500,23 +500,14 @@ class Cart extends CI_Controller {
     }
 
     /**
-     * Customer order list page
+     * Customer order list page (Requires user login)
      */
     public function my_orders()
     {
-        // Retrieve last order to get customer identifier (phone)
-        $order = $this->session->userdata('last_order');
-        if (!$order) {
-            // No recent order, redirect to home
-            redirect('menu');
+        if (!$this->session->userdata('user_id')) {
+            redirect('user/login');
         }
-        $customer_phone = $order['customer_phone'];
-        // Fetch all orders for this phone number
-        $data['orders'] = $this->Common_model->get_where('orders', ['customer_phone' => $customer_phone]);
-        $data['title'] = t('Mes Commandes', 'My Orders');
-        $this->load->view('includes/header', $data);
-        $this->load->view('customer_orders', $data);
-        $this->load->view('includes/footer');
+        redirect('user/account');
     }
 
 
