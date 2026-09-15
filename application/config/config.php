@@ -396,7 +396,17 @@ $config['encryption_key'] = '';
 $config['sess_driver'] = 'files';
 $config['sess_cookie_name'] = 'ci_session';
 $config['sess_expiration'] = 0;
-$config['sess_save_path'] = NULL; // Use PHP default session save path from php.ini
+// Session save path: /tmp for live Plesk server (open_basedir allowed), NULL for localhost XAMPP
+$is_live_server = isset($_SERVER['HTTP_HOST']) && (
+    strpos($_SERVER['HTTP_HOST'], 'pizzaonerestaurant.com') !== false ||
+    ($_SERVER['HTTP_HOST'] !== 'localhost' && $_SERVER['HTTP_HOST'] !== '127.0.0.1' && strpos($_SERVER['HTTP_HOST'], '192.168.') === false)
+);
+
+if ($is_live_server) {
+    $config['sess_save_path'] = (is_dir('/tmp') && is_writable('/tmp')) ? '/tmp' : (is_dir(APPPATH . 'cache') && is_writable(APPPATH . 'cache') ? APPPATH . 'cache' : sys_get_temp_dir());
+} else {
+    $config['sess_save_path'] = NULL;
+}
 $config['sess_match_ip'] = FALSE;
 $config['sess_time_to_update'] = 300;
 $config['sess_regenerate_destroy'] = FALSE;
