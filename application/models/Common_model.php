@@ -9,11 +9,13 @@ class Common_model extends CI_Model {
     }
 
     private function check_and_migrate_schema() {
-        if ($this->session && $this->session->userdata('db_schema_migrated_v2')) {
+        if ($this->session && $this->session->userdata('db_schema_migrated_v3')) {
             return;
         }
 
         try {
+            // Ensure wishlists table exists
+            $this->ensure_wishlists_table();
             // 1. Check if 'shops' column exists in 'products' table
             if ($this->db->table_exists('products') && !$this->db->field_exists('shops', 'products')) {
                 $this->db->query("ALTER TABLE products ADD COLUMN shops VARCHAR(255) NULL DEFAULT '1,2'");
@@ -79,19 +81,39 @@ class Common_model extends CI_Model {
             }
 
             if ($this->session) {
-                $this->session->set_userdata('db_schema_migrated_v2', true);
+                $this->session->set_userdata('db_schema_migrated_v3', true);
             }
         } catch (Exception $e) {
             log_message('error', 'Auto migration exception: ' . $e->getMessage());
         }
     }
 
+    public function ensure_wishlists_table() {
+        if (!$this->db->table_exists('wishlists')) {
+            $this->db->query("CREATE TABLE IF NOT EXISTS wishlists (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                product_id INT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                KEY user_id (user_id),
+                KEY product_id (product_id),
+                UNIQUE KEY unique_user_product (user_id, product_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+        }
+    }
+
     public function insert($table, $data) {
+        if ($table === 'wishlists') {
+            $this->ensure_wishlists_table();
+        }
         $this->db->insert($table, $data);
         return $this->db->insert_id();
     }
 
     public function get_all($table, $order_by = null, $order_type = 'DESC') {
+        if ($table === 'wishlists') {
+            $this->ensure_wishlists_table();
+        }
         if ($order_by) {
             $this->db->order_by($order_by, $order_type);
         }
@@ -99,10 +121,16 @@ class Common_model extends CI_Model {
     }
 
     public function get_where($table, $where) {
+        if ($table === 'wishlists') {
+            $this->ensure_wishlists_table();
+        }
         return $this->db->get_where($table, $where)->result();
     }
 
     public function get_single($table, $where) {
+        if ($table === 'wishlists') {
+            $this->ensure_wishlists_table();
+        }
         return $this->db->get_where($table, $where)->row();
     }
 

@@ -143,7 +143,12 @@
                     <?php
                     $wishlist_count = 0;
                     if ($this->session->userdata('user_id')) {
-                        $wishlist_count = $this->db->where('user_id', $this->session->userdata('user_id'))->count_all_results('wishlists');
+                        if (isset($this->Common_model)) {
+                            $this->Common_model->ensure_wishlists_table();
+                        }
+                        if ($this->db->table_exists('wishlists')) {
+                            $wishlist_count = $this->db->where('user_id', $this->session->userdata('user_id'))->count_all_results('wishlists');
+                        }
                     }
                     ?>
                     <span class="cart-badge" id="wishlistBadge"
