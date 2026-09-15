@@ -21,7 +21,9 @@ class Welcome extends CI_Controller {
 	public function index()
 	{
         $data['categories'] = $this->Common_model->get_where('categories', ['parent_id' => 0]);
-        $data['featured_products'] = $this->Common_model->get_products_by_category();
+        $data['featured_products'] = $this->Common_model->get_products_by_category(null, null, 6, 0);
+        $total_featured = $this->Common_model->get_products_by_category_count(null, null);
+        $data['has_more_featured'] = ($total_featured > 6);
         $this->db->order_by('id', 'DESC');
         $this->db->limit(6);
         $data['reviews'] = $this->Common_model->get_where('reviews', ['status' => 1]);
@@ -41,6 +43,47 @@ class Welcome extends CI_Controller {
 		$this->load->view('welcome_message', $data);
 		$this->load->view('includes/footer');
 	}
+
+    public function load_more_pizzas()
+    {
+        $offset = intval($this->input->get_post('offset'));
+        $limit = intval($this->input->get_post('limit'));
+        if ($limit <= 0) {
+            $limit = 6;
+        }
+        if ($offset < 0) {
+            $offset = 0;
+        }
+
+        $products = $this->Common_model->get_products_by_category(null, null, $limit, $offset);
+        $total = $this->Common_model->get_products_by_category_count(null, null);
+
+        // Check wishlist status for logged in users
+        if ($this->session->userdata('user_id')) {
+            $user_id = $this->session->userdata('user_id');
+            $wishlist = $this->Common_model->get_where('wishlists', ['user_id' => $user_id]);
+            $wishlist_product_ids = array_map(function($w) { return $w->product_id; }, $wishlist);
+            foreach ($products as &$product) {
+                $product->in_wishlist = in_array($product->id, $wishlist_product_ids);
+            }
+        }
+
+        $html = '';
+        foreach ($products as $p) {
+            $html .= $this->load->view('partials/product_card', ['p' => $p], true);
+        }
+
+        $new_offset = $offset + count($products);
+        $has_more = ($new_offset < $total) && !empty($products);
+
+        echo json_encode([
+            'status' => 'success',
+            'html' => $html,
+            'count' => count($products),
+            'has_more' => $has_more,
+            'next_offset' => $new_offset
+        ]);
+    }
 
     public function contact()
     {

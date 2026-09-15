@@ -88,9 +88,9 @@ if ($is_live) {
 } else {
     // Localhost XAMPP Credentials
     $db_host = 'localhost';
-    $db_user = 'root';
-    $db_pass = '';
-    $db_name = 'pizzaone';
+    $db_user = 'pizzaone_Rathi';
+    $db_pass = 'Rathi@123*';
+    $db_name = 'pizzaone_Rathi';
 }
 
 $db['default'] = array(

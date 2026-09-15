@@ -395,9 +395,8 @@ $config['encryption_key'] = '';
 */
 $config['sess_driver'] = 'files';
 $config['sess_cookie_name'] = 'ci_session';
-$config['sess_samesite'] = 'Lax';
 $config['sess_expiration'] = 0;
-$config['sess_save_path'] = sys_get_temp_dir(); // Use system temporary directory for file sessions
+$config['sess_save_path'] = NULL; // Use PHP default session save path from php.ini
 $config['sess_match_ip'] = FALSE;
 $config['sess_time_to_update'] = 300;
 $config['sess_regenerate_destroy'] = FALSE;

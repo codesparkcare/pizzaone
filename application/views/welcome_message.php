@@ -135,49 +135,24 @@
     <div class="section-title">
         <h2><?php echo t('Pizzas Populaires', 'Popular Pizzas'); ?></h2>
     </div>
-    <div class="pizza-grid">
+    <div class="pizza-grid" id="popularPizzasGrid">
         <?php foreach($featured_products as $p): ?>
-            <div class="pizza-card">
-                <?php if (!empty($p->offer_name)): ?>
-                    <div class="sale-badge"><?php echo $p->offer_name; ?></div>
-                <?php endif; ?>
-                <div class="pizza-img-wrapper">
-                    <div class="pizza-bg-shape"></div>
-                    <img src="<?php echo base_url('assets/images/products/'.($p->image ? $p->image : 'default.png')); ?>" alt="<?php echo $p->name; ?>">
-                    <button class="wishlist-btn" onclick="toggleWishlist(<?php echo $p->id; ?>, this)" title="Add to Wishlist" style="position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.4); border: none; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; z-index: 10;">
-                        <i class="<?php echo !empty($p->in_wishlist) ? 'fas' : 'far'; ?> fa-heart" style="color: <?php echo !empty($p->in_wishlist) ? '#ff4757' : '#fff'; ?>; font-size: 1.2rem;"></i>
-                    </button>
-                </div>
-                <div class="pizza-info">
-                    <div class="pizza-card-header">
-                        <h3 class="pizza-title"><?php echo $p->name; ?></h3>
-                        <div class="product-sizes-list">
-                            <?php if (!empty($p->sizes)): ?>
-                                <?php foreach ($p->sizes as $sz): ?>
-                                    <?php $short_size = ucfirst(strtolower(explode(' ', trim($sz->size_name))[0])); ?>
-                                    <div class="size-price-item">
-                                        <span class="size-badge"><?php echo htmlspecialchars($short_size); ?></span>
-                                        <span class="price-val">€<?php echo number_format($sz->size_price, 2); ?></span>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <div class="size-price-item">
-                                    <span class="price-val">€<?php echo number_format($p->price, 2); ?></span>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                    <p class="pizza-desc"><?php echo $p->description; ?></p>
-                    
-                    <div class="pizza-footer">
-                        <a href="javascript:void(0)" onclick="openProductModal(<?php echo $p->id; ?>)" style="color: #111111; font-weight: 600; text-decoration: none; font-size: 0.9rem;"><?php echo t('Voir les détails', 'View Details'); ?></a>
-                        <button class="btn-basket" onclick="openProductModal(<?php echo $p->id; ?>)">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <?php $this->load->view('partials/product_card', ['p' => $p]); ?>
         <?php endforeach; ?>
+    </div>
+
+    <!-- Infinite Scroll & Load More Container -->
+    <div id="loadMoreContainer" style="text-align: center; margin: 35px 0 15px 0; min-height: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <div id="loadingSpinner" style="display: none; align-items: center; justify-content: center; gap: 10px; color: var(--primary, #e21b1b); font-weight: 600; font-size: 1rem; padding: 10px 20px;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 1.4rem;"></i>
+            <span><?php echo t('Chargement de plus de pizzas...', 'Loading more pizzas...'); ?></span>
+        </div>
+        <?php if (!empty($has_more_featured)): ?>
+            <button id="btnLoadMore" type="button" class="btn-load-more" onclick="loadMorePizzas()" style="display: inline-flex; align-items: center; gap: 10px; background: #ffffff; color: #222222; border: 2px solid #e2e8f0; padding: 12px 30px; border-radius: 50px; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.25s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.06);">
+                <span><?php echo t('Voir plus de pizzas', 'View More Pizzas'); ?></span>
+                <i class="fas fa-chevron-down" style="font-size: 0.85rem; color: var(--primary, #e21b1b);"></i>
+            </button>
+        <?php endif; ?>
     </div>
 </section>
 
@@ -279,5 +254,98 @@
         }
 
         setInterval(nextSlide, 5000);
+    });
+</script>
+
+<style>
+.animate-fade-in {
+    animation: fadeInPizza 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes fadeInPizza {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.btn-load-more:hover {
+    background: #f8fafc !important;
+    border-color: var(--primary, #e21b1b) !important;
+    color: var(--primary, #e21b1b) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08) !important;
+}
+</style>
+
+<script>
+    let pizzaOffset = 6;
+    const pizzaLimit = 6;
+    let isPizzaLoading = false;
+    let hasMorePizzas = <?php echo !empty($has_more_featured) ? 'true' : 'false'; ?>;
+
+    function loadMorePizzas() {
+        if (isPizzaLoading || !hasMorePizzas) return;
+        isPizzaLoading = true;
+
+        const spinner = document.getElementById('loadingSpinner');
+        const btn = document.getElementById('btnLoadMore');
+        if (spinner) spinner.style.display = 'inline-flex';
+        if (btn) btn.style.display = 'none';
+
+        fetch('<?php echo base_url("welcome/load_more_pizzas"); ?>?offset=' + pizzaOffset + '&limit=' + pizzaLimit, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const grid = document.getElementById('popularPizzasGrid');
+                if (grid && data.html) {
+                    grid.insertAdjacentHTML('beforeend', data.html);
+                }
+                pizzaOffset = data.next_offset;
+                hasMorePizzas = data.has_more;
+
+                const container = document.getElementById('loadMoreContainer');
+                if (!hasMorePizzas) {
+                    if (container) container.style.display = 'none';
+                } else if (btn) {
+                    btn.style.display = 'inline-flex';
+                }
+            }
+        })
+        .catch(err => {
+            console.error('Error loading more pizzas:', err);
+            if (btn && hasMorePizzas) btn.style.display = 'inline-flex';
+        })
+        .finally(() => {
+            isPizzaLoading = false;
+            if (spinner) spinner.style.display = 'none';
+        });
+    }
+
+    // Auto-load on scroll via IntersectionObserver
+    document.addEventListener('DOMContentLoaded', function() {
+        const loadMoreContainer = document.getElementById('loadMoreContainer');
+        if (!loadMoreContainer || !hasMorePizzas) return;
+
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && hasMorePizzas && !isPizzaLoading) {
+                        loadMorePizzas();
+                    }
+                });
+            }, {
+                rootMargin: '250px 0px',
+                threshold: 0.05
+            });
+
+            observer.observe(loadMoreContainer);
+        }
     });
 </script>

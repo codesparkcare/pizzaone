@@ -144,7 +144,7 @@ class Common_model extends CI_Model {
         return $products;
     }
 
-    public function get_products_by_category($category_id = null, $shop_id = null) {
+    public function get_products_by_category($category_id = null, $shop_id = null, $limit = null, $offset = null) {
         if ($shop_id === null && $this->session->userdata('selected_shop_id')) {
             $shop_id = $this->session->userdata('selected_shop_id');
         }
@@ -165,9 +165,35 @@ class Common_model extends CI_Model {
         }
         $this->db->where('products.status', 1);
         $this->db->order_by('products.id', 'DESC');
+        if ($limit !== null) {
+            if ($offset !== null) {
+                $this->db->limit($limit, $offset);
+            } else {
+                $this->db->limit($limit);
+            }
+        }
         $products = $this->db->get()->result();
         $this->attach_sizes($products);
         return $products;
+    }
+
+    public function get_products_by_category_count($category_id = null, $shop_id = null) {
+        if ($shop_id === null && $this->session->userdata('selected_shop_id')) {
+            $shop_id = $this->session->userdata('selected_shop_id');
+        }
+        $this->db->from('products');
+        if ($category_id) {
+            $this->db->where('products.category_id', $category_id);
+        }
+        if ($shop_id) {
+            $this->db->group_start();
+            $this->db->where('products.shops IS NULL', null, false);
+            $this->db->or_where("products.shops = ''", null, false);
+            $this->db->or_where("FIND_IN_SET(" . intval($shop_id) . ", products.shops) > 0", null, false);
+            $this->db->group_end();
+        }
+        $this->db->where('products.status', 1);
+        return $this->db->count_all_results();
     }
 
     public function get_products_by_subcategory($subcategory_id, $shop_id = null) {

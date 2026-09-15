@@ -148,9 +148,7 @@
     <!-- Location Preference Modal -->
     <div id="locationModal" class="location-modal-overlay" style="display: none;">
         <div class="location-modal-card">
-            <?php if ($selected_shop_id): ?>
-                <button type="button" class="location-modal-close" onclick="closeLocationModal()">&times;</button>
-            <?php endif; ?>
+            <button type="button" class="location-modal-close" onclick="closeLocationModal()">&times;</button>
             <div class="location-modal-header">
                 <div class="location-modal-icon">
                     <i class="fas fa-store"></i>
@@ -246,6 +244,15 @@
             <?php if (!$selected_shop_id): ?>
                 openLocationModal();
             <?php endif; ?>
+
+            const locModal = document.getElementById('locationModal');
+            if (locModal) {
+                locModal.addEventListener('click', function (e) {
+                    if (e.target === this) {
+                        closeLocationModal();
+                    }
+                });
+            }
 
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
             const navMenu = document.querySelector('.nav-menu');
