@@ -20,22 +20,22 @@
     <section class="category-filter section-padding">
         <div class="container">
             <div class="filter-wrapper">
-                <a href="<?php echo base_url('menu'); ?>" class="filter-item <?php echo !$current_cat_id ? 'active' : ''; ?>">
+                <a href="<?php echo base_url('menu'); ?>" data-cat-id="" onclick="loadCategory('', event)" class="filter-item <?php echo !$current_cat_id ? 'active' : ''; ?>">
                     <div class="filter-icon">
                         <i class="fas fa-th-large"></i>
                     </div>
                     <span><?php echo t('Tous les articles', 'All Items'); ?></span>
                 </a>
                 <?php foreach($categories as $cat): ?>
-                    <a href="<?php echo base_url('menu/'.$cat->id); ?>" class="filter-item <?php echo $current_cat_id == $cat->id && !isset($is_subcategory) ? 'active' : ''; ?>">
+                    <a href="<?php echo base_url('menu/'.$cat->id); ?>" data-cat-id="<?php echo $cat->id; ?>" onclick="loadCategory('<?php echo $cat->id; ?>', event)" class="filter-item <?php echo $current_cat_id == $cat->id && !isset($is_subcategory) ? 'active' : ''; ?>">
                         <div class="filter-icon">
                             <?php if($cat->image): ?>
-                                <img src="<?php echo base_url('assets/images/categories/'.$cat->image); ?>" alt="<?php echo $cat->name; ?>">
+                                <img src="<?php echo base_url('assets/images/categories/'.$cat->image); ?>" alt="<?php echo htmlspecialchars($cat->name); ?>" loading="lazy">
                             <?php else: ?>
                                 <i class="fas fa-pizza-slice"></i>
                             <?php endif; ?>
                         </div>
-                        <span><?php echo $cat->name; ?></span>
+                        <span><?php echo htmlspecialchars($cat->name); ?></span>
                     </a>
                     
                     <!-- Show subcategories for this parent category -->
@@ -45,15 +45,15 @@
                         });
                     ?>
                     <?php foreach($subcats as $subcat): ?>
-                        <a href="<?php echo base_url('menu/'.$subcat->id); ?>" class="filter-item filter-subitem <?php echo $current_cat_id == $subcat->id && isset($is_subcategory) && $is_subcategory ? 'active' : ''; ?>">
+                        <a href="<?php echo base_url('menu/'.$subcat->id); ?>" data-cat-id="<?php echo $subcat->id; ?>" onclick="loadCategory('<?php echo $subcat->id; ?>', event)" class="filter-item filter-subitem <?php echo $current_cat_id == $subcat->id && isset($is_subcategory) && $is_subcategory ? 'active' : ''; ?>">
                             <div class="filter-icon">
                                 <?php if($subcat->image): ?>
-                                    <img src="<?php echo base_url('assets/images/categories/'.$subcat->image); ?>" alt="<?php echo $subcat->name; ?>">
+                                    <img src="<?php echo base_url('assets/images/categories/'.$subcat->image); ?>" alt="<?php echo htmlspecialchars($subcat->name); ?>" loading="lazy">
                                 <?php else: ?>
                                     <i class="fas fa-arrow-right"></i>
                                 <?php endif; ?>
                             </div>
-                            <span><?php echo $subcat->name; ?></span>
+                            <span><?php echo htmlspecialchars($subcat->name); ?></span>
                         </a>
                     <?php endforeach; ?>
                 <?php endforeach; ?>
@@ -74,64 +74,15 @@
                         } 
                     }
                 ?>
-                <h2><?php echo t('Affichage de ', 'Showing ') . $cat_name; ?></h2>
+                <h2 id="categoryHeaderTitle"><?php echo t('Affichage de ', 'Showing ') . $cat_name; ?></h2>
             <?php else: ?>
-                <h2><?php echo t('Tous les produits', 'All Products'); ?></h2>
+                <h2 id="categoryHeaderTitle"><?php echo t('Tous les produits', 'All Products'); ?></h2>
             <?php endif; ?>
-            <p><?php echo count($products) . ' ' . t('articles trouvés', 'items found'); ?></p>
+            <p id="categoryHeaderCount"><?php echo count($products) . ' ' . t('articles trouvés', 'items found'); ?></p>
         </div>
 
-        <div class="menu-grid">
-            <?php if(!empty($products)): ?>
-                <?php foreach($products as $p): ?>
-                    <div class="menu-card">
-                        <div class="menu-card-img">
-                            <img src="<?php echo base_url('assets/images/products/'.($p->image ? $p->image : 'default.png')); ?>" alt="<?php echo $p->name; ?>">
-                            <?php if (!empty($p->offer_name)): ?>
-                                <div class="menu-card-badge">
-                                    <div style="background: #ff0000; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; text-align: center; font-weight: bold; box-shadow: 0 0 5px rgba(255,0,0,0.5);"><?php echo $p->offer_name; ?></div>
-                                </div>
-                            <?php endif; ?>
-                            <button class="wishlist-btn" onclick="toggleWishlist(<?php echo $p->id; ?>, this)" title="Add to Wishlist">
-                                <i class="<?php echo !empty($p->in_wishlist) ? 'fas' : 'far'; ?> fa-heart" style="color: <?php echo !empty($p->in_wishlist) ? '#ff4757' : '#fff'; ?>;"></i>
-                            </button>
-                        </div>
-                        <div class="menu-card-body">
-                            <div class="menu-card-header">
-                                <h3><?php echo $p->name; ?></h3>
-                                <div class="product-sizes-list">
-                                    <?php if (!empty($p->sizes)): ?>
-                                        <?php foreach ($p->sizes as $sz): ?>
-                                            <?php $short_size = ucfirst(strtolower(explode(' ', trim($sz->size_name))[0])); ?>
-                                            <div class="size-price-item">
-                                                <span class="size-badge"><?php echo htmlspecialchars($short_size); ?></span>
-                                                <span class="price-val">€<?php echo number_format($sz->size_price, 2); ?></span>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    <?php else: ?>
-                                        <div class="size-price-item">
-                                            <span class="price-val">€<?php echo number_format($p->price, 2); ?></span>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                            <p><?php echo $p->description; ?></p>
-                            <div class="menu-card-footer">
-                                <a href="javascript:void(0)" onclick="openProductModal(<?php echo $p->id; ?>)" class="btn-details"><?php echo t('Voir les détails', 'View Details'); ?></a>
-                                <a href="javascript:void(0)" onclick="openProductModal(<?php echo $p->id; ?>)" class="btn-add">
-                                    <i class="fas fa-plus"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <div class="no-products">
-                    <i class="fas fa-search"></i>
-                    <p><?php echo t('Aucun produit trouvé dans cette catégorie.', 'No products found in this category.'); ?></p>
-                    <a href="<?php echo base_url('menu'); ?>" class="btn-primary"><?php echo t('Tout parcourir', 'Browse All'); ?></a>
-                </div>
-            <?php endif; ?>
+        <div class="menu-grid" id="menuProductsGrid">
+            <?php $this->load->view('partials/menu_products_grid', ['products' => $products]); ?>
         </div>
     </section>
 </main>
@@ -534,4 +485,159 @@
     font-size: 1.2rem;
     transition: var(--transition);
 }
+
+.animate-fade-in {
+    animation: fadeInMenu 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes fadeInMenu {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 </style>
+
+<script>
+    const categoryCache = {};
+    let isCatLoading = false;
+    const initialCatId = '<?php echo $current_cat_id ? $current_cat_id : ""; ?>';
+    
+    // Save initial page products into cache
+    const initialGrid = document.getElementById('menuProductsGrid');
+    const initialTitle = document.getElementById('categoryHeaderTitle')?.textContent || '';
+    const initialCount = document.getElementById('categoryHeaderCount')?.textContent || '';
+    if (initialGrid) {
+        categoryCache[initialCatId] = {
+            html: initialGrid.innerHTML,
+            title: initialTitle,
+            count: initialCount
+        };
+    }
+
+    function loadCategory(catId, event) {
+        if (event) event.preventDefault();
+        if (isCatLoading) return;
+
+        const strCatId = String(catId || '');
+
+        // Update active filter styling immediately
+        document.querySelectorAll('.filter-item').forEach(item => {
+            const itemCat = item.getAttribute('data-cat-id') || '';
+            if (itemCat === strCatId) {
+                item.classList.add('active');
+                item.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            } else {
+                item.classList.remove('active');
+            }
+        });
+
+        const targetUrl = '<?php echo base_url("menu"); ?>' + (strCatId ? '/' + strCatId : '');
+
+        // If in cache, render INSTANTLY (0ms)
+        if (categoryCache[strCatId]) {
+            renderCategoryData(categoryCache[strCatId]);
+            window.history.pushState({ catId: strCatId }, '', targetUrl);
+            return;
+        }
+
+        // Show loading state in grid
+        const grid = document.getElementById('menuProductsGrid');
+        if (grid) {
+            grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--primary, #e21b1b);"><i class="fas fa-spinner fa-spin" style="font-size: 2.5rem;"></i><p style="margin-top: 15px; font-weight: 600; color: #555;"><?php echo t("Chargement des produits...", "Loading products..."); ?></p></div>';
+        }
+
+        isCatLoading = true;
+        fetch(targetUrl, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const titleText = data.cat_name ? ('<?php echo t("Affichage de ", "Showing "); ?>' + data.cat_name) : '<?php echo t("Tous les produits", "All Products"); ?>';
+                const countText = data.count + ' ' + '<?php echo t("articles trouvés", "items found"); ?>';
+                
+                const payload = {
+                    html: data.html,
+                    title: titleText,
+                    count: countText
+                };
+
+                categoryCache[strCatId] = payload;
+                renderCategoryData(payload);
+                window.history.pushState({ catId: strCatId }, '', targetUrl);
+            }
+        })
+        .catch(err => {
+            console.error('Error loading category:', err);
+            window.location.href = targetUrl;
+        })
+        .finally(() => {
+            isCatLoading = false;
+        });
+    }
+
+    function renderCategoryData(data) {
+        const grid = document.getElementById('menuProductsGrid');
+        const titleEl = document.getElementById('categoryHeaderTitle');
+        const countEl = document.getElementById('categoryHeaderCount');
+
+        if (grid && data.html) grid.innerHTML = data.html;
+        if (titleEl && data.title) titleEl.textContent = data.title;
+        if (countEl && data.count) countEl.textContent = data.count;
+    }
+
+    // Handle browser Back / Forward buttons
+    window.addEventListener('popstate', function(e) {
+        const catId = e.state ? e.state.catId : '';
+        if (catId !== undefined) {
+            loadCategory(catId);
+        }
+    });
+
+    // Background prefetch for remaining categories when browser is idle
+    window.addEventListener('load', function() {
+        const prefetchCategories = () => {
+            const items = Array.from(document.querySelectorAll('.filter-item'));
+            let queue = items.map(el => el.getAttribute('data-cat-id') || '').filter(id => id !== initialCatId);
+
+            function fetchNext() {
+                if (queue.length === 0) return;
+                const nextId = queue.shift();
+                if (categoryCache[nextId]) {
+                    fetchNext();
+                    return;
+                }
+
+                const url = '<?php echo base_url("menu"); ?>' + (nextId ? '/' + nextId : '');
+                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(r => r.json())
+                    .then(res => {
+                        if (res.status === 'success') {
+                            const titleText = res.cat_name ? ('<?php echo t("Affichage de ", "Showing "); ?>' + res.cat_name) : '<?php echo t("Tous les produits", "All Products"); ?>';
+                            const countText = res.count + ' ' + '<?php echo t("articles trouvés", "items found"); ?>';
+                            categoryCache[nextId] = {
+                                html: res.html,
+                                title: titleText,
+                                count: countText
+                            };
+                        }
+                    })
+                    .catch(() => {})
+                    .finally(() => {
+                        setTimeout(fetchNext, 400); // polite background queue
+                    });
+            }
+            setTimeout(fetchNext, 1200);
+        };
+
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(prefetchCategories);
+        } else {
+            setTimeout(prefetchCategories, 1500);
+        }
+    });
+</script>

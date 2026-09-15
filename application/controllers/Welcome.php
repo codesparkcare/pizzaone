@@ -133,6 +133,27 @@ class Welcome extends CI_Controller {
                 $product->in_wishlist = in_array($product->id, $wishlist_product_ids);
             }
         }
+
+        if ($this->input->is_ajax_request()) {
+            $cat_name = "";
+            if ($category_id) {
+                foreach ($data['all_categories'] as $c) {
+                    if ($c->id == $category_id) {
+                        $cat_name = $c->name;
+                        break;
+                    }
+                }
+            }
+            $html = $this->load->view('partials/menu_products_grid', $data, true);
+            echo json_encode([
+                'status' => 'success',
+                'html' => $html,
+                'cat_name' => $cat_name,
+                'count' => count($data['products']),
+                'current_cat_id' => $category_id
+            ]);
+            return;
+        }
         
         $this->load->view('includes/header', $data);
         $this->load->view('menu', $data);
