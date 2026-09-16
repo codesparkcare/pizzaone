@@ -2076,7 +2076,25 @@ class CI_Email {
 		}
 
 		stream_set_timeout($this->_smtp_connect, $this->smtp_timeout);
-		$this->_set_error_message($this->_get_smtp_data());
+		stream_set_blocking($this->_smtp_connect, TRUE);
+
+		// Wait for initial 220 greeting banner from SMTP server
+		$greeting = '';
+		$start_time = time();
+		while (empty($greeting) && (time() - $start_time) < $this->smtp_timeout)
+		{
+			$greeting = $this->_get_smtp_data();
+			if (empty($greeting))
+			{
+				usleep(150000); // 150ms
+			}
+		}
+
+		if ((int) self::substr($greeting, 0, 3) !== 220)
+		{
+			$this->_set_error_message('lang:email_smtp_error', $greeting);
+			return FALSE;
+		}
 
 		if ($this->smtp_crypto === 'tls')
 		{
