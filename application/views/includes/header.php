@@ -111,6 +111,90 @@
             }
             $shop_color_class = ($selected_shop_id == '2') ? 'shop-2-active' : 'shop-1-active';
             ?>
+            <style>
+                .location-header-pill {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    background: transparent;
+                    border: none;
+                    padding: 0;
+                    cursor: pointer;
+                    text-align: left;
+                    outline: none;
+                    text-decoration: none;
+                    -webkit-tap-highlight-color: transparent;
+                }
+                .location-header-text {
+                    display: none;
+                }
+                @media (max-width: 992px) {
+                    .location-header-pill {
+                        display: inline-flex !important;
+                        align-items: center !important;
+                        background: #fff5f5 !important;
+                        border: 1px solid #fecaca !important;
+                        border-radius: 24px !important;
+                        padding: 4px 12px 4px 4px !important;
+                        box-shadow: 0 2px 8px rgba(231, 76, 60, 0.1) !important;
+                        max-width: 220px !important;
+                    }
+                    .location-header-pill.shop-2-active {
+                        background: #eff6ff !important;
+                        border-color: #bfdbfe !important;
+                        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1) !important;
+                    }
+                    .location-header-pill.shop-2-active .location-header-sub {
+                        color: #2563eb !important;
+                    }
+                    .location-header-text {
+                        display: flex !important;
+                        flex-direction: column !important;
+                        line-height: 1.15 !important;
+                        text-align: left !important;
+                        margin-left: 6px !important;
+                    }
+                    .location-header-sub {
+                        font-size: 0.62rem !important;
+                        font-weight: 700 !important;
+                        color: #e74c3c !important;
+                        text-transform: uppercase !important;
+                        letter-spacing: 0.3px !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        gap: 3px !important;
+                    }
+                    .location-header-sub .loc-arrow {
+                        font-size: 0.52rem !important;
+                    }
+                    .location-header-name {
+                        font-size: 0.8rem !important;
+                        font-weight: 700 !important;
+                        color: #1e293b !important;
+                        white-space: nowrap !important;
+                        overflow: hidden !important;
+                        text-overflow: ellipsis !important;
+                        max-width: 140px !important;
+                        margin-top: 1px !important;
+                    }
+                    .location-header-addr {
+                        font-size: 0.65rem !important;
+                        font-weight: 500 !important;
+                        color: #64748b !important;
+                        white-space: nowrap !important;
+                        overflow: hidden !important;
+                        text-overflow: ellipsis !important;
+                        max-width: 140px !important;
+                    }
+                    .location-icon-btn {
+                        width: 32px !important;
+                        height: 32px !important;
+                        font-size: 0.88rem !important;
+                        flex-shrink: 0 !important;
+                        box-shadow: none !important;
+                    }
+                }
+            </style>
             <div class="location-switcher">
                 <button class="location-header-pill <?php echo $shop_color_class; ?>" onclick="openLocationModal()" type="button"
                     title="<?php echo t('Magasin actuel : ', 'Current Shop: ') . htmlspecialchars($selected_shop_name); ?>">

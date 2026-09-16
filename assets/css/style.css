@@ -2238,11 +2238,10 @@ body {
     text-decoration: none;
 }
 
-.location-header-text {
-    display: none;
-    flex-direction: column;
-    line-height: 1.15;
-    text-align: left;
+@media (min-width: 993px) {
+    .location-header-text {
+        display: none;
+    }
 }
 
 .location-header-sub {
