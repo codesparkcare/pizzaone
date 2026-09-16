@@ -253,6 +253,172 @@
             justify-content: flex-end;
             gap: 10px;
         }
+
+        /* ==========================================
+           DataTables Styling (Pagination, Search, Info)
+           ========================================== */
+        .dataTables_wrapper {
+            width: 100%;
+            position: relative;
+            clear: both;
+        }
+
+        /* Top controls (Show entries & Search) */
+        .dataTables_wrapper .row:first-child {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            margin-bottom: 20px !important;
+            flex-wrap: wrap !important;
+            gap: 15px !important;
+        }
+
+        .dataTables_wrapper .col-md-6,
+        .dataTables_wrapper .col-md-5,
+        .dataTables_wrapper .col-md-7,
+        .dataTables_wrapper .col-sm-12 {
+            width: auto !important;
+            max-width: none !important;
+            flex: unset !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .dataTables_length label,
+        .dataTables_filter label {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            font-size: 0.88rem !important;
+            color: #475569 !important;
+            font-weight: 500 !important;
+            margin: 0 !important;
+        }
+
+        .dataTables_length select {
+            padding: 6px 12px !important;
+            border-radius: 8px !important;
+            border: 1px solid #cbd5e1 !important;
+            outline: none !important;
+            font-size: 0.85rem !important;
+            background-color: #fff !important;
+            cursor: pointer !important;
+            color: #1e293b !important;
+            transition: border-color 0.2s;
+        }
+
+        .dataTables_length select:focus {
+            border-color: var(--primary) !important;
+        }
+
+        .dataTables_filter input {
+            padding: 7px 14px !important;
+            border-radius: 8px !important;
+            border: 1px solid #cbd5e1 !important;
+            outline: none !important;
+            font-size: 0.85rem !important;
+            color: #1e293b !important;
+            transition: all 0.2s ease !important;
+            min-width: 200px !important;
+        }
+
+        .dataTables_filter input:focus {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15) !important;
+        }
+
+        /* Bottom controls (Showing entries & Pagination) */
+        .dataTables_wrapper .row:last-child {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            margin-top: 20px !important;
+            padding-top: 15px !important;
+            border-top: 1px solid #f1f5f9 !important;
+            flex-wrap: wrap !important;
+            gap: 15px !important;
+        }
+
+        .dataTables_info {
+            font-size: 0.88rem !important;
+            color: #64748b !important;
+            font-weight: 500 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .dataTables_paginate {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        /* Fix bullet points and flex pagination buttons */
+        .dataTables_paginate ul.pagination {
+            display: flex !important;
+            list-style: none !important;
+            list-style-type: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            gap: 5px !important;
+            align-items: center !important;
+            justify-content: flex-end !important;
+        }
+
+        .dataTables_paginate ul.pagination li,
+        .dataTables_paginate ul.pagination li.page-item,
+        .dataTables_paginate ul.pagination li.paginate_button {
+            list-style: none !important;
+            list-style-type: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            display: inline-flex !important;
+        }
+
+        .dataTables_paginate ul.pagination li a.page-link {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-width: 34px !important;
+            height: 34px !important;
+            padding: 0 10px !important;
+            border-radius: 8px !important;
+            border: 1px solid #e2e8f0 !important;
+            background: #ffffff !important;
+            color: #334155 !important;
+            font-size: 0.85rem !important;
+            font-weight: 500 !important;
+            text-decoration: none !important;
+            transition: all 0.2s ease !important;
+            cursor: pointer !important;
+            box-sizing: border-box !important;
+            line-height: 1 !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+        }
+
+        .dataTables_paginate ul.pagination li:not(.disabled):not(.active):hover a.page-link {
+            background: #fff5f5 !important;
+            color: var(--primary) !important;
+            border-color: #fecaca !important;
+            transform: translateY(-1px) !important;
+        }
+
+        .dataTables_paginate ul.pagination li.active a.page-link {
+            background: var(--primary) !important;
+            color: #ffffff !important;
+            border-color: var(--primary) !important;
+            font-weight: 600 !important;
+            box-shadow: 0 2px 8px rgba(231, 76, 60, 0.35) !important;
+            cursor: default !important;
+        }
+
+        .dataTables_paginate ul.pagination li.disabled a.page-link {
+            background: #f8fafc !important;
+            color: #94a3b8 !important;
+            border-color: #e2e8f0 !important;
+            cursor: not-allowed !important;
+            opacity: 0.65 !important;
+            transform: none !important;
+        }
     </style>
 </head>
 <body>
