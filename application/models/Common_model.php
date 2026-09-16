@@ -495,5 +495,224 @@ class Common_model extends CI_Model {
         $this->attach_sizes($products);
         return $products;
     }
+
+    /**
+     * Send email notification to Super Admin on new order
+     */
+    public function send_order_admin_notification($order_id, $order_data, $cart_items, $shop = null) {
+        try {
+            if (!$this->db->table_exists('smtp_settings')) {
+                return false;
+            }
+            $smtp = $this->db->get('smtp_settings')->row();
+            if (!$smtp || !$smtp->is_active) {
+                return false;
+            }
+
+            $admin_email = 'pizzaone95130@gmail.com';
+            $from_email  = !empty($smtp->from_email) ? $smtp->from_email : (!empty($smtp->smtp_user) ? $smtp->smtp_user : 'commande@pizzaonerestaurant.com');
+            $from_name   = !empty($smtp->from_name) ? $smtp->from_name : 'Pizza One';
+
+            $config = [
+                'protocol'    => 'smtp',
+                'smtp_host'   => $smtp->smtp_host,
+                'smtp_port'   => (int)$smtp->smtp_port,
+                'smtp_crypto' => $smtp->smtp_crypto,
+                'smtp_user'   => $smtp->smtp_user,
+                'smtp_pass'   => $smtp->smtp_pass,
+                'mailtype'    => 'html',
+                'charset'     => 'utf-8',
+                'wordwrap'    => TRUE,
+                'newline'     => "\r\n",
+                'crlf'        => "\r\n"
+            ];
+
+            $ci = &get_instance();
+            $ci->load->library('email');
+            $ci->email->initialize($config);
+
+            $ci->email->from($from_email, $from_name);
+            $ci->email->to($admin_email);
+
+            $shop_name = $shop ? (is_object($shop) ? $shop->name : ($shop['name'] ?? 'Pizza One')) : 'Pizza One';
+            $total_val = number_format(floatval($order_data['total'] ?? $order_data['total_amount'] ?? 0), 2);
+            $order_type_str = (($order_data['order_type'] ?? '') === 'collect') ? 'À emporter (Click & Collect)' : 'Livraison à domicile';
+            $payment_str = (($order_data['payment_method'] ?? '') === 'cash') ? 'Espèces à la livraison / retrait' : 'Carte bancaire';
+
+            $subject = "🍕 Nouvelle Commande #{$order_id} - {$shop_name} (€{$total_val})";
+            $ci->email->subject($subject);
+
+            // Build HTML items rows
+            $items_html = '';
+            if (!empty($cart_items)) {
+                foreach ($cart_items as $item) {
+                    $qty = $item['quantity'] ?? 1;
+                    $pname = htmlspecialchars($item['product_name'] ?? 'Produit');
+                    $itotal = number_format(floatval($item['item_total'] ?? 0), 2);
+                    $items_html .= "
+                    <tr style='border-bottom: 1px solid #f1f5f9;'>
+                        <td style='padding: 12px 10px; color: #1e293b; font-weight: 600;'>{$pname}</td>
+                        <td style='padding: 12px 10px; text-align: center; color: #64748b;'>x{$qty}</td>
+                        <td style='padding: 12px 10px; text-align: right; color: #1e293b; font-weight: 600;'>€{$itotal}</td>
+                    </tr>";
+                }
+            }
+
+            $customer_name  = htmlspecialchars($order_data['customer_name'] ?? 'Client');
+            $customer_phone = htmlspecialchars($order_data['customer_phone'] ?? 'N/A');
+            $customer_addr  = htmlspecialchars($order_data['customer_address'] ?? 'N/A');
+            $notes          = htmlspecialchars($order_data['notes'] ?? '');
+            $created_at     = date('d/m/Y à H:i', strtotime($order_data['created_at'] ?? 'now'));
+            $subtotal_val   = number_format(floatval($order_data['subtotal'] ?? 0), 2);
+            $delivery_val   = number_format(floatval($order_data['delivery_fee'] ?? 0), 2);
+            $admin_url      = base_url('admin/orders');
+
+            $notes_block = '';
+            if (!empty($notes)) {
+                $notes_block = "
+                <div style='margin-top: 15px; padding: 12px 15px; background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 4px;'>
+                    <strong style='color: #92400e; font-size: 13px;'>📝 Instructions spéciales :</strong>
+                    <p style='margin: 4px 0 0 0; color: #78350f; font-size: 14px;'>{$notes}</p>
+                </div>";
+            }
+
+            $body = "
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset='utf-8'>
+                <title>{$subject}</title>
+            </head>
+            <body style='margin:0; padding:20px; background-color:#f4f7f6; font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif;'>
+                <table width='100%' border='0' cellspacing='0' cellpadding='0'>
+                    <tr>
+                        <td align='center'>
+                            <table width='600' style='max-width:600px; background:#ffffff; border-radius:16px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.08);' border='0' cellspacing='0' cellpadding='0'>
+                                
+                                <!-- Header -->
+                                <tr>
+                                    <td style='background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); padding: 30px; text-align: center; color: #ffffff;'>
+                                        <h1 style='margin:0; font-size: 24px; font-weight: 700; letter-spacing: 0.5px;'>🍕 PIZZA ONE</h1>
+                                        <p style='margin: 6px 0 0 0; font-size: 16px; opacity: 0.95;'>Nouvelle commande reçue !</p>
+                                        <div style='display: inline-block; margin-top: 12px; background: rgba(255,255,255,0.2); padding: 4px 14px; border-radius: 20px; font-size: 14px; font-weight: 600;'>
+                                            Commande #{$order_id}
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- Content Body -->
+                                <tr>
+                                    <td style='padding: 25px 30px;'>
+                                        
+                                        <!-- Order Info Badges -->
+                                        <table width='100%' border='0' cellspacing='0' cellpadding='0' style='margin-bottom: 20px;'>
+                                            <tr>
+                                                <td width='50%' style='padding: 10px; background: #f8fafc; border-radius: 8px;'>
+                                                    <div style='font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700;'>📍 Magasin</div>
+                                                    <div style='font-size: 15px; font-weight: 700; color: #1e293b; margin-top: 3px;'>{$shop_name}</div>
+                                                </td>
+                                                <td width='10'></td>
+                                                <td width='50%' style='padding: 10px; background: #f8fafc; border-radius: 8px;'>
+                                                    <div style='font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700;'>🛵 Mode</div>
+                                                    <div style='font-size: 15px; font-weight: 700; color: #1e293b; margin-top: 3px;'>{$order_type_str}</div>
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                        <!-- Customer Box -->
+                                        <div style='background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin-bottom: 20px;'>
+                                            <h3 style='margin: 0 0 12px 0; font-size: 15px; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;'>
+                                                👤 Informations Client
+                                            </h3>
+                                            <table width='100%' style='font-size: 14px; color: #334155;'>
+                                                <tr>
+                                                    <td style='padding: 3px 0; width: 100px; color: #64748b;'><strong>Nom :</strong></td>
+                                                    <td style='padding: 3px 0; font-weight: 600; color: #0f172a;'>{$customer_name}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style='padding: 3px 0; color: #64748b;'><strong>Téléphone :</strong></td>
+                                                    <td style='padding: 3px 0; font-weight: 600; color: #e74c3c;'>
+                                                        <a href='tel:{$customer_phone}' style='color: #e74c3c; text-decoration: none;'>{$customer_phone}</a>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style='padding: 3px 0; color: #64748b;'><strong>Adresse :</strong></td>
+                                                    <td style='padding: 3px 0; font-weight: 500;'>{$customer_addr}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style='padding: 3px 0; color: #64748b;'><strong>Paiement :</strong></td>
+                                                    <td style='padding: 3px 0; font-weight: 600;'>{$payment_str}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style='padding: 3px 0; color: #64748b;'><strong>Date :</strong></td>
+                                                    <td style='padding: 3px 0;'>{$created_at}</td>
+                                                </tr>
+                                            </table>
+                                            {$notes_block}
+                                        </div>
+
+                                        <!-- Items List -->
+                                        <h3 style='margin: 20px 0 10px 0; font-size: 15px; color: #1e293b;'>📋 Articles commandés</h3>
+                                        <table width='100%' border='0' cellspacing='0' cellpadding='0' style='border-collapse: collapse; font-size: 14px;'>
+                                            <thead>
+                                                <tr style='background: #f1f5f9; text-transform: uppercase; font-size: 11px; color: #475569;'>
+                                                    <th style='padding: 10px; text-align: left;'>Article</th>
+                                                    <th style='padding: 10px; text-align: center;'>Quantité</th>
+                                                    <th style='padding: 10px; text-align: right;'>Prix</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {$items_html}
+                                            </tbody>
+                                        </table>
+
+                                        <!-- Totals -->
+                                        <table width='100%' border='0' cellspacing='0' cellpadding='0' style='margin-top: 15px; font-size: 14px;'>
+                                            <tr>
+                                                <td style='padding: 4px 10px; text-align: right; color: #64748b;'>Sous-total :</td>
+                                                <td style='padding: 4px 10px; text-align: right; width: 100px; font-weight: 600; color: #1e293b;'>€{$subtotal_val}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style='padding: 4px 10px; text-align: right; color: #64748b;'>Frais de livraison :</td>
+                                                <td style='padding: 4px 10px; text-align: right; font-weight: 600; color: #1e293b;'>€{$delivery_val}</td>
+                                            </tr>
+                                            <tr style='border-top: 2px solid #e2e8f0;'>
+                                                <td style='padding: 12px 10px; text-align: right; font-size: 16px; font-weight: 700; color: #0f172a;'>TOTAL :</td>
+                                                <td style='padding: 12px 10px; text-align: right; font-size: 18px; font-weight: 800; color: #e74c3c;'>€{$total_val}</td>
+                                            </tr>
+                                        </table>
+
+                                        <!-- Action Button -->
+                                        <div style='text-align: center; margin-top: 25px;'>
+                                            <a href='{$admin_url}' style='background: #e74c3c; color: #ffffff; padding: 12px 28px; border-radius: 8px; font-weight: 600; font-size: 14px; text-decoration: none; display: inline-block; box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);'>
+                                                Gérer cette commande dans l'Admin &rarr;
+                                            </a>
+                                        </div>
+
+                                    </td>
+                                </tr>
+
+                                <!-- Footer -->
+                                <tr>
+                                    <td style='background: #f8fafc; padding: 20px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0;'>
+                                        Cet email a été généré automatiquement par le système de commande en ligne <strong>Pizza One</strong>.<br>
+                                        Expéditeur configuré : {$from_email}
+                                    </td>
+                                </tr>
+
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </body>
+            </html>";
+
+            $ci->email->message($body);
+            return $ci->email->send();
+        } catch (\Exception $e) {
+            log_message('error', 'Failed to send admin order email: ' . $e->getMessage());
+            return false;
+        }
+    }
 }
 ?>

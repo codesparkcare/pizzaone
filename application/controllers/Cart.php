@@ -489,6 +489,10 @@ class Cart extends CI_Controller {
             'created_at'      => date('Y-m-d H:i:s')
         ];
         $order_id = $this->Common_model->insert('orders', $order_data);
+
+        // Send order notification email to Super Admin (pizzaone95130@gmail.com) via SMTP
+        $this->Common_model->send_order_admin_notification($order_id, $order_data, $cart, $shop);
+
         // Store order confirmation in session for frontend display
         $this->session->set_userdata('last_order', array_merge($order_data, [
             'id' => $order_id,
