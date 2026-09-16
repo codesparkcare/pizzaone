@@ -498,16 +498,15 @@ if ($selected_shop_id == '2') {
                     alert(data.message);
                     window.location.href = '<?php echo base_url("user/login"); ?>';
                 } else {
-                    // Update badge count
+                    // Update badge count for both desktop and mobile
                     let badge = document.getElementById('wishlistBadge');
-                    if (badge) {
-                        badge.textContent = data.wishlist_count;
-                        if (data.wishlist_count > 0) {
-                            badge.style.display = 'flex';
-                        } else {
-                            badge.style.display = 'none';
+                    let mobileBadge = document.getElementById('mobileWishlistBadge');
+                    [badge, mobileBadge].forEach(function(b) {
+                        if (b) {
+                            b.textContent = data.wishlist_count;
+                            b.style.display = data.wishlist_count > 0 ? 'flex' : 'none';
                         }
-                    }
+                    });
 
                     if (data.status === 'added') {
                         let icon = btnElement.querySelector('i');
@@ -530,10 +529,109 @@ if ($selected_shop_id == '2') {
                 console.error('Error toggling wishlist:', error);
             });
     }
+
+    // Mobile Dropdowns Toggle
+    function toggleMobileDropdown(dropdownId, event) {
+        event.stopPropagation();
+        var target = document.getElementById(dropdownId);
+        var allDropdowns = document.querySelectorAll('.mobile-dropdown-menu');
+        allDropdowns.forEach(function(d) {
+            if (d !== target) d.classList.remove('show');
+        });
+        if (target) target.classList.toggle('show');
+    }
+
+    document.addEventListener('click', function(e) {
+        var allDropdowns = document.querySelectorAll('.mobile-dropdown-menu');
+        allDropdowns.forEach(function(d) { d.classList.remove('show'); });
+    });
 </script>
 
 <script type="text/javascript"
     src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+<!-- Mobile Bottom Navigation Bar (Visible only on mobile devices) -->
+<?php
+$mb_wishlist_count = 0;
+if ($this->session->userdata('user_id')) {
+    if (isset($this->Common_model)) {
+        $this->Common_model->ensure_wishlists_table();
+    }
+    if ($this->db->table_exists('wishlists')) {
+        $mb_wishlist_count = $this->db->where('user_id', $this->session->userdata('user_id'))->count_all_results('wishlists');
+    }
+}
+$mb_cart_count = count($this->session->userdata('cart') ?: []);
+?>
+<nav class="mobile-bottom-nav" id="mobileBottomNav">
+    <!-- 1. Home Icon (First) -->
+    <a href="<?php echo base_url(); ?>" class="mobile-nav-item <?php echo (uri_string() == '' || uri_string() == 'welcome') ? 'active' : ''; ?>" title="<?php echo t('Accueil', 'Home'); ?>">
+        <div class="mobile-nav-icon-wrap">
+            <i class="fas fa-home"></i>
+        </div>
+        <span class="mobile-nav-label"><?php echo t('Accueil', 'Home'); ?></span>
+    </a>
+
+    <!-- 2. User Profile Icon -->
+    <div class="mobile-nav-item mobile-dropdown-trigger" id="mobileUserBtn" onclick="toggleMobileDropdown('mobileUserDropdown', event)" title="<?php echo t('Mon Compte', 'Account'); ?>">
+        <div class="mobile-nav-icon-wrap">
+            <i class="fas fa-user"></i>
+        </div>
+        <span class="mobile-nav-label"><?php echo $this->session->userdata('user_id') ? t('Compte', 'Account') : t('Connexion', 'Login'); ?></span>
+        
+        <!-- Mobile User Dropdown -->
+        <div class="mobile-dropdown-menu" id="mobileUserDropdown">
+            <?php if ($this->session->userdata('user_id')): ?>
+                <a href="<?php echo base_url('user/account'); ?>"><i class="fas fa-user-circle"></i> <?php echo t('Mon Compte', 'My Account'); ?></a>
+                <a href="<?php echo base_url('user/account'); ?>"><i class="fas fa-receipt"></i> <?php echo t('Mes Commandes', 'My Orders'); ?></a>
+                <a href="<?php echo base_url('user/logout'); ?>" style="color: #ef4444;"><i class="fas fa-sign-out-alt"></i> <?php echo t('Déconnexion', 'Logout'); ?></a>
+            <?php else: ?>
+                <a href="<?php echo base_url('user/login'); ?>"><i class="fas fa-sign-in-alt"></i> <?php echo t('Connexion', 'Login'); ?></a>
+                <a href="<?php echo base_url('user/register'); ?>"><i class="fas fa-user-plus"></i> <?php echo t('S\'inscrire', 'Register'); ?></a>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- 3. Language Icon -->
+    <div class="mobile-nav-item mobile-dropdown-trigger" id="mobileLangBtn" onclick="toggleMobileDropdown('mobileLangDropdown', event)" title="<?php echo t('Langue', 'Language'); ?>">
+        <div class="mobile-nav-icon-wrap">
+            <i class="fas fa-globe"></i>
+        </div>
+        <span class="mobile-nav-label"><?php echo strtoupper(current_lang()); ?></span>
+        
+        <!-- Mobile Language Dropdown -->
+        <div class="mobile-dropdown-menu" id="mobileLangDropdown">
+            <a href="javascript:void(0);" onclick="changeLanguage('fr')" class="<?php echo current_lang() === 'fr' ? 'active-lang-link' : ''; ?>">
+                🇫🇷 Français
+            </a>
+            <a href="javascript:void(0);" onclick="changeLanguage('en')" class="<?php echo current_lang() === 'en' ? 'active-lang-link' : ''; ?>">
+                🇬🇧 English
+            </a>
+        </div>
+    </div>
+
+    <!-- 4. Wishlist Icon -->
+    <a href="<?php echo base_url('wishlist'); ?>" class="mobile-nav-item <?php echo (uri_string() == 'wishlist') ? 'active' : ''; ?>" title="<?php echo t('Favoris', 'Wishlist'); ?>">
+        <div class="mobile-nav-icon-wrap">
+            <i class="fas fa-heart"></i>
+            <span class="mobile-nav-badge" id="mobileWishlistBadge" style="display: <?php echo $mb_wishlist_count > 0 ? 'flex' : 'none'; ?>;">
+                <?php echo $mb_wishlist_count; ?>
+            </span>
+        </div>
+        <span class="mobile-nav-label"><?php echo t('Favoris', 'Wishlist'); ?></span>
+    </a>
+
+    <!-- 5. Cart Basket Icon -->
+    <a href="<?php echo base_url('cart'); ?>" class="mobile-nav-item <?php echo (strpos(uri_string(), 'cart') !== false) ? 'active' : ''; ?>" title="<?php echo t('Panier', 'Cart'); ?>">
+        <div class="mobile-nav-icon-wrap">
+            <i class="fas fa-shopping-basket"></i>
+            <span class="mobile-nav-badge" id="mobileCartBadge" style="display: <?php echo $mb_cart_count > 0 ? 'flex' : 'none'; ?>;">
+                <?php echo $mb_cart_count; ?>
+            </span>
+        </div>
+        <span class="mobile-nav-label"><?php echo t('Panier', 'Cart'); ?></span>
+    </a>
+</nav>
 
 </body>
 

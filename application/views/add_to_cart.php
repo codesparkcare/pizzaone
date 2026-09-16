@@ -643,10 +643,12 @@ document.getElementById('addToCartForm').addEventListener('submit', function(e) 
     .then(response => response.json())
     .then(res => {
         if (res.status === 'success') {
-            const badge = document.getElementById('cartBadge');
-            if (badge) {
-                badge.textContent = res.cart_count || 0;
-            }
+            [document.getElementById('cartBadge'), document.getElementById('mobileCartBadge')].forEach(badge => {
+                if (badge) {
+                    badge.textContent = res.cart_count || 0;
+                    badge.style.display = (res.cart_count > 0) ? 'flex' : 'none';
+                }
+            });
             showModal(res.message);
             window.location.href = '<?php echo base_url('cart/view'); ?>';
         } else {

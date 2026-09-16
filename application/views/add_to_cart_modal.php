@@ -1053,13 +1053,15 @@ function validateAddonGroup(checkbox) {
         .then(res => {
             if (res.status === 'success') {
                 // Update cart badge with animation
-                const badge = document.getElementById('cartBadge');
-                if (badge) {
-                    badge.textContent = res.cart_count || 0;
-                    badge.classList.remove('pulse');
-                    setTimeout(() => badge.classList.add('pulse'), 10);
-                    setTimeout(() => badge.classList.remove('pulse'), 610);
-                }
+                [document.getElementById('cartBadge'), document.getElementById('mobileCartBadge')].forEach(badge => {
+                    if (badge) {
+                        badge.textContent = res.cart_count || 0;
+                        badge.style.display = (res.cart_count > 0) ? 'flex' : 'none';
+                        badge.classList.remove('pulse');
+                        setTimeout(() => badge.classList.add('pulse'), 10);
+                        setTimeout(() => badge.classList.remove('pulse'), 610);
+                    }
+                });
                 alert(res.message);
                 
                 // Close the modal

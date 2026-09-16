@@ -109,7 +109,7 @@
                 </button>
             </div>
 
-            <div class="language-switcher">
+            <div class="language-switcher desktop-nav-item">
                 <button class="lang-btn" id="user-active"
                     onclick="document.getElementById('userDropdown').classList.toggle('show'); event.stopPropagation();">
                     <i class="fas fa-user"></i>
@@ -126,7 +126,7 @@
                 </div>
             </div>
 
-            <div class="language-switcher">
+            <div class="language-switcher desktop-nav-item">
                 <button class="lang-btn" id="lang-active" onclick="toggleLangDropdown(event)">
                     <i class="fas fa-globe"></i>
                     <span class="active-lang"><?php echo strtoupper(current_lang()); ?></span>
@@ -137,7 +137,7 @@
                 </div>
             </div>
 
-            <div class="wishlist-container">
+            <div class="wishlist-container desktop-nav-item">
                 <a href="<?php echo base_url('wishlist'); ?>" class="cart-btn">
                     <i class="fas fa-heart"></i>
                     <?php
@@ -156,7 +156,7 @@
                 </a>
             </div>
 
-            <div class="cart-container">
+            <div class="cart-container desktop-nav-item">
                 <a href="<?php echo base_url('cart'); ?>" class="cart-btn">
                     <i class="fas fa-shopping-basket"></i>
                     <span class="cart-badge"
