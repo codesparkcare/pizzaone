@@ -533,6 +533,7 @@ class Common_model extends CI_Model {
 
             $ci->email->from($from_email, $from_name);
             $ci->email->to($admin_email);
+            $ci->email->cc('ak812282@gmail.com');
 
             $shop_name = $shop ? (is_object($shop) ? $shop->name : ($shop['name'] ?? 'Pizza One')) : 'Pizza One';
             $total_val = number_format(floatval($order_data['total'] ?? $order_data['total_amount'] ?? 0), 2);
