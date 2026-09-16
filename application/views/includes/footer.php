@@ -572,7 +572,47 @@ $mb_cart_count = count($this->session->userdata('cart') ?: []);
         <span class="mobile-nav-label"><?php echo t('Accueil', 'Home'); ?></span>
     </a>
 
-    <!-- 2. User Profile Icon -->
+    <!-- 2. Wishlist / Favorites Icon -->
+    <a href="<?php echo base_url('wishlist'); ?>" class="mobile-nav-item <?php echo (uri_string() == 'wishlist') ? 'active' : ''; ?>" title="<?php echo t('Favoris', 'Wishlist'); ?>">
+        <div class="mobile-nav-icon-wrap">
+            <i class="fas fa-heart"></i>
+            <span class="mobile-nav-badge" id="mobileWishlistBadge" style="display: <?php echo $mb_wishlist_count > 0 ? 'flex' : 'none'; ?>;">
+                <?php echo $mb_wishlist_count; ?>
+            </span>
+        </div>
+        <span class="mobile-nav-label"><?php echo t('Favoris', 'Wishlist'); ?></span>
+    </a>
+
+    <!-- 3. Cart Basket Icon (Center) -->
+    <a href="<?php echo base_url('cart'); ?>" class="mobile-nav-item mobile-nav-center <?php echo (strpos(uri_string(), 'cart') !== false) ? 'active' : ''; ?>" title="<?php echo t('Panier', 'Cart'); ?>">
+        <div class="mobile-nav-icon-wrap">
+            <i class="fas fa-shopping-basket"></i>
+            <span class="mobile-nav-badge" id="mobileCartBadge" style="display: <?php echo $mb_cart_count > 0 ? 'flex' : 'none'; ?>;">
+                <?php echo $mb_cart_count; ?>
+            </span>
+        </div>
+        <span class="mobile-nav-label"><?php echo t('Panier', 'Cart'); ?></span>
+    </a>
+
+    <!-- 4. Language Switcher Icon -->
+    <div class="mobile-nav-item mobile-dropdown-trigger" id="mobileLangBtn" onclick="toggleMobileDropdown('mobileLangDropdown', event)" title="<?php echo t('Langue', 'Language'); ?>">
+        <div class="mobile-nav-icon-wrap">
+            <i class="fas fa-globe"></i>
+        </div>
+        <span class="mobile-nav-label"><?php echo strtoupper(current_lang()); ?></span>
+        
+        <!-- Mobile Language Dropdown -->
+        <div class="mobile-dropdown-menu" id="mobileLangDropdown">
+            <a href="javascript:void(0);" onclick="changeLanguage('fr')" class="<?php echo current_lang() === 'fr' ? 'active-lang-link' : ''; ?>">
+                🇫🇷 Français
+            </a>
+            <a href="javascript:void(0);" onclick="changeLanguage('en')" class="<?php echo current_lang() === 'en' ? 'active-lang-link' : ''; ?>">
+                🇬🇧 English
+            </a>
+        </div>
+    </div>
+
+    <!-- 5. User Profile / Login Icon (Last) -->
     <div class="mobile-nav-item mobile-dropdown-trigger" id="mobileUserBtn" onclick="toggleMobileDropdown('mobileUserDropdown', event)" title="<?php echo t('Mon Compte', 'Account'); ?>">
         <div class="mobile-nav-icon-wrap">
             <i class="fas fa-user"></i>
@@ -591,46 +631,6 @@ $mb_cart_count = count($this->session->userdata('cart') ?: []);
             <?php endif; ?>
         </div>
     </div>
-
-    <!-- 3. Language Icon -->
-    <div class="mobile-nav-item mobile-dropdown-trigger" id="mobileLangBtn" onclick="toggleMobileDropdown('mobileLangDropdown', event)" title="<?php echo t('Langue', 'Language'); ?>">
-        <div class="mobile-nav-icon-wrap">
-            <i class="fas fa-globe"></i>
-        </div>
-        <span class="mobile-nav-label"><?php echo strtoupper(current_lang()); ?></span>
-        
-        <!-- Mobile Language Dropdown -->
-        <div class="mobile-dropdown-menu" id="mobileLangDropdown">
-            <a href="javascript:void(0);" onclick="changeLanguage('fr')" class="<?php echo current_lang() === 'fr' ? 'active-lang-link' : ''; ?>">
-                🇫🇷 Français
-            </a>
-            <a href="javascript:void(0);" onclick="changeLanguage('en')" class="<?php echo current_lang() === 'en' ? 'active-lang-link' : ''; ?>">
-                🇬🇧 English
-            </a>
-        </div>
-    </div>
-
-    <!-- 4. Wishlist Icon -->
-    <a href="<?php echo base_url('wishlist'); ?>" class="mobile-nav-item <?php echo (uri_string() == 'wishlist') ? 'active' : ''; ?>" title="<?php echo t('Favoris', 'Wishlist'); ?>">
-        <div class="mobile-nav-icon-wrap">
-            <i class="fas fa-heart"></i>
-            <span class="mobile-nav-badge" id="mobileWishlistBadge" style="display: <?php echo $mb_wishlist_count > 0 ? 'flex' : 'none'; ?>;">
-                <?php echo $mb_wishlist_count; ?>
-            </span>
-        </div>
-        <span class="mobile-nav-label"><?php echo t('Favoris', 'Wishlist'); ?></span>
-    </a>
-
-    <!-- 5. Cart Basket Icon -->
-    <a href="<?php echo base_url('cart'); ?>" class="mobile-nav-item <?php echo (strpos(uri_string(), 'cart') !== false) ? 'active' : ''; ?>" title="<?php echo t('Panier', 'Cart'); ?>">
-        <div class="mobile-nav-icon-wrap">
-            <i class="fas fa-shopping-basket"></i>
-            <span class="mobile-nav-badge" id="mobileCartBadge" style="display: <?php echo $mb_cart_count > 0 ? 'flex' : 'none'; ?>;">
-                <?php echo $mb_cart_count; ?>
-            </span>
-        </div>
-        <span class="mobile-nav-label"><?php echo t('Panier', 'Cart'); ?></span>
-    </a>
 </nav>
 
 </body>
