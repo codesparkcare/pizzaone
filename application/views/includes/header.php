@@ -97,15 +97,37 @@
             <?php
             $selected_shop_id = $this->session->userdata('selected_shop_id');
             $selected_shop_name = $this->session->userdata('selected_shop_name');
-            if (!$selected_shop_name) {
-                $selected_shop_name = t('Sélectionner le magasin', 'Select Shop Location');
+            if ($selected_shop_id == '2') {
+                $selected_shop_name = 'Le Plessis-Bouchard';
+                $selected_shop_addr = '95130 Le Plessis-Bouchard';
+            } elseif ($selected_shop_id == '1') {
+                $selected_shop_name = 'Villiers-le-bel';
+                $selected_shop_addr = '95400 Villiers Le Bel';
+            } else {
+                if (!$selected_shop_name) {
+                    $selected_shop_name = t('Choisir un magasin', 'Select Store');
+                }
+                $selected_shop_addr = t('Voir les adresses', 'View locations');
             }
             $shop_color_class = ($selected_shop_id == '2') ? 'shop-2-active' : 'shop-1-active';
             ?>
             <div class="location-switcher">
-                <button class="location-icon-btn <?php echo $shop_color_class; ?>" onclick="openLocationModal()"
+                <button class="location-header-pill <?php echo $shop_color_class; ?>" onclick="openLocationModal()" type="button"
                     title="<?php echo t('Magasin actuel : ', 'Current Shop: ') . htmlspecialchars($selected_shop_name); ?>">
-                    <i class="fas fa-map-marker-alt"></i>
+                    <span class="location-icon-btn <?php echo $shop_color_class; ?>">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </span>
+                    <span class="location-header-text">
+                        <span class="location-header-sub">
+                            <?php echo t('Votre magasin', 'Your Store'); ?> <i class="fas fa-chevron-down loc-arrow"></i>
+                        </span>
+                        <span class="location-header-name">
+                            <?php echo htmlspecialchars($selected_shop_name); ?>
+                        </span>
+                        <span class="location-header-addr">
+                            <?php echo htmlspecialchars($selected_shop_addr); ?>
+                        </span>
+                    </span>
                 </button>
             </div>
 
