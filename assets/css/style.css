@@ -2235,21 +2235,51 @@ body {
 .location-header-pill {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    background: transparent;
-    border: none;
-    padding: 0;
+    background: #fff5f5;
+    border: 1px solid #fecaca;
+    border-radius: 20px;
+    padding: 2px 14px 2px 3px;
+    box-shadow: 0 2px 6px rgba(231, 76, 60, 0.08);
+    min-width: 180px;
+    max-width: 255px;
     cursor: pointer;
     text-align: left;
     outline: none;
-    -webkit-tap-highlight-color: transparent;
     text-decoration: none;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
 }
 
-@media (min-width: 993px) {
-    .location-header-text {
-        display: none;
-    }
+.location-header-pill:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(231, 76, 60, 0.15);
+}
+
+.location-header-pill.shop-2-active {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.08);
+}
+
+.location-header-pill.shop-2-active:hover {
+    background: #dbeafe;
+    border-color: #93c5fd;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
+}
+
+.location-header-pill.shop-2-active .location-header-sub {
+    color: #2563eb;
+}
+
+.location-header-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.08;
+    text-align: left;
+    margin-left: 6px;
+    flex: 1;
 }
 
 .location-header-sub {

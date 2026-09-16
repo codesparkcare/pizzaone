@@ -113,90 +113,89 @@
             ?>
             <style>
                 .location-header-pill {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 6px;
-                    background: transparent;
-                    border: none;
-                    padding: 0;
-                    cursor: pointer;
-                    text-align: left;
-                    outline: none;
-                    text-decoration: none;
-                    -webkit-tap-highlight-color: transparent;
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    background: #fff5f5 !important;
+                    border: 1px solid #fecaca !important;
+                    border-radius: 20px !important;
+                    padding: 2px 14px 2px 3px !important;
+                    box-shadow: 0 2px 6px rgba(231, 76, 60, 0.08) !important;
+                    min-width: 180px !important;
+                    max-width: 255px !important;
+                    cursor: pointer !important;
+                    text-align: left !important;
+                    outline: none !important;
+                    text-decoration: none !important;
+                    transition: all 0.2s ease !important;
+                    -webkit-tap-highlight-color: transparent !important;
+                }
+                .location-header-pill:hover {
+                    background: #fee2e2 !important;
+                    border-color: #fca5a5 !important;
+                    transform: translateY(-1px) !important;
+                    box-shadow: 0 4px 10px rgba(231, 76, 60, 0.15) !important;
+                }
+                .location-header-pill.shop-2-active {
+                    background: #eff6ff !important;
+                    border-color: #bfdbfe !important;
+                    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.08) !important;
+                }
+                .location-header-pill.shop-2-active:hover {
+                    background: #dbeafe !important;
+                    border-color: #93c5fd !important;
+                    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15) !important;
+                }
+                .location-header-pill.shop-2-active .location-header-sub {
+                    color: #2563eb !important;
                 }
                 .location-header-text {
-                    display: none;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    line-height: 1.08 !important;
+                    text-align: left !important;
+                    margin-left: 6px !important;
+                    flex: 1 !important;
                 }
-                @media (max-width: 992px) {
-                    .location-header-pill {
-                        display: inline-flex !important;
-                        align-items: center !important;
-                        background: #fff5f5 !important;
-                        border: 1px solid #fecaca !important;
-                        border-radius: 20px !important;
-                        padding: 2px 14px 2px 3px !important;
-                        box-shadow: 0 2px 6px rgba(231, 76, 60, 0.08) !important;
-                        min-width: 195px !important;
-                        max-width: 255px !important;
-                    }
-                    .location-header-pill.shop-2-active {
-                        background: #eff6ff !important;
-                        border-color: #bfdbfe !important;
-                        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.08) !important;
-                    }
-                    .location-header-pill.shop-2-active .location-header-sub {
-                        color: #2563eb !important;
-                    }
-                    .location-header-text {
-                        display: flex !important;
-                        flex-direction: column !important;
-                        line-height: 1.08 !important;
-                        text-align: left !important;
-                        margin-left: 6px !important;
-                        flex: 1 !important;
-                    }
-                    .location-header-sub {
-                        font-size: 0.58rem !important;
-                        font-weight: 700 !important;
-                        color: #e74c3c !important;
-                        text-transform: uppercase !important;
-                        letter-spacing: 0.35px !important;
-                        display: flex !important;
-                        align-items: center !important;
-                        gap: 3px !important;
-                        margin-bottom: 1px !important;
-                    }
-                    .location-header-sub .loc-arrow {
-                        font-size: 0.5rem !important;
-                    }
-                    .location-header-name {
-                        font-size: 0.78rem !important;
-                        font-weight: 700 !important;
-                        color: #1e293b !important;
-                        white-space: nowrap !important;
-                        overflow: hidden !important;
-                        text-overflow: ellipsis !important;
-                        max-width: 175px !important;
-                        margin: 0 !important;
-                    }
-                    .location-header-addr {
-                        font-size: 0.62rem !important;
-                        font-weight: 500 !important;
-                        color: #64748b !important;
-                        white-space: nowrap !important;
-                        overflow: hidden !important;
-                        text-overflow: ellipsis !important;
-                        max-width: 175px !important;
-                        margin-top: 1px !important;
-                    }
-                    .location-icon-btn {
-                        width: 28px !important;
-                        height: 28px !important;
-                        font-size: 0.8rem !important;
-                        flex-shrink: 0 !important;
-                        box-shadow: none !important;
-                    }
+                .location-header-sub {
+                    font-size: 0.58rem !important;
+                    font-weight: 700 !important;
+                    color: #e74c3c !important;
+                    text-transform: uppercase !important;
+                    letter-spacing: 0.35px !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    gap: 3px !important;
+                    margin-bottom: 1px !important;
+                }
+                .location-header-sub .loc-arrow {
+                    font-size: 0.5rem !important;
+                }
+                .location-header-name {
+                    font-size: 0.78rem !important;
+                    font-weight: 700 !important;
+                    color: #1e293b !important;
+                    white-space: nowrap !important;
+                    overflow: hidden !important;
+                    text-overflow: ellipsis !important;
+                    max-width: 175px !important;
+                    margin: 0 !important;
+                }
+                .location-header-addr {
+                    font-size: 0.62rem !important;
+                    font-weight: 500 !important;
+                    color: #64748b !important;
+                    white-space: nowrap !important;
+                    overflow: hidden !important;
+                    text-overflow: ellipsis !important;
+                    max-width: 175px !important;
+                    margin-top: 1px !important;
+                }
+                .location-icon-btn {
+                    width: 28px !important;
+                    height: 28px !important;
+                    font-size: 0.8rem !important;
+                    flex-shrink: 0 !important;
+                    box-shadow: none !important;
                 }
             </style>
             <div class="location-switcher">
