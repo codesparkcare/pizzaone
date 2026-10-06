@@ -104,6 +104,7 @@ class Admin extends CI_Controller
     public function dashboard()
     {
         $this->check_login();
+        $this->Common_model->ensure_orders_fcm_schema();
         $data['title'] = 'Dashboard';
         $data['total_products'] = $this->Common_model->get_count('products');
         $data['total_categories'] = $this->Common_model->get_count('categories');
@@ -2198,6 +2199,71 @@ class Admin extends CI_Controller
             'is_enabled' => $new_status,
             'message' => $method->name_en . ' is now ' . ($new_status ? 'Enabled (ON)' : 'Disabled (OFF)')
         ]);
+    }
+
+    /**
+     * App & Push Notification Settings / Database Schema Manager
+     */
+    public function notification_settings()
+    {
+        $this->check_login();
+        
+        // Auto-run schema check
+        $migration_report = $this->Common_model->ensure_orders_fcm_schema();
+
+        if ($this->input->server('REQUEST_METHOD') === 'POST') {
+            $is_active = $this->input->post('is_active') ? 1 : 0;
+            $server_key = trim($this->input->post('server_key') ?? '');
+            $project_id = trim($this->input->post('project_id') ?? 'pizzaone-25548');
+            $service_account_json = trim($this->input->post('service_account_json') ?? '');
+
+            $update_data = [
+                'is_active' => $is_active,
+                'server_key' => $server_key,
+                'project_id' => $project_id,
+                'service_account_json' => $service_account_json
+            ];
+
+            $this->db->where('id', 1)->update('fcm_settings', $update_data);
+            $this->session->set_flashdata('success', 'FCM Notification settings updated successfully!');
+            redirect('admin/notification_settings');
+        }
+
+        $data['title'] = 'App & Notifications';
+        $data['migration_report'] = $migration_report;
+        $data['fcm'] = $this->db->get_where('fcm_settings', ['id' => 1])->row();
+        
+        // Device tokens count
+        $data['total_devices'] = $this->db->table_exists('fcm_device_tokens') 
+            ? $this->db->count_all('fcm_device_tokens') 
+            : 0;
+
+        $data['devices'] = $this->db->table_exists('fcm_device_tokens') 
+            ? $this->db->order_by('id', 'DESC')->limit(10)->get('fcm_device_tokens')->result() 
+            : [];
+
+        $this->load->view('admin/includes/header', $data);
+        $this->load->view('admin/notification_settings', $data);
+        $this->load->view('admin/includes/footer');
+    }
+
+    /**
+     * Force run database migration button from admin panel
+     */
+    public function run_db_migration()
+    {
+        $this->check_login();
+        $report = $this->Common_model->ensure_orders_fcm_schema();
+        
+        $msg = 'Database migration executed successfully! ';
+        if (!empty($report['messages'])) {
+            $msg .= implode(' ', $report['messages']);
+        } else {
+            $msg .= 'All required tables (fcm_device_tokens, fcm_settings) and columns (orders.items_json) are already up-to-date.';
+        }
+
+        $this->session->set_flashdata('success', $msg);
+        redirect('admin/notification_settings');
     }
 }
 ?>

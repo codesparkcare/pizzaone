@@ -9,7 +9,7 @@ class Common_model extends CI_Model {
     }
 
     private function check_and_migrate_schema() {
-        if ($this->session && $this->session->userdata('db_schema_migrated_v3')) {
+        if ($this->session && $this->session->userdata('db_schema_migrated_v7')) {
             return;
         }
 
@@ -86,8 +86,11 @@ class Common_model extends CI_Model {
             // 9. Ensure user_addresses table exists
             $this->ensure_user_addresses_table();
 
+            // 10. Ensure mobile FCM and order receipts schema exists
+            $this->ensure_orders_fcm_schema();
+
             if ($this->session) {
-                $this->session->set_userdata('db_schema_migrated_v5', true);
+                $this->session->set_userdata('db_schema_migrated_v7', true);
             }
         } catch (Exception $e) {
             log_message('error', 'Auto migration exception: ' . $e->getMessage());
@@ -717,10 +720,20 @@ class Common_model extends CI_Model {
     }
 
     public function ensure_orders_fcm_schema() {
+        $report = [
+            'orders_items_json' => false,
+            'fcm_device_tokens' => false,
+            'fcm_settings'      => false,
+            'messages'          => []
+        ];
         try {
             // 1. Ensure items_json column exists in orders
-            if ($this->db->table_exists('orders') && !$this->db->field_exists('items_json', 'orders')) {
-                $this->db->query("ALTER TABLE orders ADD COLUMN items_json LONGTEXT NULL DEFAULT NULL AFTER notes");
+            if ($this->db->table_exists('orders')) {
+                if (!$this->db->field_exists('items_json', 'orders')) {
+                    $this->db->query("ALTER TABLE orders ADD COLUMN items_json LONGTEXT NULL DEFAULT NULL AFTER notes");
+                    $report['messages'][] = "Added column 'items_json' to table 'orders'.";
+                }
+                $report['orders_items_json'] = true;
             }
 
             // 2. Ensure fcm_device_tokens table exists
@@ -736,7 +749,9 @@ class Common_model extends CI_Model {
                     INDEX (token),
                     INDEX (shop_id)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+                $report['messages'][] = "Created table 'fcm_device_tokens'.";
             }
+            $report['fcm_device_tokens'] = $this->db->table_exists('fcm_device_tokens');
 
             // 3. Ensure fcm_settings table exists
             if (!$this->db->table_exists('fcm_settings')) {
@@ -748,12 +763,19 @@ class Common_model extends CI_Model {
                     is_active TINYINT(1) DEFAULT 1,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
-                
+                $report['messages'][] = "Created table 'fcm_settings'.";
+            }
+            $report['fcm_settings'] = $this->db->table_exists('fcm_settings');
+            
+            // Ensure default record exists in fcm_settings
+            if ($report['fcm_settings']) {
                 $this->db->query("INSERT INTO fcm_settings (id, project_id, is_active) VALUES (1, 'pizzaone-25548', 1) ON DUPLICATE KEY UPDATE project_id=project_id;");
             }
         } catch (\Exception $e) {
             log_message('error', 'FCM schema migration error: ' . $e->getMessage());
+            $report['messages'][] = 'Error: ' . $e->getMessage();
         }
+        return $report;
     }
 
     public function send_fcm_new_order_notification($order_id, $order_data, $shop = null) {
