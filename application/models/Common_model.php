@@ -715,5 +715,113 @@ class Common_model extends CI_Model {
             return false;
         }
     }
+
+    public function ensure_orders_fcm_schema() {
+        try {
+            // 1. Ensure items_json column exists in orders
+            if ($this->db->table_exists('orders') && !$this->db->field_exists('items_json', 'orders')) {
+                $this->db->query("ALTER TABLE orders ADD COLUMN items_json LONGTEXT NULL DEFAULT NULL AFTER notes");
+            }
+
+            // 2. Ensure fcm_device_tokens table exists
+            if (!$this->db->table_exists('fcm_device_tokens')) {
+                $this->db->query("CREATE TABLE IF NOT EXISTS fcm_device_tokens (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    token VARCHAR(255) NOT NULL UNIQUE,
+                    shop_id INT NULL DEFAULT NULL,
+                    device_name VARCHAR(100) NULL,
+                    platform VARCHAR(20) NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    INDEX (token),
+                    INDEX (shop_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+            }
+
+            // 3. Ensure fcm_settings table exists
+            if (!$this->db->table_exists('fcm_settings')) {
+                $this->db->query("CREATE TABLE IF NOT EXISTS fcm_settings (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    server_key TEXT NULL,
+                    project_id VARCHAR(100) DEFAULT 'pizzaone-25548',
+                    service_account_json LONGTEXT NULL,
+                    is_active TINYINT(1) DEFAULT 1,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+                
+                $this->db->query("INSERT INTO fcm_settings (id, project_id, is_active) VALUES (1, 'pizzaone-25548', 1) ON DUPLICATE KEY UPDATE project_id=project_id;");
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'FCM schema migration error: ' . $e->getMessage());
+        }
+    }
+
+    public function send_fcm_new_order_notification($order_id, $order_data, $shop = null) {
+        try {
+            $this->ensure_orders_fcm_schema();
+            
+            $tokens_res = $this->db->select('token')->get('fcm_device_tokens')->result();
+            if (empty($tokens_res)) {
+                return ['success' => false, 'message' => 'No registered devices'];
+            }
+
+            $tokens = array_map(function($t) { return $t->token; }, $tokens_res);
+
+            $settings = $this->db->get_where('fcm_settings', ['id' => 1])->row();
+            $server_key = $settings ? $settings->server_key : null;
+
+            $shop_name = $shop ? (is_object($shop) ? $shop->name : ($shop['name'] ?? 'Pizza One')) : 'Pizza One';
+            $customer_name = $order_data['customer_name'] ?? 'Client';
+            $total_val = number_format(floatval($order_data['total_amount'] ?? $order_data['total'] ?? 0), 2);
+            $order_type = ($order_data['order_type'] ?? '') === 'collect' ? 'À emporter' : 'Livraison';
+
+            $title = "🍕 Nouvelle Commande #{$order_id} ({$total_val}€)";
+            $body = "{$customer_name} • {$order_type} • {$shop_name}";
+
+            $payload = [
+                'registration_ids' => $tokens,
+                'priority' => 'high',
+                'notification' => [
+                    'title' => $title,
+                    'body' => $body,
+                    'sound' => 'order_alert',
+                    'badge' => 1,
+                    'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+                    'android_channel_id' => 'order_notifications'
+                ],
+                'data' => [
+                    'order_id' => (string)$order_id,
+                    'type' => 'new_order',
+                    'title' => $title,
+                    'body' => $body,
+                    'total' => (string)$total_val,
+                    'shop_name' => $shop_name,
+                    'customer_name' => $customer_name
+                ]
+            ];
+
+            if (!empty($server_key)) {
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                    'Authorization: key=' . $server_key,
+                    'Content-Type: application/json'
+                ]);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+                $response = curl_exec($ch);
+                curl_close($ch);
+                return ['success' => true, 'response' => json_decode($response, true)];
+            }
+
+            return ['success' => true, 'devices_count' => count($tokens), 'note' => 'Devices queued.'];
+        } catch (\Exception $e) {
+            log_message('error', 'FCM Notification error: ' . $e->getMessage());
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
 }
+
 ?>

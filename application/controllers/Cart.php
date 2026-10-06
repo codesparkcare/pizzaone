@@ -486,12 +486,16 @@ class Cart extends CI_Controller {
             'total'           => $total,
             'total_amount'    => $total,
             'status'          => 'pending',
-            'created_at'      => date('Y-m-d H:i:s')
+            'created_at'      => date('Y-m-d H:i:s'),
+            'items_json'      => json_encode(array_values($cart), JSON_UNESCAPED_UNICODE)
         ];
         $order_id = $this->Common_model->insert('orders', $order_data);
 
         // Send order notification email to Super Admin (pizzaone95130@gmail.com) via SMTP
         $this->Common_model->send_order_admin_notification($order_id, $order_data, $cart, $shop);
+
+        // Send real-time FCM push notification to Flutter app devices
+        $this->Common_model->send_fcm_new_order_notification($order_id, $order_data, $shop);
 
         // Store order confirmation in session for frontend display
         $this->session->set_userdata('last_order', array_merge($order_data, [

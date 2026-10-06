@@ -101,3 +101,15 @@ $route['cart/clear'] = 'cart/clear';
 $route['cart/my_orders'] = 'cart/my_orders';
 $route['my_orders'] = 'cart/my_orders';
 $route['my-orders'] = 'cart/my_orders';
+
+// Flutter Order Management Mobile API Routes
+$route['api'] = 'api/index';
+$route['api/login'] = 'api/login';
+$route['api/dashboard'] = 'api/dashboard';
+$route['api/orders'] = 'api/orders';
+$route['api/orders/(:num)'] = 'api/order_details/$1';
+$route['api/orders/(:num)/status'] = 'api/update_order_status/$1';
+$route['api/shops'] = 'api/shops';
+$route['api/register_token'] = 'api/register_token';
+$route['api/unregister_token'] = 'api/unregister_token';
+$route['api/test_notification'] = 'api/test_notification';
