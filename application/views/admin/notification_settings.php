@@ -111,7 +111,7 @@
                     <small style="color: #64748b; display: block; margin-top: 4px;">Sends high-priority notifications with custom ringtone to kitchen tablets when new orders arrive</small>
                 </div>
 
-                <form action="<?php echo base_url('admin/notification_settings'); ?>" method="POST">
+                <form action="<?php echo base_url('admin/notification_settings'); ?>" method="POST" enctype="multipart/form-data">
                     
                     <div style="margin-bottom: 20px; background: #f8fafc; padding: 14px 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
                         <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600; color: #1e293b; margin: 0;">
@@ -121,21 +121,59 @@
                         <small style="color: #64748b; margin-left: 28px; display: block; margin-top: 4px;">Automatically alerts staff devices immediately after customer checkout</small>
                     </div>
 
+                    <!-- 1. Firebase Service Account JSON (Recommended - Google Modern Standard) -->
+                    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 18px; margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                            <label style="font-weight: 700; font-size: 0.95rem; color: #166534; margin: 0; display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-key"></i> Firebase Service Account Private Key (Recommended)
+                            </label>
+                            <?php if (!empty($fcm->service_account_json)): ?>
+                                <span class="badge" style="background: #15803d; color: #fff; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">
+                                    <i class="fas fa-check-circle"></i> Service Account Active
+                                </span>
+                            <?php else: ?>
+                                <span class="badge" style="background: #eab308; color: #854d0e; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">
+                                    Not Uploaded Yet
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                        <p style="font-size: 0.85rem; color: #15803d; margin: 0 0 12px 0; line-height: 1.4;">
+                            In Firebase Console &rarr; <strong>Project settings</strong> &rarr; <strong>Service accounts</strong> &rarr; Click <strong>"Generate new private key"</strong> and upload the downloaded <code>.json</code> file below:
+                        </p>
+                        
+                        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                            <input type="file" name="service_account_file" accept=".json,application/json" style="padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; font-size: 0.85rem;">
+                            <button type="button" onclick="document.getElementById('rawJsonWrapper').style.display = document.getElementById('rawJsonWrapper').style.display === 'none' ? 'block' : 'none';" style="background: none; border: none; color: #15803d; text-decoration: underline; font-size: 0.85rem; cursor: pointer; padding: 0;">
+                                Or paste JSON text
+                            </button>
+                        </div>
+
+                        <div id="rawJsonWrapper" style="display: none; margin-top: 12px;">
+                            <textarea name="service_account_json" rows="4" placeholder='{"type": "service_account", "project_id": "pizzaone-25548", ...}' style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: monospace; font-size: 0.8rem; box-sizing: border-box;"><?php echo htmlspecialchars($fcm->service_account_json ?? ''); ?></textarea>
+                        </div>
+                    </div>
+
+                    <!-- 2. Firebase Project ID -->
                     <div style="margin-bottom: 18px;">
                         <label style="font-weight: 600; font-size: 0.9rem; color: #334155; display: block; margin-bottom: 6px;">Firebase Project ID</label>
                         <input type="text" name="project_id" value="<?php echo htmlspecialchars($fcm->project_id ?? 'pizzaone-25548'); ?>" placeholder="pizzaone-25548" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box;">
                     </div>
 
-                    <div style="margin-bottom: 18px;">
+                    <!-- 3. Legacy Server Key (Optional Alternative) -->
+                    <div style="margin-bottom: 22px;">
                         <label style="font-weight: 600; font-size: 0.9rem; color: #334155; display: block; margin-bottom: 6px;">
-                            Firebase Cloud Messaging Server Key (Legacy / Web API Key)
+                            Legacy Server Key <span style="font-weight: 400; color: #64748b;">(Optional / Fallback)</span>
                         </label>
-                        <input type="password" name="server_key" value="<?php echo htmlspecialchars($fcm->server_key ?? ''); ?>" placeholder="AAAA... or AIza..." style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box;">
-                        <small style="color: #64748b; display: block; margin-top: 4px;">Found in Firebase Console &rarr; Project Settings &rarr; Cloud Messaging</small>
+                        <input type="password" name="server_key" value="<?php echo htmlspecialchars($fcm->server_key ?? ''); ?>" placeholder="AAAA..." style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box;">
+                        <small style="color: #64748b; display: block; margin-top: 4px;">Only required if using Legacy Cloud Messaging API instead of Service Account</small>
                     </div>
 
-                    <div style="text-align: right; margin-top: 25px;">
-                        <button type="submit" class="btn" style="background: var(--success, #10b981); color: #fff; padding: 10px 24px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; font-size: 0.95rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px; flex-wrap: wrap; margin-top: 25px; border-top: 1px solid #f1f5f9; padding-top: 18px;">
+                        <a href="<?php echo base_url('admin/test_fcm_notification'); ?>" class="btn" style="background: #3b82f6; color: #fff; padding: 10px 18px; border-radius: 8px; font-weight: 600; text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-paper-plane"></i> Send Test Notification
+                        </a>
+
+                        <button type="submit" class="btn" style="background: var(--success, #10b981); color: #fff; padding: 10px 24px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
                             <i class="fas fa-save"></i> Save Notification Settings
                         </button>
                     </div>

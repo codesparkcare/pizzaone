@@ -778,6 +778,65 @@ class Common_model extends CI_Model {
         return $report;
     }
 
+    /**
+     * Generate OAuth2 Access Token for FCM HTTP v1 using Service Account JSON
+     */
+    public function get_fcm_v1_access_token($service_account) {
+        $sa = is_array($service_account) ? $service_account : json_decode($service_account, true);
+        if (empty($sa['client_email']) || empty($sa['private_key'])) {
+            return false;
+        }
+
+        $now = time();
+        $cache_key = 'fcm_v1_oauth_token';
+        if ($this->session && $this->session->userdata($cache_key) && ($this->session->userdata($cache_key . '_expires') > $now + 60)) {
+            return $this->session->userdata($cache_key);
+        }
+
+        $header = ['alg' => 'RS256', 'typ' => 'JWT'];
+        $claim = [
+            'iss'   => $sa['client_email'],
+            'scope' => 'https://www.googleapis.com/auth/firebase.messaging',
+            'aud'   => 'https://oauth2.googleapis.com/token',
+            'exp'   => $now + 3600,
+            'iat'   => $now
+        ];
+
+        $b64Header = rtrim(strtr(base64_encode(json_encode($header)), '+/', '-_'), '=');
+        $b64Claim  = rtrim(strtr(base64_encode(json_encode($claim)), '+/', '-_'), '=');
+
+        $binary_signature = '';
+        if (!openssl_sign($b64Header . '.' . $b64Claim, $binary_signature, $sa['private_key'], OPENSSL_ALGO_SHA256)) {
+            log_message('error', 'FCM v1 JWT sign failed: ' . openssl_error_string());
+            return false;
+        }
+        $b64Sig = rtrim(strtr(base64_encode($binary_signature), '+/', '-_'), '=');
+        $jwt    = $b64Header . '.' . $b64Claim . '.' . $b64Sig;
+
+        $ch = curl_init('https://oauth2.googleapis.com/token');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+            'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+            'assertion'  => $jwt
+        ]));
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $res = curl_exec($ch);
+        curl_close($ch);
+
+        $data = json_decode($res, true);
+        if (!empty($data['access_token'])) {
+            if ($this->session) {
+                $this->session->set_userdata($cache_key, $data['access_token']);
+                $this->session->set_userdata($cache_key . '_expires', $now + 3500);
+            }
+            return $data['access_token'];
+        }
+
+        log_message('error', 'FCM OAuth2 token generation error: ' . $res);
+        return false;
+    }
+
     public function send_fcm_new_order_notification($order_id, $order_data, $shop = null) {
         try {
             $this->ensure_orders_fcm_schema();
@@ -790,44 +849,115 @@ class Common_model extends CI_Model {
             $tokens = array_map(function($t) { return $t->token; }, $tokens_res);
 
             $settings = $this->db->get_where('fcm_settings', ['id' => 1])->row();
-            $server_key = $settings ? $settings->server_key : null;
+            if (!$settings || !$settings->is_active) {
+                return ['success' => false, 'message' => 'FCM is disabled in settings'];
+            }
 
-            $shop_name = $shop ? (is_object($shop) ? $shop->name : ($shop['name'] ?? 'Pizza One')) : 'Pizza One';
+            $shop_name     = $shop ? (is_object($shop) ? $shop->name : ($shop['name'] ?? 'Pizza One')) : 'Pizza One';
             $customer_name = $order_data['customer_name'] ?? 'Client';
-            $total_val = number_format(floatval($order_data['total_amount'] ?? $order_data['total'] ?? 0), 2);
-            $order_type = ($order_data['order_type'] ?? '') === 'collect' ? 'À emporter' : 'Livraison';
+            $total_val     = number_format(floatval($order_data['total_amount'] ?? $order_data['total'] ?? 0), 2);
+            $order_type    = ($order_data['order_type'] ?? '') === 'collect' ? 'À emporter' : 'Livraison';
 
             $title = "🍕 Nouvelle Commande #{$order_id} ({$total_val}€)";
-            $body = "{$customer_name} • {$order_type} • {$shop_name}";
+            $body  = "{$customer_name} • {$order_type} • {$shop_name}";
 
-            $payload = [
-                'registration_ids' => $tokens,
-                'priority' => 'high',
-                'notification' => [
-                    'title' => $title,
-                    'body' => $body,
-                    'sound' => 'order_alert',
-                    'badge' => 1,
-                    'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
-                    'android_channel_id' => 'order_notifications'
-                ],
-                'data' => [
-                    'order_id' => (string)$order_id,
-                    'type' => 'new_order',
-                    'title' => $title,
-                    'body' => $body,
-                    'total' => (string)$total_val,
-                    'shop_name' => $shop_name,
-                    'customer_name' => $customer_name
-                ]
-            ];
+            // 1. Try FCM HTTP v1 using Service Account JSON (Google Modern Standard)
+            if (!empty($settings->service_account_json)) {
+                $sa = json_decode($settings->service_account_json, true);
+                if (is_array($sa) && !empty($sa['project_id']) && !empty($sa['private_key'])) {
+                    $project_id = $sa['project_id'];
+                    $access_token = $this->get_fcm_v1_access_token($sa);
 
-            if (!empty($server_key)) {
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
+                    if ($access_token) {
+                        $url = "https://fcm.googleapis.com/v1/projects/{$project_id}/messages:send";
+                        $results = [];
+
+                        foreach ($tokens as $token) {
+                            $v1_payload = [
+                                'message' => [
+                                    'token'        => $token,
+                                    'notification' => [
+                                        'title' => $title,
+                                        'body'  => $body
+                                    ],
+                                    'data' => [
+                                        'order_id'      => (string)$order_id,
+                                        'type'          => 'new_order',
+                                        'title'         => $title,
+                                        'body'          => $body,
+                                        'total'         => (string)$total_val,
+                                        'shop_name'     => (string)$shop_name,
+                                        'customer_name' => (string)$customer_name,
+                                        'sound'         => 'order_alert'
+                                    ],
+                                    'android' => [
+                                        'priority'     => 'HIGH',
+                                        'notification' => [
+                                            'sound'      => 'order_alert',
+                                            'channel_id' => 'order_notifications'
+                                        ]
+                                    ]
+                                ]
+                            ];
+
+                            $ch = curl_init($url);
+                            curl_setopt($ch, CURLOPT_POST, true);
+                            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                                'Authorization: Bearer ' . $access_token,
+                                'Content-Type: application/json'
+                            ]);
+                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($v1_payload));
+                            $res = curl_exec($ch);
+                            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                            curl_close($ch);
+
+                            $results[] = [
+                                'token' => substr($token, 0, 15) . '...',
+                                'code'  => $http_code,
+                                'res'   => json_decode($res, true)
+                            ];
+                        }
+
+                        return [
+                            'success'  => true,
+                            'protocol' => 'FCM HTTP v1 (Modern)',
+                            'devices'  => count($tokens),
+                            'details'  => $results
+                        ];
+                    }
+                }
+            }
+
+            // 2. Fallback to Legacy FCM Endpoint if server_key is provided
+            if (!empty($settings->server_key)) {
+                $payload = [
+                    'registration_ids' => $tokens,
+                    'priority'         => 'high',
+                    'notification'     => [
+                        'title'              => $title,
+                        'body'               => $body,
+                        'sound'              => 'order_alert',
+                        'badge'              => 1,
+                        'click_action'       => 'FLUTTER_NOTIFICATION_CLICK',
+                        'android_channel_id' => 'order_notifications'
+                    ],
+                    'data' => [
+                        'order_id'      => (string)$order_id,
+                        'type'          => 'new_order',
+                        'title'         => $title,
+                        'body'          => $body,
+                        'total'         => (string)$total_val,
+                        'shop_name'     => $shop_name,
+                        'customer_name' => $customer_name
+                    ]
+                ];
+
+                $ch = curl_init('https://fcm.googleapis.com/fcm/send');
                 curl_setopt($ch, CURLOPT_POST, true);
                 curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                    'Authorization: key=' . $server_key,
+                    'Authorization: key=' . $settings->server_key,
                     'Content-Type: application/json'
                 ]);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -835,10 +965,15 @@ class Common_model extends CI_Model {
                 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
                 $response = curl_exec($ch);
                 curl_close($ch);
-                return ['success' => true, 'response' => json_decode($response, true)];
+
+                return [
+                    'success'  => true,
+                    'protocol' => 'Legacy FCM',
+                    'response' => json_decode($response, true)
+                ];
             }
 
-            return ['success' => true, 'devices_count' => count($tokens), 'note' => 'Devices queued.'];
+            return ['success' => false, 'message' => 'Neither Service Account JSON nor Server Key is configured in settings.'];
         } catch (\Exception $e) {
             log_message('error', 'FCM Notification error: ' . $e->getMessage());
             return ['success' => false, 'error' => $e->getMessage()];

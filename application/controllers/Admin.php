@@ -2217,6 +2217,21 @@ class Admin extends CI_Controller
             $project_id = trim($this->input->post('project_id') ?? 'pizzaone-25548');
             $service_account_json = trim($this->input->post('service_account_json') ?? '');
 
+            // Handle Service Account JSON file upload
+            if (!empty($_FILES['service_account_file']['tmp_name']) && is_uploaded_file($_FILES['service_account_file']['tmp_name'])) {
+                $uploaded_content = file_get_contents($_FILES['service_account_file']['tmp_name']);
+                $parsed = json_decode($uploaded_content, true);
+                if (is_array($parsed) && !empty($parsed['client_email']) && !empty($parsed['private_key'])) {
+                    $service_account_json = $uploaded_content;
+                    if (!empty($parsed['project_id'])) {
+                        $project_id = $parsed['project_id'];
+                    }
+                } else {
+                    $this->session->set_flashdata('error', 'Invalid Service Account JSON file. Must contain client_email and private_key.');
+                    redirect('admin/notification_settings');
+                }
+            }
+
             $update_data = [
                 'is_active' => $is_active,
                 'server_key' => $server_key,
@@ -2263,6 +2278,33 @@ class Admin extends CI_Controller
         }
 
         $this->session->set_flashdata('success', $msg);
+        redirect('admin/notification_settings');
+    }
+
+    /**
+     * Send test notification from admin panel
+     */
+    public function test_fcm_notification()
+    {
+        $this->check_login();
+        $res = $this->Common_model->send_fcm_new_order_notification(
+            9999,
+            [
+                'customer_name' => 'Pizza One Test Admin',
+                'total_amount'  => 19.90,
+                'order_type'    => 'delivery'
+            ],
+            'Villiers-le-bel'
+        );
+
+        if (!empty($res['success'])) {
+            $proto = $res['protocol'] ?? 'FCM';
+            $this->session->set_flashdata('success', "Test notification dispatched successfully via {$proto} to " . ($res['devices'] ?? $res['sent_to'] ?? 1) . ' device(s)!');
+        } else {
+            $err = $res['message'] ?? $res['error'] ?? 'Failed to send test notification.';
+            $this->session->set_flashdata('error', "Push notification error: {$err}");
+        }
+
         redirect('admin/notification_settings');
     }
 }
