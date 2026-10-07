@@ -55,6 +55,59 @@ class Api extends CI_Controller {
     /**
      * Admin / Staff Login
      */
+    /**
+     * Heartbeat / Keep Alive / Check Session
+     * Called every minute by Flutter mobile app to maintain persistent session and keep FCM token fresh
+     */
+    public function check_session() {
+         = ->get_request_data();
+         = trim($data['token'] ?? '');
+         = trim($data['username'] ?? '');
+         = trim($data['fcm_token'] ?? '');
+
+        // Touch FCM token timestamp so device stays registered
+        if (!empty($fcm_token)) {
+            $this->db->where('token', $fcm_token)->update('fcm_device_tokens', [
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+        }
+
+        $user_data = null;
+        if (!empty($username)) {
+            $admin = $this->Common_model->get_single('admins', ['username' => $username]);
+            if ($admin) {
+                $user_data = [
+                    'id' => (int)$admin->admin_id,
+                    'username' => $admin->username,
+                    'role' => $admin->role,
+                    'shop_id' => null,
+                    'shop_name' => 'Toutes les boutiques'
+                ];
+            } else {
+                $shop_user = $this->Common_model->get_single('shop_users', ['username' => $username]);
+                if ($shop_user) {
+                    $shop = $this->Common_model->get_single('shops', ['id' => $shop_user->shop_id]);
+                    $user_data = [
+                        'id' => (int)$shop_user->id,
+                        'username' => $shop_user->username,
+                        'role' => 'staff',
+                        'shop_id' => (int)$shop_user->shop_id,
+                        'shop_name' => $shop ? $shop->name : 'Boutique #' . $shop_user->shop_id
+                    ];
+                }
+            }
+        }
+
+        $this->json_response([
+            'status' => 'success',
+            'session_alive' => true,
+            'authenticated' => true,
+            'user' => $user_data,
+            'server_time' => date('Y-m-d H:i:s'),
+            'timestamp' => time()
+        ]);
+    }
+
     public function login() {
         $data = $this->get_request_data();
         $username = trim($data['username'] ?? '');
