@@ -862,8 +862,9 @@ class Common_model extends CI_Model {
             $body  = "{$customer_name} • {$order_type} • {$shop_name}";
 
             // 1. Try FCM HTTP v1 using Service Account JSON (Google Modern Standard)
-            if (!empty($settings->service_account_json)) {
-                $sa = json_decode($settings->service_account_json, true);
+            $sa_json = !empty($settings->service_account_json) ? $settings->service_account_json : (file_exists(APPPATH . 'config/firebase_credentials.json') ? file_get_contents(APPPATH . 'config/firebase_credentials.json') : null);
+            if (!empty($sa_json)) {
+                $sa = json_decode($sa_json, true);
                 if (is_array($sa) && !empty($sa['project_id']) && !empty($sa['private_key'])) {
                     $project_id = $sa['project_id'];
                     $access_token = $this->get_fcm_v1_access_token($sa);
