@@ -60,10 +60,10 @@ class Api extends CI_Controller {
      * Called every minute by Flutter mobile app to maintain persistent session and keep FCM token fresh
      */
     public function check_session() {
-         = ->get_request_data();
-         = trim($data['token'] ?? '');
-         = trim($data['username'] ?? '');
-         = trim($data['fcm_token'] ?? '');
+        $data = $this->get_request_data();
+        $token = trim($data['token'] ?? '');
+        $username = trim($data['username'] ?? '');
+        $fcm_token = trim($data['fcm_token'] ?? '');
 
         // Touch FCM token timestamp so device stays registered
         if (!empty($fcm_token)) {
