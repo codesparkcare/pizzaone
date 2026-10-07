@@ -247,9 +247,15 @@ class Api extends CI_Controller {
         if (!empty($status) && $status !== 'all') {
             if ($status === 'in_progress') {
                 $this->db->where_in('orders.status', ['confirmed', 'preparing', 'ready']);
+            } elseif ($status === 'preparing') {
+                $this->db->where_in('orders.status', ['confirmed', 'preparing']);
             } else {
                 $this->db->where('orders.status', $status);
             }
+        } elseif (empty($search) && $status !== 'history' && $status !== 'everything') {
+            // 'all' tab shows only active/new orders (pending, confirmed, preparing, ready)
+            // Delivered orders move to the 'delivered' tab
+            $this->db->where_in('orders.status', ['pending', 'confirmed', 'preparing', 'ready']);
         }
 
         if (!empty($shop_id)) {
