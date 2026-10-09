@@ -15,6 +15,15 @@ class Admin extends CI_Controller
     private function check_login()
     {
         if (!$this->session->userdata('admin_id')) {
+            if ($this->input->is_ajax_request()) {
+                http_response_code(401);
+                echo json_encode([
+                    'status' => 'error',
+                    'session_active' => false,
+                    'message' => 'Session expired. Please log in again.'
+                ]);
+                exit;
+            }
             redirect('admin/login');
         }
 
@@ -113,7 +122,7 @@ class Admin extends CI_Controller
             $this->db->where('shop_id', $shop_id);
             $data['total_orders'] = $this->db->count_all_results('orders');
             
-            $this->db->select('shops.name, COUNT(orders.id) as count');
+            $this->db->select('shops.id as shop_id, shops.name, COUNT(orders.id) as count');
             $this->db->from('shops');
             $this->db->join('orders', 'orders.shop_id = shops.id', 'left');
             $this->db->where('shops.id', $shop_id);
@@ -122,7 +131,7 @@ class Admin extends CI_Controller
         } else {
             $data['total_orders'] = $this->Common_model->get_count('orders');
             
-            $this->db->select('shops.name, COUNT(orders.id) as count');
+            $this->db->select('shops.id as shop_id, shops.name, COUNT(orders.id) as count');
             $this->db->from('shops');
             $this->db->join('orders', 'orders.shop_id = shops.id', 'left');
             $this->db->group_by('shops.id');
@@ -139,6 +148,13 @@ class Admin extends CI_Controller
         }
         $this->db->limit(15);
         $data['recent_orders'] = $this->db->get('orders')->result();
+
+        $this->db->select_max('id', 'max_id');
+        if ($this->session->userdata('admin_role') === 'staff') {
+            $this->db->where('shop_id', $this->session->userdata('shop_id'));
+        }
+        $max_row = $this->db->get('orders')->row();
+        $data['initial_max_order_id'] = !empty($max_row->max_id) ? (int)$max_row->max_id : 0;
 
         $this->load->view('admin/includes/header', $data);
         $this->load->view('admin/dashboard', $data);
@@ -881,6 +897,107 @@ class Admin extends CI_Controller
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Order not found']);
         }
+    }
+
+    /**
+     * AJAX: Check for new orders, fetch pending orders & update stats (polled every 15s)
+     * Keeps the admin session active on the server.
+     */
+    public function ajax_check_new_orders()
+    {
+        if (!$this->session->userdata('admin_id')) {
+            http_response_code(401);
+            echo json_encode([
+                'status'         => 'error',
+                'session_active' => false,
+                'message'        => 'Session expired. Please log in again.'
+            ]);
+            return;
+        }
+
+        $admin_role = $this->session->userdata('admin_role');
+        $shop_id = $this->session->userdata('shop_id');
+        $admin_username = $this->session->userdata('admin_username') ?: 'Admin';
+
+        // 1. Fetch pending / new orders
+        $this->db->order_by('id', 'DESC');
+        $this->db->where_in('status', ['pending', 'new']);
+        if ($admin_role === 'staff' && !empty($shop_id)) {
+            $this->db->where('shop_id', $shop_id);
+        }
+        $this->db->limit(20);
+        $pending_orders = $this->db->get('orders')->result();
+
+        // 2. Find max order ID
+        $this->db->select_max('id', 'max_id');
+        if ($admin_role === 'staff' && !empty($shop_id)) {
+            $this->db->where('shop_id', $shop_id);
+        }
+        $max_row = $this->db->get('orders')->row();
+        $latest_order_id = !empty($max_row->max_id) ? (int)$max_row->max_id : 0;
+
+        // 3. Count pending orders
+        $this->db->where_in('status', ['pending', 'new']);
+        if ($admin_role === 'staff' && !empty($shop_id)) {
+            $this->db->where('shop_id', $shop_id);
+        }
+        $pending_count = $this->db->from('orders')->count_all_results();
+
+        // 4. Shop order counts for the stat cards
+        if ($admin_role === 'staff' && !empty($shop_id)) {
+            $this->db->select('shops.id as shop_id, shops.name, COUNT(orders.id) as count');
+            $this->db->from('shops');
+            $this->db->join('orders', 'orders.shop_id = shops.id AND orders.shop_id = ' . (int)$shop_id, 'left');
+            $this->db->where('shops.id', $shop_id);
+            $this->db->group_by('shops.id');
+            $shop_orders = $this->db->get()->result_array();
+        } else {
+            $this->db->select('shops.id as shop_id, shops.name, COUNT(orders.id) as count');
+            $this->db->from('shops');
+            $this->db->join('orders', 'orders.shop_id = shops.id', 'left');
+            $this->db->group_by('shops.id');
+            $shop_orders = $this->db->get()->result_array();
+        }
+
+        // Format dates and numbers
+        foreach ($pending_orders as $ord) {
+            $ord->formatted_amount = number_format(floatval($ord->total_amount ?? $ord->total ?? 0), 2);
+            $ord->formatted_date = date('d M Y, h:i A', strtotime($ord->created_at));
+        }
+
+        echo json_encode([
+            'status'          => 'success',
+            'session_active'  => true,
+            'admin_username'  => $admin_username,
+            'server_time'     => date('Y-m-d H:i:s'),
+            'latest_order_id' => $latest_order_id,
+            'pending_count'   => $pending_count,
+            'pending_orders'  => $pending_orders,
+            'shop_orders'     => $shop_orders
+        ]);
+    }
+
+    /**
+     * AJAX: Ping session to keep alive and check status
+     */
+    public function ajax_ping_session()
+    {
+        if (!$this->session->userdata('admin_id')) {
+            http_response_code(401);
+            echo json_encode([
+                'status'         => 'error',
+                'session_active' => false,
+                'message'        => 'Session expired'
+            ]);
+            return;
+        }
+
+        echo json_encode([
+            'status'         => 'success',
+            'session_active' => true,
+            'admin_username' => $this->session->userdata('admin_username'),
+            'server_time'    => date('Y-m-d H:i:s')
+        ]);
     }
 
     public function update_order_status($id)

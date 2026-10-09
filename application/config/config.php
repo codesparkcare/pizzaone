@@ -395,7 +395,7 @@ $config['encryption_key'] = '';
 */
 $config['sess_driver'] = 'files';
 $config['sess_cookie_name'] = 'ci_session';
-$config['sess_expiration'] = 0;
+$config['sess_expiration'] = 86400 * 30; // 30 days (keep admin login active)
 // Session save path: /tmp for live Plesk server (open_basedir allowed), NULL for localhost XAMPP
 $is_live_server = isset($_SERVER['HTTP_HOST']) && (
     strpos($_SERVER['HTTP_HOST'], 'pizzaonerestaurant.com') !== false ||
