@@ -547,15 +547,15 @@
     </div>
 </div>
 
-<!-- ===================== NEW ORDER ALARM BANNER ===================== -->
+<!-- ===================== PENDING ORDER ALARM BANNER ===================== -->
 <div id="newOrderAlarmBanner" class="new-order-alarm-banner" style="display:none;">
     <div class="alarm-content">
         <div class="alarm-icon-box">
             <i class="fas fa-bell"></i>
         </div>
         <div class="alarm-text-box">
-            <h4 class="alarm-title">NEW ORDER RECEIVED! (<span id="alarmPendingCount">1</span> Pending)</h4>
-            <p class="alarm-subtitle" id="alarmOrderSubtitle">A new order was just placed on the live server.</p>
+            <h4 class="alarm-title">PENDING ORDERS ALERT! (<span id="alarmPendingCount">1</span> Pending)</h4>
+            <p class="alarm-subtitle" id="alarmOrderSubtitle">There are pending orders on the dashboard waiting for processing!</p>
         </div>
     </div>
     <div class="alarm-actions">
@@ -563,7 +563,7 @@
             <i class="fas fa-eye"></i> View Order
         </button>
         <button type="button" id="alarmStopBtn" class="btn-alarm-stop" style="cursor:pointer;">
-            <i class="fas fa-volume-mute"></i> Stop Alarm
+            <i class="fas fa-volume-mute"></i> Stop Alarm (13s)
         </button>
     </div>
 </div>
@@ -687,11 +687,16 @@
 <script>
     // Global Dashboard & Alarm State
     var lastKnownMaxOrderId = <?php echo (int)($initial_max_order_id ?? 0); ?>;
+    var currentPendingCount = <?php echo !empty($recent_orders) ? count($recent_orders) : 0; ?>;
     var COUNTDOWN_INTERVAL = 15;
     var countdownSec = COUNTDOWN_INTERVAL;
     var countdownTimerId = null;
     var isPolling = false;
     var alarmIntervalId = null;
+    var alarmStopTimeoutId = null;
+    var isSoundAlarmPlaying = false;
+    var isUserSilenced = false;
+    var ALARM_DURATION_MS = 13000; // 13 seconds continuous sound
     var audioCtx = null;
     var isSoundAlarmEnabled = (localStorage.getItem('pizzaone_alarm_sound') !== 'false');
 
@@ -751,19 +756,45 @@
         }
     }
 
-    function startOrderAlarm(orderId) {
-        if (!isSoundAlarmEnabled) return;
-        playRestaurantChime();
+    /* 13-Second Continuous Alarm Sound */
+    function play13sAlarmSound() {
+        if (!isSoundAlarmEnabled || isUserSilenced) return;
+
+        // Clear existing interval & timeout to restart 13s cycle cleanly
         if (alarmIntervalId) clearInterval(alarmIntervalId);
+        if (alarmStopTimeoutId) clearTimeout(alarmStopTimeoutId);
+
+        isSoundAlarmPlaying = true;
+        // Play first chime immediately
+        playRestaurantChime();
+
+        // Repeat chime every 1.5 seconds throughout the 13 seconds
         alarmIntervalId = setInterval(function() {
             playRestaurantChime();
-        }, 2500);
+        }, 1500);
+
+        // Auto-stop chime strictly after 13 seconds (13000 ms)
+        alarmStopTimeoutId = setTimeout(function() {
+            stopAlarmSoundOnly();
+        }, ALARM_DURATION_MS);
     }
 
-    function stopOrderAlarm() {
+    function stopAlarmSoundOnly() {
         if (alarmIntervalId) {
             clearInterval(alarmIntervalId);
             alarmIntervalId = null;
+        }
+        if (alarmStopTimeoutId) {
+            clearTimeout(alarmStopTimeoutId);
+            alarmStopTimeoutId = null;
+        }
+        isSoundAlarmPlaying = false;
+    }
+
+    function stopOrderAlarm(manualStop) {
+        stopAlarmSoundOnly();
+        if (manualStop) {
+            isUserSilenced = true;
         }
         var banner = document.getElementById('newOrderAlarmBanner');
         if (banner) {
@@ -811,26 +842,34 @@
         }
     }
 
-    function showNewOrderAlarm(orderId, pendingCount) {
+    function showPendingOrderAlarm(pendingCount, latestOrderId) {
+        currentPendingCount = pendingCount;
         var banner = document.getElementById('newOrderAlarmBanner');
         var countEl = document.getElementById('alarmPendingCount');
         var subtitleEl = document.getElementById('alarmOrderSubtitle');
         var viewBtn = document.getElementById('alarmViewBtn');
 
-        if (countEl) countEl.textContent = pendingCount || 1;
-        if (subtitleEl) subtitleEl.textContent = 'Order #' + orderId + ' has just arrived! Total pending: ' + (pendingCount || 1);
-        if (viewBtn) {
-            viewBtn.setAttribute('data-id', orderId);
+        if (countEl) countEl.textContent = pendingCount;
+        if (subtitleEl) {
+            subtitleEl.textContent = (pendingCount > 1) 
+                ? 'There are ' + pendingCount + ' pending orders on the dashboard waiting for processing!'
+                : 'There is a pending order waiting on the dashboard! Attention required.';
+        }
+        if (viewBtn && latestOrderId) {
+            viewBtn.setAttribute('data-id', latestOrderId);
             viewBtn.onclick = function() {
-                stopOrderAlarm();
-                openOrderModal(orderId);
+                stopOrderAlarm(true);
+                openOrderModal(latestOrderId);
             };
         }
         if (banner) {
             banner.style.display = 'flex';
         }
 
-        startOrderAlarm(orderId);
+        // Trigger continuous 13-second alarm sound if not silenced
+        if (!isSoundAlarmPlaying && !isUserSilenced) {
+            play13sAlarmSound();
+        }
     }
 
     /* ===================== COUNTDOWN & 15s POLLING ===================== */
@@ -888,13 +927,24 @@
             // 1. Session is active on live server
             updateSessionStatus(true, data.admin_username);
 
-            // 2. Detect brand new order
+            // 2. Check pending orders on dashboard
+            var pendingCount = parseInt(data.pending_count, 10) || 0;
             var latestId = parseInt(data.latest_order_id, 10) || 0;
+
+            // If a brand new order arrived, reset user silence so 13s alarm sounds again
             if (lastKnownMaxOrderId > 0 && latestId > lastKnownMaxOrderId) {
-                showNewOrderAlarm(latestId, data.pending_count);
+                isUserSilenced = false;
             }
             if (latestId > lastKnownMaxOrderId) {
                 lastKnownMaxOrderId = latestId;
+            }
+
+            if (pendingCount > 0) {
+                showPendingOrderAlarm(pendingCount, latestId);
+            } else {
+                currentPendingCount = 0;
+                isUserSilenced = false;
+                stopOrderAlarm(false);
             }
 
             // 3. Update pending orders count badge
@@ -1171,6 +1221,9 @@
         // 1. Audio unlock on any first user gesture (satisfies browser autoplay policies)
         function unlockAudio() {
             getAudioContext();
+            if (currentPendingCount > 0 && !isUserSilenced && !isSoundAlarmPlaying) {
+                play13sAlarmSound();
+            }
         }
         ['click', 'touchstart', 'keydown'].forEach(function(evt) {
             document.addEventListener(evt, unlockAudio, { once: true });
@@ -1186,19 +1239,25 @@
                 syncSoundToggleUI();
                 if (isSoundAlarmEnabled) {
                     getAudioContext();
-                    playRestaurantChime();
+                    isUserSilenced = false;
+                    if (currentPendingCount > 0) {
+                        play13sAlarmSound();
+                    } else {
+                        playRestaurantChime();
+                    }
                 } else {
-                    stopOrderAlarm();
+                    stopOrderAlarm(true);
                 }
             });
         }
 
-        // 3. Test Sound button
+        // 3. Test Sound button (plays 13-second alarm sound)
         var testSoundBtn = document.getElementById('testAlarmSoundBtn');
         if (testSoundBtn) {
             testSoundBtn.addEventListener('click', function() {
                 getAudioContext();
-                playRestaurantChime();
+                isUserSilenced = false;
+                play13sAlarmSound();
             });
         }
 
@@ -1206,7 +1265,7 @@
         var stopAlarmBtn = document.getElementById('alarmStopBtn');
         if (stopAlarmBtn) {
             stopAlarmBtn.addEventListener('click', function() {
-                stopOrderAlarm();
+                stopOrderAlarm(true);
             });
         }
 
@@ -1233,5 +1292,10 @@
 
         // 8. Start auto-refresh countdown
         startCountdown();
+
+        // 9. Initial check: if pending orders exist on dashboard, show alarm & sound
+        if (currentPendingCount > 0) {
+            showPendingOrderAlarm(currentPendingCount, lastKnownMaxOrderId);
+        }
     });
 </script>
