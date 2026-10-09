@@ -131,12 +131,13 @@ class Admin extends CI_Controller
 
         $data['total_admins'] = $this->Common_model->get_count('admins');
 
-        // Recent orders
+        // Pending / New orders only for the dashboard
         $this->db->order_by('id', 'DESC');
-        $this->db->limit(5);
+        $this->db->where_in('status', ['pending', 'new']);
         if ($this->session->userdata('admin_role') === 'staff') {
             $this->db->where('shop_id', $this->session->userdata('shop_id'));
         }
+        $this->db->limit(15);
         $data['recent_orders'] = $this->db->get('orders')->result();
 
         $this->load->view('admin/includes/header', $data);
@@ -852,9 +853,20 @@ class Admin extends CI_Controller
         
         if ($order) {
             $order->formatted_date = date('d M Y, h:i A', strtotime($order->created_at));
-            $order->subtotal = number_format($order->subtotal, 2);
-            $order->delivery_fee = number_format($order->delivery_fee, 2);
-            $order->total_amount = number_format($order->total_amount, 2);
+            $order->subtotal = number_format((float)$order->subtotal, 2);
+            $order->delivery_fee = number_format((float)$order->delivery_fee, 2);
+            $order->total_amount = number_format((float)$order->total_amount, 2);
+
+            // Parse items JSON breakdown if present
+            $items = [];
+            if (!empty($order->items_json)) {
+                $decoded = json_decode($order->items_json, true);
+                if (is_array($decoded)) {
+                    $items = $decoded;
+                }
+            }
+            $order->items = $items;
+
             echo json_encode(['status' => 'success', 'order' => $order]);
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Order not found']);
@@ -866,8 +878,15 @@ class Admin extends CI_Controller
         $this->check_login();
         $status = $this->input->post('status');
         $this->Common_model->update('orders', ['id' => $id], ['status' => $status]);
+
+        if ($this->input->is_ajax_request()) {
+            echo json_encode(['status' => 'success', 'message' => 'Order status updated successfully']);
+            return;
+        }
+
         $this->session->set_flashdata('success', 'Order status updated successfully');
-        redirect('admin/orders');
+        $redirect_to = $this->input->post('redirect_to') ?: 'admin/orders';
+        redirect($redirect_to);
     }
 
     public function edit_product($id)

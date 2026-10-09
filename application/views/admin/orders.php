@@ -98,12 +98,46 @@
                     .then(data => {
                         if(data.status === 'success') {
                             var order = data.order;
+
+                            // Build Items List HTML if available
+                            var itemsHtml = '';
+                            if (order.items && order.items.length > 0) {
+                                itemsHtml += '<div style="margin-top: 15px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden;">';
+                                itemsHtml += '<div style="background: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #e2e8f0; font-weight: 700; font-size: 0.9rem; color: #2d3748;"><i class="fas fa-pizza-slice" style="color:#e74c3c; margin-right:6px;"></i> Ordered Items</div>';
+                                itemsHtml += '<table style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">';
+                                itemsHtml += '<thead><tr style="border-bottom: 1px solid #edf2f7; background: #fafafa; color: #718096; text-align: left;"><th style="padding: 8px 15px;">Item</th><th style="padding: 8px 10px; text-align:center;">Qty</th><th style="padding: 8px 15px; text-align:right;">Total</th></tr></thead>';
+                                itemsHtml += '<tbody>';
+                                order.items.forEach(function(it) {
+                                    var itName = it.name || it.product_name || 'Item';
+                                    var itSize = it.size || it.size_name || '';
+                                    var itQty = it.quantity || it.qty || 1;
+                                    var itTotal = parseFloat(it.item_total || (it.price * itQty) || 0).toFixed(2);
+                                    
+                                    var addonsText = '';
+                                    if (it.addons && it.addons.length > 0) {
+                                        var addonNames = it.addons.map(function(a){ return typeof a === 'object' ? (a.name || a.addon_name || '') : a; });
+                                        addonsText = '<div style="font-size:0.78rem; color:#718096; margin-top:2px;"><i class="fas fa-plus" style="font-size:0.65rem;"></i> ' + addonNames.join(', ') + '</div>';
+                                    }
+                                    var notesText = '';
+                                    if (it.instructions || it.notes) {
+                                        notesText = '<div style="font-size:0.78rem; color:#d97706; font-style:italic; margin-top:2px;"><i class="fas fa-info-circle" style="font-size:0.7rem;"></i> ' + (it.instructions || it.notes) + '</div>';
+                                    }
+
+                                    itemsHtml += '<tr style="border-bottom: 1px solid #f7fafc;">';
+                                    itemsHtml += '<td style="padding: 10px 15px;"><strong style="color:#2d3748;">' + itName + '</strong> ' + (itSize ? '<span class="badge" style="background:#edf2f7; color:#4a5568; font-size:0.75rem; padding:2px 6px; border-radius:4px; margin-left:4px;">' + itSize + '</span>' : '') + addonsText + notesText + '</td>';
+                                    itemsHtml += '<td style="padding: 10px; text-align:center; font-weight:600; color:#4a5568;">' + itQty + '</td>';
+                                    itemsHtml += '<td style="padding: 10px 15px; text-align:right; font-weight:700; color:#2d3748;">€' + itTotal + '</td>';
+                                    itemsHtml += '</tr>';
+                                });
+                                itemsHtml += '</tbody></table></div>';
+                            }
+
                             var html = `
                                 <div style="display:flex; gap: 20px; flex-wrap: wrap;">
                                     <div style="flex:1; min-width: 250px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
                                         <h5 style="margin-top:0; border-bottom: 1px solid #ddd; padding-bottom: 8px;">Customer</h5>
-                                        <p><strong>Name:</strong> ${order.customer_name}</p>
-                                        <p><strong>Phone:</strong> ${order.customer_phone}</p>
+                                        <p><strong>Name:</strong> ${order.customer_name || 'N/A'}</p>
+                                        <p><strong>Phone:</strong> <a href="tel:${order.customer_phone}" style="color:#3498db; text-decoration:none;">${order.customer_phone || '—'}</a></p>
                                         <p><strong>Address:</strong> ${order.customer_address || 'N/A'}</p>
                                     </div>
                                     <div style="flex:1; min-width: 250px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
@@ -115,14 +149,15 @@
                                         <p><strong>Date:</strong> ${order.formatted_date}</p>
                                     </div>
                                 </div>
+                                ${itemsHtml}
                                 <div style="margin-top: 15px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
                                     <h5 style="margin-top:0; border-bottom: 1px solid #ddd; padding-bottom: 8px;">Notes</h5>
                                     <p>${order.notes || '<em>No special notes provided.</em>'}</p>
                                 </div>
                                 <div style="margin-top: 15px; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #eee; text-align:right;">
-                                    <p>Subtotal: $${order.subtotal}</p>
-                                    <p>Delivery Fee: $${order.delivery_fee}</p>
-                                    <h4 style="color: #e74c3c; margin-bottom:0; margin-top:10px;">Total: $${order.total_amount}</h4>
+                                    <p style="margin: 4px 0;">Subtotal: €${order.subtotal}</p>
+                                    <p style="margin: 4px 0;">Delivery Fee: €${order.delivery_fee}</p>
+                                    <h4 style="color: #e74c3c; margin-bottom:0; margin-top:8px;">Total: €${order.total_amount}</h4>
                                 </div>
                             `;
                             modalBody.innerHTML = html;
