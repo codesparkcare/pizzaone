@@ -315,9 +315,46 @@
             <h3><?php echo t('Produits', 'Products'); ?></h3>
             <ul>
                 <?php foreach ($cart_items as $item): ?>
-                    <li style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span><?php echo htmlspecialchars($item['product_name']); ?> x <?php echo $item['quantity']; ?></span>
-                        <span style="font-weight: 600;">€<?php echo number_format($item['item_total'], 2); ?></span>
+                    <?php 
+                        $size_name = $item['size_name'] ?? '';
+                        if (empty($size_name) && !empty($item['size_price'])) {
+                            $sz = $this->db->select('sizes.name')->from('product_sizes')->join('sizes', 'sizes.id = product_sizes.size_id')->where('product_sizes.product_id', $item['product_id'])->where('product_sizes.price', $item['size_price'])->get()->row();
+                            $size_name = $sz->name ?? '';
+                        }
+                        $item_addons = !empty($item['addons']) ? $item['addons'] : [];
+                        if (empty($item_addons)) {
+                            $a_ids = array_unique(array_filter(array_merge(
+                                !empty($item['addon_group_ids']) ? (array)$item['addon_group_ids'] : [],
+                                !empty($item['addon_ids']) ? (array)$item['addon_ids'] : []
+                            )));
+                            if (!empty($a_ids)) {
+                                $item_addons = $this->db->where_in('id', $a_ids)->get('addons')->result_array();
+                            }
+                        }
+                    ?>
+                    <li style="margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <span>
+                                <strong><?php echo htmlspecialchars($item['product_name']); ?></strong> x <?php echo $item['quantity']; ?>
+                                <?php if (!empty($size_name)): ?>
+                                    <span style="font-size: 0.72rem; background: #eff6ff; color: #1d4ed8; padding: 1px 6px; border-radius: 4px; margin-left: 4px; font-weight: 600;"><?php echo htmlspecialchars($size_name); ?></span>
+                                <?php endif; ?>
+                            </span>
+                            <span style="font-weight: 600;">€<?php echo number_format($item['item_total'], 2); ?></span>
+                        </div>
+                        <?php if (!empty($item_addons)): ?>
+                            <div style="margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px;">
+                                <?php foreach ($item_addons as $ad): 
+                                    $ad_name = is_array($ad) ? ($ad['name'] ?? '') : ($ad->name ?? (string)$ad);
+                                    $ad_price = is_array($ad) ? floatval($ad['price'] ?? 0) : floatval($ad->price ?? 0);
+                                    $is_sans = stripos($ad_name, 'sans ') === 0;
+                                ?>
+                                    <span style="font-size: 0.7rem; padding: 1px 6px; border-radius: 4px; background: <?= $is_sans ? '#fef2f2' : '#f0fdf4'; ?>; color: <?= $is_sans ? '#b91c1c' : '#15803d'; ?>; border: 1px solid <?= $is_sans ? '#fecaca' : '#bbf7d0'; ?>; font-weight: 600;">
+                                        <i class="fas <?= $is_sans ? 'fa-ban' : 'fa-check'; ?>" style="font-size: 0.62rem;"></i> <?= htmlspecialchars($ad_name); ?><?= ($ad_price > 0) ? ' (+€' . number_format($ad_price, 2) . ')' : ''; ?>
+                                    </span>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
                     </li>
                 <?php endforeach; ?>
             </ul>

@@ -107,6 +107,7 @@
                                                             <input type="checkbox" 
                                                                    name="addon_group_<?php echo $group->group_id; ?>" 
                                                                    value="<?php echo $addon->id; ?>"
+                                                                   data-name="<?php echo htmlspecialchars($addon->name); ?>"
                                                                    data-base-price="<?php echo $addon->price; ?>"
                                                                    data-price="<?php echo $addon->price; ?>"
                                                                    data-size-prices='<?php echo htmlspecialchars(json_encode($addon->size_prices_by_name ?? []), ENT_QUOTES, 'UTF-8'); ?>'
@@ -1010,6 +1011,7 @@ function validateAddonGroup(checkbox) {
         const sizeInput = document.querySelector('input[name="product_size"]:checked');
         const hasSizes = document.querySelectorAll('input[name="product_size"]').length > 0;
         const sizePrice = sizeInput ? sizeInput.value : 0;
+        const sizeName = sizeInput && sizeInput.dataset.name ? sizeInput.dataset.name : '';
 
         // Validate that size is selected only if sizes exist
         if (hasSizes && !sizeInput) {
@@ -1032,6 +1034,7 @@ function validateAddonGroup(checkbox) {
         formData.append('product_id', productId);
         formData.append('quantity', quantity);
         formData.append('size_price', sizePrice);
+        formData.append('size_name', sizeName);
         
         // Add old addon system values
         addonIds.forEach(id => formData.append('addon_ids[]', id));

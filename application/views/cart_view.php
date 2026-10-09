@@ -24,33 +24,52 @@
                                         <h3><?php echo $item['product_name']; ?></h3>
                                         <div class="item-specs">
                                             <?php 
-                                                // Get size name
-                                                $this->load->model('Common_model');
-                                                $product = $this->Common_model->get_single('products', ['id' => $item['product_id']]);
-                                                
-                                                $this->db->select('sizes.name');
-                                                $this->db->from('product_sizes');
-                                                $this->db->join('sizes', 'sizes.id = product_sizes.size_id');
-                                                $this->db->where('product_sizes.product_id', $item['product_id']);
-                                                $this->db->where('product_sizes.price', $item['size_price']);
-                                                $size = $this->db->get()->row();
+                                                $size_name = $item['size_name'] ?? '';
+                                                if (empty($size_name) && !empty($item['size_price'])) {
+                                                    $this->db->select('sizes.name');
+                                                    $this->db->from('product_sizes');
+                                                    $this->db->join('sizes', 'sizes.id = product_sizes.size_id');
+                                                    $this->db->where('product_sizes.product_id', $item['product_id']);
+                                                    $this->db->where('product_sizes.price', $item['size_price']);
+                                                    $sz_row = $this->db->get()->row();
+                                                    $size_name = $sz_row->name ?? '';
+                                                }
+
+                                                // Resolve addons
+                                                $item_addons = !empty($item['addons']) ? $item['addons'] : [];
+                                                if (empty($item_addons)) {
+                                                    $a_ids = array_unique(array_filter(array_merge(
+                                                        !empty($item['addon_group_ids']) ? (array)$item['addon_group_ids'] : [],
+                                                        !empty($item['addon_ids']) ? (array)$item['addon_ids'] : []
+                                                    )));
+                                                    if (!empty($a_ids)) {
+                                                        $item_addons = $this->db->where_in('id', $a_ids)->get('addons')->result_array();
+                                                    }
+                                                }
                                             ?>
-                                            <span class="spec-item">
-                                                <strong><?php echo t('Taille :', 'Size:'); ?></strong> <?php echo $size->name ?? 'Standard'; ?>
-                                            </span>
-                                            
-                                            <?php if (!empty($item['addon_ids'])): ?>
+                                            <?php if (!empty($size_name)): ?>
                                                 <span class="spec-item">
-                                                    <strong><?php echo t('Suppléments :', 'Add-ons:'); ?></strong> <?php echo count($item['addon_ids']) . ' ' . t('article(s)', 'item(s)'); ?>
+                                                    <strong><?php echo t('Taille :', 'Size:'); ?></strong> <?php echo htmlspecialchars($size_name); ?>
                                                 </span>
+                                            <?php endif; ?>
+                                            
+                                            <?php if (!empty($item_addons)): ?>
+                                                <div style="margin-top: 5px; display: flex; flex-wrap: wrap; gap: 4px;">
+                                                    <?php foreach ($item_addons as $ad): 
+                                                        $ad_name = is_array($ad) ? ($ad['name'] ?? '') : ($ad->name ?? (string)$ad);
+                                                        $ad_price = is_array($ad) ? floatval($ad['price'] ?? 0) : floatval($ad->price ?? 0);
+                                                        $is_sans = stripos($ad_name, 'sans ') === 0;
+                                                    ?>
+                                                        <span style="display: inline-flex; align-items: center; gap: 3px; font-size: 0.73rem; font-weight: 600; padding: 2px 7px; border-radius: 4px; background: <?= $is_sans ? '#fef2f2' : '#f0fdf4'; ?>; color: <?= $is_sans ? '#b91c1c' : '#15803d'; ?>; border: 1px solid <?= $is_sans ? '#fecaca' : '#bbf7d0'; ?>;">
+                                                            <i class="fas <?= $is_sans ? 'fa-ban' : 'fa-check'; ?>" style="font-size: 0.65rem;"></i> <?= htmlspecialchars($ad_name); ?><?= ($ad_price > 0) ? ' (+€' . number_format($ad_price, 2) . ')' : ''; ?>
+                                                        </span>
+                                                    <?php endforeach; ?>
+                                                </div>
                                             <?php endif; ?>
                                         </div>
                                     </div>
                                     <div class="item-price">
                                         <span class="price-label">€<?php echo number_format($item['size_price'], 2); ?></span>
-                                        <?php if (!empty($item['addon_prices'])): ?>
-                                            <span class="addon-label">+ <?php echo count($item['addon_prices']) . ' ' . t('suppléments', 'add-ons'); ?></span>
-                                        <?php endif; ?>
                                     </div>
                                     <div class="item-quantity">
                                         <button class="qty-btn" onclick="updateQty('<?php echo $item_key; ?>', -1)">

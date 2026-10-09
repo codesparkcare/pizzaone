@@ -147,10 +147,11 @@ class Cart extends CI_Controller {
         $product_id = $this->input->post('product_id');
         $quantity = $this->input->post('quantity', true);
         $size_price = $this->input->post('size_price', true);
-        $addon_ids = $this->input->post('addon_ids[]'); // Array of addon IDs (old system)
-        $addon_prices = $this->input->post('addon_prices[]'); // Array of addon prices (old system)
-        $addon_group_ids = $this->input->post('addon_group_ids[]'); // Array of addon group IDs (new system)
-        $addon_group_prices = $this->input->post('addon_group_prices[]'); // Array of addon group prices (new system)
+        $size_name = $this->input->post('size_name', true);
+        $addon_ids = $this->input->post('addon_ids') ?: $this->input->post('addon_ids[]'); // Array of addon IDs (old system)
+        $addon_prices = $this->input->post('addon_prices') ?: $this->input->post('addon_prices[]'); // Array of addon prices (old system)
+        $addon_group_ids = $this->input->post('addon_group_ids') ?: $this->input->post('addon_group_ids[]'); // Array of addon group IDs (new system)
+        $addon_group_prices = $this->input->post('addon_group_prices') ?: $this->input->post('addon_group_prices[]'); // Array of addon group prices (new system)
 
         // Get product info
         $product = $this->Common_model->get_single('products', ['id' => $product_id]);
@@ -175,6 +176,18 @@ class Cart extends CI_Controller {
         // Set default size_price for products without sizes
         if (!$has_sizes) {
             $size_price = $product->price ?? 0;
+            $size_name = '';
+        } elseif (empty($size_name)) {
+            // Lookup size name if not passed from frontend
+            $sz_row = $this->db->select('sizes.name')
+                ->from('product_sizes')
+                ->join('sizes', 'sizes.id = product_sizes.size_id')
+                ->where('product_sizes.product_id', $product_id)
+                ->where('product_sizes.price', $size_price)
+                ->get()->row();
+            if ($sz_row) {
+                $size_name = $sz_row->name;
+            }
         }
 
         // Initialize cart in session if not exists
@@ -186,21 +199,21 @@ class Cart extends CI_Controller {
         
         // Create unique cart item key based on product, size, and all addon selections
         // Combine both old addon IDs and new addon group IDs for uniqueness
-        $addon_string = !empty($addon_ids) ? implode(',', $addon_ids) : '';
-        $addon_group_string = !empty($addon_group_ids) ? implode(',', $addon_group_ids) : '';
+        $addon_string = (!empty($addon_ids) && is_array($addon_ids)) ? implode(',', $addon_ids) : '';
+        $addon_group_string = (!empty($addon_group_ids) && is_array($addon_group_ids)) ? implode(',', $addon_group_ids) : '';
         $all_addons_string = $addon_string . '|' . $addon_group_string;
         $item_key = $product_id . '_' . $size_price . '_' . md5($all_addons_string);
 
         // Calculate item total (old addons)
         $addon_total = 0;
-        if (!empty($addon_prices)) {
+        if (!empty($addon_prices) && is_array($addon_prices)) {
             foreach ($addon_prices as $price) {
                 $addon_total += floatval($price);
             }
         }
 
         // Calculate item total (new addon groups)
-        if (!empty($addon_group_prices)) {
+        if (!empty($addon_group_prices) && is_array($addon_group_prices)) {
             foreach ($addon_group_prices as $price) {
                 $addon_total += floatval($price);
             }
@@ -208,22 +221,63 @@ class Cart extends CI_Controller {
 
         $item_total = (floatval($size_price) + $addon_total) * intval($quantity);
 
+        // Build rich addon array with names, prices, types
+        $selected_addon_ids = [];
+        if (!empty($addon_ids) && is_array($addon_ids)) {
+            $selected_addon_ids = array_merge($selected_addon_ids, $addon_ids);
+        }
+        if (!empty($addon_group_ids) && is_array($addon_group_ids)) {
+            $selected_addon_ids = array_merge($selected_addon_ids, $addon_group_ids);
+        }
+        $selected_addon_ids = array_unique(array_filter($selected_addon_ids));
+
+        $addons_list = [];
+        if (!empty($selected_addon_ids)) {
+            $addon_records = $this->db->where_in('id', $selected_addon_ids)->get('addons')->result();
+            
+            $price_map = [];
+            if (!empty($addon_ids) && !empty($addon_prices) && is_array($addon_ids) && is_array($addon_prices)) {
+                foreach ($addon_ids as $idx => $aid) {
+                    $price_map[$aid] = floatval($addon_prices[$idx] ?? 0);
+                }
+            }
+            if (!empty($addon_group_ids) && !empty($addon_group_prices) && is_array($addon_group_ids) && is_array($addon_group_prices)) {
+                foreach ($addon_group_ids as $idx => $aid) {
+                    $price_map[$aid] = floatval($addon_group_prices[$idx] ?? 0);
+                }
+            }
+
+            foreach ($addon_records as $rec) {
+                $custom_price = isset($price_map[$rec->id]) ? $price_map[$rec->id] : floatval($rec->price);
+                $addons_list[] = [
+                    'id'    => (int)$rec->id,
+                    'name'  => $rec->name,
+                    'price' => $custom_price,
+                    'type'  => $rec->type ?? 'include'
+                ];
+            }
+        }
+
         // Add or update item in cart
         if (isset($cart[$item_key])) {
             $cart[$item_key]['quantity'] += intval($quantity);
             $cart[$item_key]['item_total'] = (floatval($cart[$item_key]['size_price']) + $addon_total) * intval($cart[$item_key]['quantity']);
+            $cart[$item_key]['addons'] = $addons_list;
+            $cart[$item_key]['size_name'] = $size_name ?: ($cart[$item_key]['size_name'] ?? '');
         } else {
             $cart[$item_key] = [
-                'product_id' => $product_id,
-                'product_name' => $product->name,
-                'product_image' => $product->image,
-                'size_price' => $size_price,
-                'addon_ids' => $addon_ids,
-                'addon_prices' => $addon_prices,
-                'addon_group_ids' => $addon_group_ids,
-                'addon_group_prices' => $addon_group_prices,
-                'quantity' => intval($quantity),
-                'item_total' => $item_total
+                'product_id'          => $product_id,
+                'product_name'        => $product->name,
+                'product_image'       => $product->image,
+                'size_price'          => $size_price,
+                'size_name'           => $size_name ?: '',
+                'addons'              => $addons_list,
+                'addon_ids'           => $addon_ids,
+                'addon_prices'        => $addon_prices,
+                'addon_group_ids'     => $addon_group_ids,
+                'addon_group_prices'  => $addon_group_prices,
+                'quantity'            => intval($quantity),
+                'item_total'          => $item_total
             ];
         }
 
@@ -471,6 +525,9 @@ class Cart extends CI_Controller {
         // Get shop info
         $shop = $shop_id ? $this->db->get_where('shops', ['id' => $shop_id])->row() : null;
 
+        // Ensure all items in cart have enriched sizes and addons
+        $enriched_cart = $this->Common_model->enrich_order_items(array_values($cart));
+
         // Insert order into database
         $order_data = [
             'order_type'      => $order_type,
@@ -487,12 +544,12 @@ class Cart extends CI_Controller {
             'total_amount'    => $total,
             'status'          => 'pending',
             'created_at'      => date('Y-m-d H:i:s'),
-            'items_json'      => json_encode(array_values($cart), JSON_UNESCAPED_UNICODE)
+            'items_json'      => json_encode($enriched_cart, JSON_UNESCAPED_UNICODE)
         ];
         $order_id = $this->Common_model->insert('orders', $order_data);
 
         // Send order notification email to Super Admin (pizzaone95130@gmail.com) via SMTP
-        $this->Common_model->send_order_admin_notification($order_id, $order_data, $cart, $shop);
+        $this->Common_model->send_order_admin_notification($order_id, $order_data, $enriched_cart, $shop);
 
         // Send real-time FCM push notification to Flutter app devices
         $this->Common_model->send_fcm_new_order_notification($order_id, $order_data, $shop);

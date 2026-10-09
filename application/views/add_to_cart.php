@@ -115,6 +115,7 @@
                                                             <input type="checkbox" 
                                                                    name="addon_group_<?php echo $group->group_id; ?>" 
                                                                    value="<?php echo $addon->id; ?>"
+                                                                   data-name="<?php echo htmlspecialchars($addon->name); ?>"
                                                                    data-base-price="<?php echo $addon->price; ?>"
                                                                    data-price="<?php echo $addon->price; ?>"
                                                                    data-size-prices='<?php echo htmlspecialchars(json_encode($addon->size_prices_by_name ?? []), ENT_QUOTES, 'UTF-8'); ?>'
@@ -609,6 +610,7 @@ document.getElementById('addToCartForm').addEventListener('submit', function(e) 
     const quantity = document.getElementById('quantity').value;
     const sizeInput = document.querySelector('input[name="product_size"]:checked');
     const sizePrice = sizeInput ? parseFloat(sizeInput.value) : 0;
+    const sizeName = sizeInput && sizeInput.dataset.name ? sizeInput.dataset.name : '';
     const sizeOptions = document.querySelectorAll('input[name="product_size"]');
 
     if (sizeOptions.length > 0 && !sizeInput) {
@@ -628,6 +630,7 @@ document.getElementById('addToCartForm').addEventListener('submit', function(e) 
     formData.append('product_id', productId);
     formData.append('quantity', quantity);
     formData.append('size_price', sizePrice);
+    formData.append('size_name', sizeName);
     
     addonIds.forEach(id => formData.append('addon_ids[]', id));
     addonPrices.forEach(price => formData.append('addon_prices[]', price));

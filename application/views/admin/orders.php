@@ -109,24 +109,56 @@
                                 itemsHtml += '<tbody>';
                                 order.items.forEach(function(it) {
                                     var itName = it.name || it.product_name || 'Item';
-                                    var itSize = it.size || it.size_name || '';
+                                    var itSize = it.size_name || it.size || '';
                                     var itQty = it.quantity || it.qty || 1;
                                     var itTotal = parseFloat(it.item_total || (it.price * itQty) || 0).toFixed(2);
                                     
-                                    var addonsText = '';
-                                    if (it.addons && it.addons.length > 0) {
-                                        var addonNames = it.addons.map(function(a){ return typeof a === 'object' ? (a.name || a.addon_name || '') : a; });
-                                        addonsText = '<div style="font-size:0.78rem; color:#718096; margin-top:2px;"><i class="fas fa-plus" style="font-size:0.65rem;"></i> ' + addonNames.join(', ') + '</div>';
+                                    var addonsHtml = '';
+                                    var rawAddons = it.addons || it.selected_addons || it.addon_items || [];
+                                    if (typeof rawAddons === 'string' && rawAddons.trim() !== '') {
+                                        try { rawAddons = JSON.parse(rawAddons); } catch(e) { rawAddons = [rawAddons]; }
                                     }
-                                    var notesText = '';
-                                    if (it.instructions || it.notes) {
-                                        notesText = '<div style="font-size:0.78rem; color:#d97706; font-style:italic; margin-top:2px;"><i class="fas fa-info-circle" style="font-size:0.7rem;"></i> ' + (it.instructions || it.notes) + '</div>';
+                                    if (rawAddons && (Array.isArray(rawAddons) || typeof rawAddons === 'object')) {
+                                        var addonList = Array.isArray(rawAddons) ? rawAddons : Object.values(rawAddons);
+                                        if (addonList.length > 0) {
+                                            addonsHtml = '<div style="margin-top: 5px; display: flex; flex-wrap: wrap; gap: 4px;">';
+                                            addonList.forEach(function(a) {
+                                                var aName = '';
+                                                var aPrice = 0;
+                                                if (typeof a === 'object' && a !== null) {
+                                                    aName = a.name || a.addon_name || a.title || '';
+                                                    aPrice = parseFloat(a.price || 0);
+                                                } else if (typeof a === 'string' || typeof a === 'number') {
+                                                    aName = String(a);
+                                                }
+                                                if (!aName) return;
+                                                
+                                                var isSans = aName.toLowerCase().startsWith('sans ') || (typeof a === 'object' && a.type === 'exclude');
+                                                var bg = isSans ? '#fef2f2' : '#f0fdf4';
+                                                var textCol = isSans ? '#b91c1c' : '#15803d';
+                                                var borderCol = isSans ? '#fecaca' : '#bbf7d0';
+                                                var icon = isSans ? 'fa-ban' : 'fa-check';
+                                                var priceText = (aPrice > 0) ? ' (+€' + aPrice.toFixed(2) + ')' : '';
+
+                                                addonsHtml += '<span style="display:inline-flex; align-items:center; gap:3px; background:' + bg + '; color:' + textCol + '; border:1px solid ' + borderCol + '; border-radius:4px; padding:2px 7px; font-size:0.75rem; font-weight:600;">' +
+                                                    '<i class="fas ' + icon + '" style="font-size:0.65rem;"></i> ' + aName + priceText +
+                                                '</span>';
+                                            });
+                                            addonsHtml += '</div>';
+                                        }
                                     }
 
-                                    itemsHtml += '<tr style="border-bottom: 1px solid #f7fafc;">';
-                                    itemsHtml += '<td style="padding: 10px 15px;"><strong style="color:#2d3748;">' + itName + '</strong> ' + (itSize ? '<span class="badge" style="background:#edf2f7; color:#4a5568; font-size:0.75rem; padding:2px 6px; border-radius:4px; margin-left:4px;">' + itSize + '</span>' : '') + addonsText + notesText + '</td>';
-                                    itemsHtml += '<td style="padding: 10px; text-align:center; font-weight:600; color:#4a5568;">' + itQty + '</td>';
-                                    itemsHtml += '<td style="padding: 10px 15px; text-align:right; font-weight:700; color:#2d3748;">€' + itTotal + '</td>';
+                                    var notesText = '';
+                                    if (it.instructions || it.notes) {
+                                        notesText = '<div style="font-size:0.78rem; color:#d97706; font-style:italic; margin-top:4px;"><i class="fas fa-info-circle" style="font-size:0.7rem;"></i> ' + (it.instructions || it.notes) + '</div>';
+                                    }
+
+                                    itemsHtml += '<tr style="border-bottom: 1px solid #f1f5f9;">';
+                                    itemsHtml += '<td style="padding: 10px 15px; vertical-align: top;"><strong style="color:#1e293b; font-size:0.92rem;">' + itName + '</strong> ' + 
+                                        (itSize ? '<span class="badge" style="background:#eff6ff; color:#1d4ed8; font-size:0.75rem; padding:2px 8px; border-radius:4px; margin-left:6px; font-weight:600; border:1px solid #dbeafe;">' + itSize + '</span>' : '') + 
+                                        addonsHtml + notesText + '</td>';
+                                    itemsHtml += '<td style="padding: 10px; text-align:center; font-weight:700; color:#475569; vertical-align: top;">' + itQty + '</td>';
+                                    itemsHtml += '<td style="padding: 10px 15px; text-align:right; font-weight:700; color:#1e293b; vertical-align: top;">€' + itTotal + '</td>';
                                     itemsHtml += '</tr>';
                                 });
                                 itemsHtml += '</tbody></table></div>';

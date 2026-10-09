@@ -831,6 +831,16 @@ class Admin extends CI_Controller
             redirect('admin/orders');
         }
 
+        // Enrich items breakdown
+        $items = [];
+        if (!empty($data['order']->items_json)) {
+            $decoded = json_decode($data['order']->items_json, true);
+            if (is_array($decoded)) {
+                $items = $decoded;
+            }
+        }
+        $data['order']->items = $this->Common_model->enrich_order_items($items);
+
         $this->load->view('admin/includes/header', $data);
         $this->load->view('admin/view_order', $data);
         $this->load->view('admin/includes/footer');
@@ -865,7 +875,7 @@ class Admin extends CI_Controller
                     $items = $decoded;
                 }
             }
-            $order->items = $items;
+            $order->items = $this->Common_model->enrich_order_items($items);
 
             echo json_encode(['status' => 'success', 'order' => $order]);
         } else {

@@ -52,9 +52,47 @@
         <h2 style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem; border-bottom: 1px dashed #cbd5e1; padding-bottom: 0.6rem;"><?php echo t('Articles commandés', 'Ordered Items'); ?></h2>
         <ul style="list-style: none; padding: 0; margin: 0;">
             <?php foreach ($order['cart_items'] as $item): ?>
-                <li style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 0.95rem; color: #334155;">
-                    <span><strong style="color: #e74c3c;"><?= intval($item['quantity']); ?>x</strong> <?= htmlspecialchars($item['product_name']); ?></span>
-                    <span style="font-weight: 600; color: #1e293b;">€<?= number_format($item['item_total'], 2); ?></span>
+                <?php 
+                    $size_name = $item['size_name'] ?? '';
+                    if (empty($size_name) && !empty($item['size_price']) && !empty($item['product_id'])) {
+                        $sz = $this->db->select('sizes.name')->from('product_sizes')->join('sizes', 'sizes.id = product_sizes.size_id')->where('product_sizes.product_id', $item['product_id'])->where('product_sizes.price', $item['size_price'])->get()->row();
+                        $size_name = $sz->name ?? '';
+                    }
+                    $item_addons = !empty($item['addons']) ? $item['addons'] : [];
+                    if (empty($item_addons)) {
+                        $a_ids = array_unique(array_filter(array_merge(
+                            !empty($item['addon_group_ids']) ? (array)$item['addon_group_ids'] : [],
+                            !empty($item['addon_ids']) ? (array)$item['addon_ids'] : []
+                        )));
+                        if (!empty($a_ids)) {
+                            $item_addons = $this->db->where_in('id', $a_ids)->get('addons')->result_array();
+                        }
+                    }
+                ?>
+                <li style="padding: 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 0.95rem; color: #334155;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <span>
+                            <strong style="color: #e74c3c;"><?= intval($item['quantity']); ?>x</strong> 
+                            <?= htmlspecialchars($item['product_name']); ?>
+                            <?php if (!empty($size_name)): ?>
+                                <span style="font-size: 0.75rem; background: #eff6ff; color: #1d4ed8; padding: 2px 7px; border-radius: 4px; margin-left: 6px; font-weight: 600; border: 1px solid #dbeafe;"><?= htmlspecialchars($size_name); ?></span>
+                            <?php endif; ?>
+                        </span>
+                        <span style="font-weight: 600; color: #1e293b;">€<?= number_format($item['item_total'], 2); ?></span>
+                    </div>
+                    <?php if (!empty($item_addons)): ?>
+                        <div style="margin-top: 5px; display: flex; flex-wrap: wrap; gap: 4px;">
+                            <?php foreach ($item_addons as $ad): 
+                                $ad_name = is_array($ad) ? ($ad['name'] ?? '') : ($ad->name ?? (string)$ad);
+                                $ad_price = is_array($ad) ? floatval($ad['price'] ?? 0) : floatval($ad->price ?? 0);
+                                $is_sans = stripos($ad_name, 'sans ') === 0;
+                            ?>
+                                <span style="font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; background: <?= $is_sans ? '#fef2f2' : '#f0fdf4'; ?>; color: <?= $is_sans ? '#b91c1c' : '#15803d'; ?>; border: 1px solid <?= $is_sans ? '#fecaca' : '#bbf7d0'; ?>; font-weight: 600;">
+                                    <i class="fas <?= $is_sans ? 'fa-ban' : 'fa-check'; ?>" style="font-size: 0.65rem;"></i> <?= htmlspecialchars($ad_name); ?><?= ($ad_price > 0) ? ' (+€' . number_format($ad_price, 2) . ')' : ''; ?>
+                                </span>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                 </li>
             <?php endforeach; ?>
         </ul>

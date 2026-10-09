@@ -500,6 +500,92 @@ class Common_model extends CI_Model {
     }
 
     /**
+     * Enrich order items with size names and full addon objects/details
+     */
+    public function enrich_order_items($items) {
+        if (empty($items) || !is_array($items)) {
+            return [];
+        }
+
+        foreach ($items as &$it) {
+            $is_obj = is_object($it);
+            $pid = $is_obj ? ($it->product_id ?? null) : ($it['product_id'] ?? null);
+            $size_price = $is_obj ? ($it->size_price ?? null) : ($it['size_price'] ?? null);
+            $size_name = $is_obj ? ($it->size_name ?? $it->size ?? '') : ($it['size_name'] ?? $it['size'] ?? '');
+
+            // 1. Resolve size_name if empty
+            if (empty($size_name) && !empty($pid) && isset($size_price)) {
+                $sz = $this->db->select('sizes.name')
+                    ->from('product_sizes')
+                    ->join('sizes', 'sizes.id = product_sizes.size_id')
+                    ->where('product_sizes.product_id', $pid)
+                    ->where('product_sizes.price', $size_price)
+                    ->get()->row();
+                if ($sz) {
+                    $size_name = $sz->name;
+                }
+            }
+
+            if ($is_obj) {
+                $it->size_name = $size_name;
+            } else {
+                $it['size_name'] = $size_name;
+            }
+
+            // 2. Resolve addons
+            $existing_addons = $is_obj ? ($it->addons ?? []) : ($it['addons'] ?? []);
+            if (is_string($existing_addons)) {
+                $dec = json_decode($existing_addons, true);
+                if (is_array($dec)) {
+                    $existing_addons = $dec;
+                }
+            }
+
+            $addon_ids = [];
+            $addon_group_ids = $is_obj ? ($it->addon_group_ids ?? []) : ($it['addon_group_ids'] ?? []);
+            $legacy_addon_ids = $is_obj ? ($it->addon_ids ?? []) : ($it['addon_ids'] ?? []);
+
+            if (!empty($addon_group_ids) && is_array($addon_group_ids)) {
+                $addon_ids = array_merge($addon_ids, $addon_group_ids);
+            }
+            if (!empty($legacy_addon_ids) && is_array($legacy_addon_ids)) {
+                $addon_ids = array_merge($addon_ids, $legacy_addon_ids);
+            }
+
+            $final_addons = [];
+            if (!empty($existing_addons) && is_array($existing_addons)) {
+                foreach ($existing_addons as $ea) {
+                    if (is_array($ea) && !empty($ea['name'])) {
+                        $final_addons[] = $ea;
+                    } elseif (is_object($ea) && !empty($ea->name)) {
+                        $final_addons[] = (array)$ea;
+                    } elseif (is_numeric($ea)) {
+                        $addon_ids[] = (int)$ea;
+                    } elseif (is_string($ea) && !empty(trim($ea))) {
+                        $final_addons[] = ['name' => trim($ea), 'price' => 0];
+                    }
+                }
+            }
+
+            $addon_ids = array_unique(array_filter($addon_ids));
+            if (empty($final_addons) && !empty($addon_ids)) {
+                $addon_rows = $this->db->where_in('id', $addon_ids)->get('addons')->result_array();
+                if (!empty($addon_rows)) {
+                    $final_addons = $addon_rows;
+                }
+            }
+
+            if ($is_obj) {
+                $it->addons = $final_addons;
+            } else {
+                $it['addons'] = $final_addons;
+            }
+        }
+
+        return $items;
+    }
+
+    /**
      * Send email notification to Super Admin on new order
      */
     public function send_order_admin_notification($order_id, $order_data, $cart_items, $shop = null) {
@@ -549,13 +635,28 @@ class Common_model extends CI_Model {
             // Build HTML items rows
             $items_html = '';
             if (!empty($cart_items)) {
-                foreach ($cart_items as $item) {
+                $enriched_items = $this->enrich_order_items($cart_items);
+                foreach ($enriched_items as $item) {
                     $qty = $item['quantity'] ?? 1;
                     $pname = htmlspecialchars($item['product_name'] ?? 'Produit');
+                    $sz = !empty($item['size_name']) ? (' (' . htmlspecialchars($item['size_name']) . ')') : '';
                     $itotal = number_format(floatval($item['item_total'] ?? 0), 2);
+                    
+                    $addons_str = '';
+                    if (!empty($item['addons'])) {
+                        $ad_names = [];
+                        foreach ($item['addons'] as $ad) {
+                            $ad_names[] = is_array($ad) ? ($ad['name'] ?? '') : ($ad->name ?? (string)$ad);
+                        }
+                        $ad_names = array_filter($ad_names);
+                        if (!empty($ad_names)) {
+                            $addons_str = "<div style='font-size: 12px; color: #64748b; margin-top: 3px;'>+ " . htmlspecialchars(implode(', ', $ad_names)) . "</div>";
+                        }
+                    }
+
                     $items_html .= "
                     <tr style='border-bottom: 1px solid #f1f5f9;'>
-                        <td style='padding: 12px 10px; color: #1e293b; font-weight: 600;'>{$pname}</td>
+                        <td style='padding: 12px 10px; color: #1e293b; font-weight: 600;'>{$pname}{$sz}{$addons_str}</td>
                         <td style='padding: 12px 10px; text-align: center; color: #64748b;'>x{$qty}</td>
                         <td style='padding: 12px 10px; text-align: right; color: #1e293b; font-weight: 600;'>€{$itotal}</td>
                     </tr>";
